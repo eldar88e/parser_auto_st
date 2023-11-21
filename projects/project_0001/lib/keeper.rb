@@ -24,6 +24,7 @@ class Keeper
 
   def save_games(games)
     games.each do |game|
+      binding.pry
       game[:run_id] = run_id
       game[:touched_run_id] = run_id
       keys = %i[name link prise_tl prise_discount_tl]
