@@ -1,6 +1,8 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
+  SITE = 'https://psdeals.net'
+
   def initialize(keeper)
     super
     @count  = 0
