@@ -31,8 +31,6 @@ require_relative 'lib/storage'
 require_relative 'lib/fake_agent'
 require_relative 'lib/granary'
 
-require_relative 'lib/extras/faraday/net_http_connection'
-require_relative 'lib/specials/scrape/net_http/persistent/net_http_persistent'
 require_relative 'lib/specials/activerecord/mysql2_adapter_patch'
 require_relative 'lib/specials/md5_hash'
 require_relative 'lib/specials/aws_s3'

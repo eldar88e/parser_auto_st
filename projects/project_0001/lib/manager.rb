@@ -3,6 +3,7 @@ require_relative '../lib/parser'
 require_relative '../lib/keeper'
 
 class Manager < Hamster::Harvester
+  SITE = 'https://psdeals.net'
 
   def initialize
     super
@@ -11,8 +12,12 @@ class Manager < Hamster::Harvester
 
   def download
     scraper = Scraper.new(keeper)
-    scraper.scrape_games_tr
-    #scraper.scrape_games_ru
+    if commands[:tr]
+      scraper.scrape_games_tr
+    elsif commands[:ru]
+      scraper.scrape_games_ru
+    end
+    puts "Scraping finish".green
   end
 
   def store

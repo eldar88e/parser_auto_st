@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'hamster_tools/assemble_uri'
 require_relative 'hamster_tools/connect_to'
 require_relative 'hamster_tools/commands'
 require_relative 'hamster_tools/file'
