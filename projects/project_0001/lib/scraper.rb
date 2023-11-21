@@ -45,7 +45,7 @@ class Scraper < Hamster::Scraper
   def get_response(link)
     connect_to(link, ssl_verify: false)
   rescue => e
-    puts e.red
+    puts e
     binding.pry
   end
 end
