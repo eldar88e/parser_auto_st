@@ -26,10 +26,14 @@ class Parser < Hamster::Parser
       price_tl_raw                 = game_raw.at('.game-collection-item-price')&.text
 
       if price_tl_raw
-        prise_discount = game_raw.at('.game-collection-item-price-bonus')&.text || game_raw.at('.game-collection-item-price-discount')&.text
-        if prise_discount
+        prise_discount = game_raw.at('.game-collection-item-price-discount')&.text
+        prise_bonus    = game_raw.at('.game-collection-item-price-bonus')&.text
+
+          if prise_discount || prise_bonus
           game[:additional][:price_tl]          = get_price(prise_discount)
           game[:additional][:price]             = get_price(prise_discount, :ru)
+          game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
+          game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
           date_raw                              = game_raw.at('.game-collection-item-end-date')&.text
           game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
           game[:additional][:old_price_tl]      = get_price(price_tl_raw)

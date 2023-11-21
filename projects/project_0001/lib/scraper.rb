@@ -24,7 +24,7 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_ru
-    [*217..358].each do |page|
+    [*237..358].each do |page|
       link        = "#{SITE}/ru-store/all-games/#{page}"
       game_list   = get_response(link).body
       parser      = Parser.new(html: game_list)
@@ -44,5 +44,8 @@ class Scraper < Hamster::Scraper
 
   def get_response(link)
     connect_to(link, ssl_verify: false)
+  rescue => e
+    puts e.red
+    binding.pry
   end
 end
