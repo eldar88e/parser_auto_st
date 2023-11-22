@@ -8,6 +8,7 @@ class Manager < Hamster::Harvester
   def initialize
     super
     @keeper = Keeper.new
+    @debug  = commands[:debug]
   end
 
   def download
@@ -17,7 +18,7 @@ class Manager < Hamster::Harvester
     elsif commands[:ru]
       scraper.scrape_games_ru
     end
-    puts "Scraping finish".green
+    notify "Scraping finish"
   end
 
   def store
@@ -31,10 +32,17 @@ class Manager < Hamster::Harvester
       keeper.save_games(list_info)
     end
     #keeper.finish
-    puts 'Finish'.green
+    notify 'Finish store'
   end
 
   private
 
   attr_reader :keeper
+
+  def notify(message, color=:green, method_=:info)
+    message = color.nil? ? message : message.send(color)
+    Hamster.logger.send(method_, message)
+    Hamster.report message: message
+    puts message.send(color) if @debug
+  end
 end

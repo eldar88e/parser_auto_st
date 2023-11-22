@@ -20,6 +20,7 @@ require 'open-uri'
 require 'pry'
 #require 'yaml'
 #require 'irb'
+require 'telegram/bot'
 
 Dotenv.load('.env')
 require_relative 'lib/hamster'

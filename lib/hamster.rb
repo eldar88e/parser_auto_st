@@ -11,7 +11,7 @@ require_relative 'hamster/logger'   # create a new logger
 require_relative 'hamster/loggable' # inject the logger object
 
 module Hamster
-  PROJECT_DIR_NAME = 'project'
+  PROJECT_DIR_NAME = 'my_project'
 
   extend HamsterTools
 end

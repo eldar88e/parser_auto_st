@@ -2,9 +2,9 @@
 
 module Hamster
   module HamsterTools
-    def report(to:, message:, use: :telegram)
-      @_s_    = Storage.new
-      @_user_ = to
+    def report(to: nil, message:, use: :telegram)
+      @token_ ||= ENV['TELEGRAM_BOT_TOKEN']
+      @_user_ = to || ENV['CHAT_ID']
 
       unless @_user_
         log 'The recipient of the report cannot be found!', :red
@@ -24,11 +24,11 @@ module Hamster
     def tg_send(text)
       message_limit = 4000
       message_count = text.size / message_limit + 1
-      Telegram::Bot::Client.run(@_s_.telegram) do |bot|
+      Telegram::Bot::Client.run(@token_) do |bot|
         message_count.times do
           splitted_text = text.chars
           text_part     = splitted_text.shift(message_limit).join
-          bot.api.send_message(chat_id: @_user_.telegram, text: escape(text_part), parse_mode: 'MarkdownV2')
+          bot.api.send_message(chat_id: @_user_, text: escape(text_part), parse_mode: 'MarkdownV2')
         end
       end
     end
