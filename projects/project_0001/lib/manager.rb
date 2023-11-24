@@ -24,8 +24,9 @@ class Manager < Hamster::Harvester
   def store
     keeper.status = 'parsing'
     run_id        = keeper.run_id
-    list_pages = peon.give_list(subfolder: "#{run_id}_games_tr")
+    list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     list_pages.each do |name|
+      puts "#{name}".green
       file      = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser    = Parser.new(html: file)
       list_info = parser.parse_list_info

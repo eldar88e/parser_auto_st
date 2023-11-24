@@ -1,3 +1,5 @@
+require_relative '../models/sony_game_additional'
+
 class Parser < Hamster::Parser
   EXCHANGE_RATE = 5.5
   SITE          = 'https://psdeals.net'
@@ -11,6 +13,14 @@ class Parser < Hamster::Parser
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
   end
 
+  def get_last_page
+    count_result   = @html.at('div.results').text.match(/\d+/).to_s.to_i
+    games_per_page = @html.css('div.game-collection-item').size
+    last_page_bad  = count_result / games_per_page
+    last_page_f    = count_result / games_per_page.to_f
+    last_page_f > last_page_bad ? last_page_bad + 1 : last_page_bad
+  end
+
   def parse_list_info
     #url_raw         = @html.at('link[rel="canonical"]') || @html.at('link[rel="self"]')
     #data_source_url = url_raw['href']
@@ -18,32 +28,31 @@ class Parser < Hamster::Parser
     games           = []
     games_raw       = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
-      game                         = { main: {}, additional: {} }
-      game[:main][:pagetitle]      = game_raw.at('.game-collection-item-details-title').text
-      game[:additional][:platform] = game_raw.at('.game-collection-item-top-platform').text.gsub(' / ', ', ')
-      type_raw                     = game_raw.at('.game-collection-item-type').text
-      game[:additional][:type]     = translate_type(type_raw)
-      price_tl_raw                 = game_raw.at('.game-collection-item-price')&.text
+      game         = { main: {}, additional: {} }
+      price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
+      next unless price_tl_raw
 
-      if price_tl_raw
-        prise_discount = game_raw.at('.game-collection-item-price-discount')&.text
-        prise_bonus    = game_raw.at('.game-collection-item-price-bonus')&.text
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months|\d+ days/)
+      prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
+      prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
-          if prise_discount || prise_bonus
-          game[:additional][:price_tl]          = get_price(prise_discount)
-          game[:additional][:price]             = get_price(prise_discount, :ru)
-          game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
-          game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
-          date_raw                              = game_raw.at('.game-collection-item-end-date')&.text
-          game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
-          game[:additional][:old_price_tl]      = get_price(price_tl_raw)
-          game[:additional][:old_price]         = get_price(price_tl_raw, :ru)
-        else
-          game[:additional][:price_tl] = get_price(price_tl_raw)
-          game[:additional][:price]    = get_price(price_tl_raw, :ru)
-        end
+      if date_raw && (prise_discount || prise_bonus)
+        game[:additional][:price_tl]          = get_price(prise_discount)
+        game[:additional][:price]             = get_price(prise_discount, :ru)
+        game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
+        game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
+        game[:additional][:old_price_tl]      = get_price(price_tl_raw)
+        game[:additional][:old_price]         = get_price(price_tl_raw, :ru)
+        game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
+      else
+        game[:additional][:price_tl] = get_price(price_tl_raw)
+        game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
 
+      game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text
+      game[:additional][:platform]        = game_raw.at('.game-collection-item-top-platform').text.gsub(' / ', ', ')
+      type_raw                            = game_raw.at('.game-collection-item-type').text
+      game[:additional][:type]            = translate_type(type_raw)
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
@@ -58,6 +67,8 @@ class Parser < Hamster::Parser
   private
 
   def get_price(raw_price, currency=:tr)
+    return unless raw_price
+
     price = raw_price.gsub(',', '').to_f
     return price if currency == :tr
 
@@ -65,8 +76,11 @@ class Parser < Hamster::Parser
   end
 
   def get_discount_end_date(date_raw)
-    today = Date.today
-    binding.pry
+    date_raw      = date_raw.to_s
+    day_month     = date_raw.match?(/day/) ? :days : :months
+    num_day_month = date_raw.to_i
+    today         = Date.today
+    today + num_day_month.send(day_month)
   end
 
   def translate_type(type_raw)

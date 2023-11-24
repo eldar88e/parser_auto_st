@@ -4,7 +4,7 @@ create table sony_games
 
     `pagetitle`                    VARCHAR(200)       DEFAULT NULL,
     `longtitle`                    VARCHAR(255)       DEFAULT NULL,
-    description                    VARCHAR(255)       DEFAULT NULL,
+    description                    VARCHAR(1000)       DEFAULT NULL,
     alias                          VARCHAR(200)       DEFAULT NULL,
     parent                         int(10)            DEFAULT 0,
     properties                     mediumtext         DEFAULT NULL,
@@ -12,8 +12,6 @@ create table sony_games
     publishedon                    int(20)            DEFAULT NULL,
     editedon                       int(20)            DEFAULT NULL,
 
-    `md5_hash`                     VARCHAR(32)        DEFAULT NULL,
-    UNIQUE KEY `md5` (`md5_hash`),
     INDEX `deleted` (`deleted`)
 ) DEFAULT CHARSET = `utf8mb4`
   COLLATE = utf8mb4_unicode_520_ci;
