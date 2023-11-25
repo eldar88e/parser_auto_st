@@ -63,7 +63,7 @@ class Keeper
         game[:main][:properties]  = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]   = count
         #возможно еще нужно добавить поля
-
+        binding.pry
         SonyGame.store(game)
         @saved += 1
       end
