@@ -68,7 +68,7 @@ class Keeper
         @saved += 1
       end
     rescue => e
-      notify e
+      notify e.message
       binding.pry
       retry
     end
