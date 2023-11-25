@@ -67,7 +67,7 @@ class Keeper
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = count
         game[:main][:published]    = 1
-        games[:main][:uri]         = "katalog-tovarov/games/#{game[:main][:alias]}"
+        game[:main][:uri]         = "katalog-tovarov/games/#{game[:main][:alias]}"
         #возможно еще нужно добавить поля
         binding.pry
         SonyGame.store(game)
