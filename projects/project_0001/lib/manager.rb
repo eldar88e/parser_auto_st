@@ -44,7 +44,6 @@ class Manager < Hamster::Harvester
     message = "Finish store!"
     message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated: #{keeper.updated} games;" unless keeper.updated.zero?
-    message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nParsed: #{parser_count} games." unless parser_count.zero?
