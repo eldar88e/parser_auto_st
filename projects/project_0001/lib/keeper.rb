@@ -7,6 +7,8 @@ class Keeper
   PARENT         = 218
   TEMPLATE_ID    = 10
   GAMES_PER_PAGE = 36
+  SOURCE         = 0
+
   def initialize
     @count   = 0
     @run_id  = run.run_id
@@ -52,16 +54,20 @@ class Keeper
         SonyGame.find(game_db.id).update(data)
         @updated += 1
       else
-        pagetitle                 = game[:main][:pagetitle]
-        game[:main][:longtitle]   = pagetitle
-        game[:main][:description] = form_description(pagetitle)
-        game[:main][:parent]      = PARENT
-        game[:main][:publishedon] = Time.current.to_i
-        game[:main][:createdon]   = Time.current.to_i
-        game[:main][:alias]       = game[:additional][:data_source_url].split('/')[-2..-1].reverse.join('-')
-        game[:main][:template]    = TEMPLATE_ID
-        game[:main][:properties]  = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
-        game[:main][:menuindex]   = count
+        game[:additional][:source] = SOURCE
+        game[:additional][:source] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
+        pagetitle                  = game[:main][:pagetitle]
+        game[:main][:longtitle]    = pagetitle
+        game[:main][:description]  = form_description(pagetitle)
+        game[:main][:parent]       = PARENT
+        game[:main][:publishedon]  = Time.current.to_i
+        game[:main][:createdon]    = Time.current.to_i
+        game[:main][:alias]        = game[:additional][:data_source_url].split('/')[-2..-1].reverse.join('-')
+        game[:main][:template]     = TEMPLATE_ID
+        game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
+        game[:main][:menuindex]    = count
+        game[:main][:published]    = 1
+        games[:main][:uri]         = "katalog-tovarov/games/#{game[:main][:alias]}"
         #возможно еще нужно добавить поля
         binding.pry
         SonyGame.store(game)

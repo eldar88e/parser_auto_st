@@ -6,6 +6,7 @@ create table sony_games
     `longtitle`                    VARCHAR(255)       DEFAULT NULL,
     description                    VARCHAR(1000)       DEFAULT NULL,
     alias                          VARCHAR(200)       DEFAULT NULL,
+    published                      tinyint(1)         DEFAULT 0,
     parent                         int(10)            DEFAULT 0,
     template                       int(10)            DEFAULT 0,
     menuindex                      int(10)            DEFAULT 0,
