@@ -11,7 +11,7 @@ module Hamster
     def initialize
       s        = Storage.new
       commands = Hamster.commands
-      log_dir  = "#{ENV['HOME']}/my_parsing/project_#{Hamster.project_number}/log"
+      log_dir  = "#{ENV['HOME']}/my_parsing/#{Hamster::PROJECT_DIR_NAME}_#{Hamster.project_number}/log"
       log_file =
         if commands[:clone]&.is_a?(String)
           "#{commands[:clone].gsub('/', '-')}.log" 

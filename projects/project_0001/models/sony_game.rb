@@ -9,6 +9,7 @@ class SonyGame < ApplicationRecord
       additional   = data[:additional]
       additional.merge!(id: sony_game_id)
       SonyGameAdditional.store(additional)
+      SonyGameCategories.store(product_id: sony_game_id, category_id: data[:main][:parent])
     end
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error

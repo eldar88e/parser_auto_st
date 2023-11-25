@@ -23,7 +23,7 @@ module Hamster
     private
     
     def initialize(*_)
-      s              = Storage.new
+      #s              = Storage.new
       @_storehouse_  = "#{ENV['HOME']}/my_parsing/project_#{Hamster.project_number}/"
       @_peon_        = Hamster::Harvester::Peon.new(storehouse)
       @_commands_    = Hamster.commands

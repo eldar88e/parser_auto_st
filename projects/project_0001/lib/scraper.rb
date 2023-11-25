@@ -16,9 +16,7 @@ class Scraper < Hamster::Scraper
 
   def scrape_games_tr
     first_page = "#{SITE}/tr-store/all-games/1#{PARAMS}"
-    game_list  = get_response(first_page).body
-    parser     = Parser.new(html: game_list)
-    last_page  = parser.get_last_page
+    last_page = make_last_page(first_page)
     notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
     [*1..last_page].each do |page|
       link = "#{SITE}/tr-store/all-games/#{page}#{PARAMS}"
@@ -26,11 +24,15 @@ class Scraper < Hamster::Scraper
       game_list = get_response(link).body
       sleep(rand(1..3))
       peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_tr")
+      @count += 0
     end
   end
 
   def scrape_games_ru
-    [*1..358].each do |page|
+    first_page = "#{SITE}/ru-store/all-games/1#{PARAMS}"
+    last_page = make_last_page(first_page)
+    notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
+    [*1..last_page].each do |page|
       link        = "#{SITE}/ru-store/all-games/#{page}"
       game_list   = get_response(link).body
       parser      = Parser.new(html: game_list)
@@ -42,6 +44,7 @@ class Scraper < Hamster::Scraper
         name = MD5Hash.new(columns: %i[path]).generate({ path: path })
         peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ru/game_list_#{page}")
         sleep rand(3..7)
+        @count += 0
       end
     end
   end
@@ -49,6 +52,12 @@ class Scraper < Hamster::Scraper
   private
 
   attr_reader :run_id
+
+  def make_last_page(first_page)
+    game_list = get_response(first_page).body
+    parser    = Parser.new(html: game_list)
+    parser.get_last_page
+  end
 
   def get_response(link)
     connect_to(link, ssl_verify: false)

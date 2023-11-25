@@ -1,15 +1,21 @@
 require_relative '../models/sony_game_run'
 require_relative '../models/sony_game'
+require_relative '../models/sony_game_category'
+require_relative '../models/sony_game_additional'
 
 class Keeper
-  PARENT      = 218
-  TEMPLATE_ID = 10
+  PARENT         = 218
+  TEMPLATE_ID    = 10
+  GAMES_PER_PAGE = 36
   def initialize
-    @count  = 0
-    @run_id = run.run_id
+    @count   = 0
+    @run_id  = run.run_id
+    @saved   = 0
+    @updated = 0
+    @skipped  = 0
   end
 
-  attr_reader :run_id
+  attr_reader :run_id, :saved, :updated, :skipped
   attr_accessor :count
 
   def status=(new_status)
@@ -24,8 +30,10 @@ class Keeper
     run.finish
   end
 
-  def save_games(games)
+  def save_games(games, page)
+    count = page > 0 ? GAMES_PER_PAGE * page : 0
     games.each do |game|
+      count += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url]) # , deleted: 0
       next if game_db && game_db[:deleted] == 1
 
@@ -37,8 +45,12 @@ class Keeper
 
       if game_db && game_db[:md5_hash] == game[:additional][:md5_hash]
         # game_db.update(touched_run_id: run_id)
+        @skipped += 1
       elsif game_db && game_db[:md5_hash] != game[:additional][:md5_hash]
         game_db.update(game[:additional])
+        data = { createdon: Time.current.to_i, menuindex: count }
+        SonyGame.find(game_db.id).update(data)
+        @updated += 1
       else
         pagetitle                 = game[:main][:pagetitle]
         game[:main][:longtitle]   = pagetitle
@@ -47,15 +59,18 @@ class Keeper
         game[:main][:publishedon] = Time.current.to_i
         game[:main][:createdon]   = Time.current.to_i
         game[:main][:alias]       = game[:additional][:data_source_url].split('/')[-2..-1].reverse.join('-')
-        game[:main][:alias]       = TEMPLATE_ID
+        game[:main][:template]    = TEMPLATE_ID
+        game[:main][:properties]  = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
+        game[:main][:menuindex]   = count
         #возможно еще нужно добавить поля
-        # game[:main][:menuindex]
 
         SonyGame.store(game)
+        @saved += 1
       end
     rescue => e
-      puts e
+      notify e
       binding.pry
+      retry
     end
   end
 
@@ -77,5 +92,12 @@ class Keeper
     year_raw = date.match(/-\d{4}$/).to_s
     date.sub!(year_raw, '')
     (year_raw.sub('-', '') + '-' + date).to_date
+  end
+
+  def notify(message, color=:green, method_=:info)
+    message = color.nil? ? message : message.send(color)
+    Hamster.logger.send(method_, message)
+    Hamster.report message: message
+    puts message.send(color) if @debug
   end
 end

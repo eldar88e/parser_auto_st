@@ -6,8 +6,13 @@ class Parser < Hamster::Parser
 
   def initialize(**page)
     super
-    @html = Nokogiri::HTML(page[:html])
+    @html           = Nokogiri::HTML(page[:html])
+    @other_platform = 0
+    @not_price      = 0
+    @parsed         = 0
   end
+
+  attr_reader :parsed, :other_platform, :not_price
 
   def parse_games_list
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
@@ -30,7 +35,17 @@ class Parser < Hamster::Parser
     games_raw.each do |game_raw|
       game         = { main: {}, additional: {} }
       price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
-      next unless price_tl_raw
+      unless price_tl_raw
+        @not_price += 0
+        next
+      end
+
+
+      platform = game_raw.at('.game-collection-item-top-platform').text
+      unless platform.match?(/PS5|PS4/)
+        @other_platform += 1
+        next
+      end
 
       date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months|\d+ days/)
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
@@ -50,15 +65,16 @@ class Parser < Hamster::Parser
       end
 
       game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text
-      game[:additional][:platform]        = game_raw.at('.game-collection-item-top-platform').text.gsub(' / ', ', ')
+      game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
       game[:additional][:type]            = translate_type(type_raw)
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
       games << game
+      @parsed += 1
     rescue => e
-      puts e
+      notify e
       binding.pry
     end
     games
@@ -96,4 +112,10 @@ class Parser < Hamster::Parser
     end
   end
 
+  def notify(message, color=:green, method_=:info)
+    message = color.nil? ? message : message.send(color)
+    Hamster.logger.send(method_, message)
+    Hamster.report message: message
+    puts message.send(color) if @debug
+  end
 end

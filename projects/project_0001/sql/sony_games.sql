@@ -7,9 +7,12 @@ create table sony_games
     description                    VARCHAR(1000)       DEFAULT NULL,
     alias                          VARCHAR(200)       DEFAULT NULL,
     parent                         int(10)            DEFAULT 0,
+    template                       int(10)            DEFAULT 0,
+    menuindex                      int(10)            DEFAULT 0,
     properties                     mediumtext         DEFAULT NULL,
     deleted                        TINYINT(1)         DEFAULT 0,
     publishedon                    int(20)            DEFAULT NULL,
+    createdon                      int(20)            DEFAULT NULL,
     editedon                       int(20)            DEFAULT NULL,
 
     INDEX `deleted` (`deleted`)
