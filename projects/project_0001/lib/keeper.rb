@@ -9,7 +9,7 @@ class Keeper
   TEMPLATE_ID    = 10
   GAMES_PER_PAGE = 36
   SOURCE         = 3
-  USER_ID        = 99
+  USER_ID        = 1064
   FILE_TYPE      = 'image'
   SMALL_SIZE     = '50&h=50'
 
@@ -18,9 +18,10 @@ class Keeper
     @run_id  = run.run_id
     @saved   = 0
     @updated = 0
+    @skipped = 0
   end
 
-  attr_reader :run_id, :saved, :updated
+  attr_reader :run_id, :saved, :updated, :skipped
   attr_accessor :count
 
   def status=(new_status)
@@ -48,11 +49,17 @@ class Keeper
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
 
       if game_db
-        game_db.update(game[:additional]) if game_db[:md5_hash] != game[:additional][:md5_hash]
-        data      = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
-        sony_game = SonyGame.find(game_db.id)
-        sony_game.update(data) if count != sony_game[:menuindex]
-        @updated += 1
+        check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+        game_db.update(game[:additional]) if check_md5_hash
+        data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
+        sony_game       = SonyGame.find(game_db.id)
+        check_menuindex = count != sony_game[:menuindex]
+        sony_game.update(data) if check_menuindex
+        if check_md5_hash || check_menuindex
+          @updated += 1
+        else
+          @skipped += 1
+        end
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
