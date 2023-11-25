@@ -7,7 +7,7 @@ class Keeper
   PARENT         = 218
   TEMPLATE_ID    = 10
   GAMES_PER_PAGE = 36
-  SOURCE         = 0
+  SOURCE         = 3
 
   def initialize
     @count   = 0
@@ -54,8 +54,9 @@ class Keeper
         SonyGame.find(game_db.id).update(data)
         @updated += 1
       else
-        game[:additional][:source] = SOURCE
-        game[:additional][:source] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
+        game[:additional][:source]       = SOURCE
+        game[:additional][:site_link]    = "https://psprices.com/game/buy/#{game[:additional][:article]}"
+        game[:additional][:show_in_tree] = 0
         pagetitle                  = game[:main][:pagetitle]
         game[:main][:longtitle]    = pagetitle
         game[:main][:description]  = form_description(pagetitle)
