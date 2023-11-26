@@ -82,15 +82,15 @@ class Keeper
         game[:main][:published]    = 1
         game[:main][:uri]          = "katalog-tovarov/games/#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
-        binding.pry
+
         sony_game_id = SonyGame.store(game)
 
-        md5              = MD5Hash.new(columns: %i[:time])
-        md5_hash         = md5.generate(time: crnt_time)
+        #md5              = MD5Hash.new(columns: %i[:time])
+        #md5_hash         = md5.generate(time: crnt_time)
         file             = {}
         file[:source]    = SOURCE
-        file[:name]      = "#{md5_hash}"
-        file[:file]      = "#{md5_hash}.jpg"
+        #file[:name]      = "#{md5_hash}"
+        #file[:file]      = "#{md5_hash}.jpg"
         file[:type]      = FILE_TYPE
         file[:createdon] = crnt_time
         file[:createdby] = USER_ID
@@ -108,11 +108,14 @@ class Keeper
           elsif item == paths[2]
             new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
           end
-          binding.pry
-          file_db = SonyGameAdditionalFile.create!(new_file)
+          begin
+            file_db = SonyGameAdditionalFile.create!(new_file)
+          rescue TypeError => e
+            # e
+          end
           parent = file_db.id if idx.zero?
         end
-        
+        binding.pry
         @saved += 1
       end
     rescue => e
