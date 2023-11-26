@@ -120,12 +120,12 @@ class Keeper
         end
         @saved += 1
       end
-      binding.pry
     rescue => e
       notify e.message
       binding.pry
       retry
     end
+    binding.pry
   end
 
   private
