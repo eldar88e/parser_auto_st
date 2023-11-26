@@ -68,7 +68,6 @@ class Parser < Hamster::Parser
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
       game[:main][:alias]                 = make_alias(game[:additional][:data_source_url])
-      binding.pry
       games << game
       @parsed += 1
     rescue => e
