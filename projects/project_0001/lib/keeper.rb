@@ -54,9 +54,6 @@ class Keeper
 
       if game_db
         check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
-        #
-        game_db.update(janr: game[:additional][:janr])
-        #
         game_db.update(game[:additional]) if check_md5_hash
         data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
         sony_game       = SonyGame.find(game_db.id)
@@ -91,38 +88,7 @@ class Keeper
 
         sony_game_id = SonyGame.store(game)
 
-        md5              = MD5Hash.new(columns: %i[:time])
-        md5_hash         = md5.generate(time: crnt_time)
-        file             = {}
-        file[:source]    = SOURCE
-        file[:name]      = "#{md5_hash}"
-        file[:file]      = "#{md5_hash}.jpg"
-        file[:type]      = FILE_TYPE
-        file[:createdon] = crnt_time
-        file[:createdby] = USER_ID
-        file[:url]       = game[:additional][:image_link_raw]
-
-        file[:product_id] = sony_game_id
-        parent   = 0
-        paths    = %w[/ /100x98/ /520x508/]
-        new_file = {}
-        new_file.merge!(file)
-        paths.each_with_index do |item, idx|
-          new_file.merge!(path: "#{sony_game_id}#{item}", parent: parent)
-          if item == paths[1]
-            new_file[:url] = file[:url].sub(/720&h=720/, SMALL_SIZE)
-          elsif item == paths[2]
-            new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
-          end
-
-          begin
-            SonyGameAdditionalFile.create!(new_file)
-          rescue TypeError => e
-            # e
-          end
-
-          parent = SonyGameAdditionalFile.last.id if idx.zero?
-        end
+        save_image_info(sony_game_id, game[:additional][:image_link_raw])
         @saved += 1
       end
     rescue => e
@@ -134,6 +100,44 @@ class Keeper
   end
 
   private
+
+  def save_image_info(id, img)
+    crnt_time = Time.current
+    md5       = MD5Hash.new(columns: %i[:time])
+    md5_hash  = md5.generate(time: crnt_time)
+    file      = {}
+
+    file[:source]     = SOURCE
+    file[:name]       = md5_hash
+    file[:file]       = "#{md5_hash}.jpg"
+    file[:type]       = FILE_TYPE
+    file[:createdon]  = crnt_time
+    file[:createdby]  = USER_ID
+    file[:url]        = img
+    file[:product_id] = id
+
+    parent   = 0
+    paths    = %w[/ /100x98/ /520x508/]
+    new_file = {}
+    new_file.merge!(file)
+    paths.each_with_index do |item, idx|
+      new_file.merge!(path: "#{id}#{item}", parent: parent)
+      if item == paths[1]
+        new_file[:url] = file[:url].sub(/720&h=720/, SMALL_SIZE)
+      elsif item == paths[2]
+        new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
+      end
+
+      begin
+        binding.pry
+        #SonyGameAdditionalFile.create!(new_file)
+      rescue TypeError => e
+        # e
+      end
+
+      parent = SonyGameAdditionalFile.last.id if idx.zero?
+    end
+  end
 
   def form_description(title)
     <<~DESCR.gsub(/\n/, '')
