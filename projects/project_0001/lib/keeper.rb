@@ -13,6 +13,7 @@ class Keeper
   FILE_TYPE      = 'image'
   SMALL_SIZE     = '50&h=50'
   MIDDLE_SIZE    = '320&h=320'
+  PATH_CATALOG   = 'katalog-tovarov/games/'
 
   def initialize
     @count   = 0
@@ -76,12 +77,12 @@ class Keeper
         game[:main][:publishedby]  = USER_ID
         game[:main][:createdon]    = crnt_time.to_i
         game[:main][:createdby]    = USER_ID
-        game[:main][:alias]        = game[:additional][:data_source_url].split('/')[-2..-1].reverse.join('-')
+        game[:main][:alias]        = make_alias(game[:additional][:data_source_url])
         game[:main][:template]     = TEMPLATE_ID
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = count
         game[:main][:published]    = 1
-        game[:main][:uri]          = "katalog-tovarov/games/#{game[:main][:alias]}"
+        game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
         sony_game_id = SonyGame.store(game)
@@ -129,6 +130,11 @@ class Keeper
   end
 
   private
+
+  def make_alias(url)
+    alias_raw = url.split('/')[-2..-1].reverse.join('-')
+    alias_raw.gsub('ü','u').gsub('ö','o').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
+  end
 
   def form_description(title)
     <<~DESCR.gsub(/\n/, '')

@@ -27,11 +27,8 @@ class Parser < Hamster::Parser
   end
 
   def parse_list_info
-    #url_raw         = @html.at('link[rel="canonical"]') || @html.at('link[rel="self"]')
-    #data_source_url = url_raw['href']
-    #data_source_url = SITE + data_source_url unless data_source_url.include?(SITE)
-    games           = []
-    games_raw       = @html.css('div.game-collection-item')
+    games     = []
+    games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
       game         = { main: {}, additional: {} }
       price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
@@ -39,7 +36,6 @@ class Parser < Hamster::Parser
         @not_price += 0
         next
       end
-
 
       platform = game_raw.at('.game-collection-item-top-platform').text
       unless platform.match?(/PS5|PS4/)
