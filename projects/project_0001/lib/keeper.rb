@@ -108,12 +108,14 @@ class Keeper
           elsif item == paths[2]
             new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
           end
+
           begin
-            file_db = SonyGameAdditionalFile.create!(new_file)
+            SonyGameAdditionalFile.create!(new_file)
           rescue TypeError => e
             # e
           end
-          parent = file_db.id if idx.zero?
+
+          parent = SonyGameAdditionalFile.last.id if idx.zero?
         end
         binding.pry
         @saved += 1
