@@ -26,7 +26,13 @@ class SonyGame < ApplicationRecord
         end
         file_db = SonyGameAdditionalFile.create!(new_file)
         parent = file_db.id if idx.zero?
+      rescue => e
+        p e
+        binding.pry
       end
+    rescue => e
+      p e
+      binding.pry
     end
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error
