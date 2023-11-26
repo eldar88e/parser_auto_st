@@ -24,8 +24,8 @@ class SonyGame < ApplicationRecord
         elsif item == paths[2]
           new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
         end
-        file_db = SonyGameAdditionalFile.create!(new_file)
-        parent = file_db.id if idx.zero?
+        #file_db = SonyGameAdditionalFile.create!(new_file)
+        #parent = file_db.id if idx.zero?
       end
     end
   rescue ActiveRecord::RecordNotUnique
