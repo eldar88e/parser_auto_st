@@ -60,7 +60,7 @@ class Parser < Hamster::Parser
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
 
-      game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü]/, 'version')
+      game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'version')
       game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
       game[:additional][:type]            = translate_type(type_raw)
@@ -68,6 +68,7 @@ class Parser < Hamster::Parser
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
       game[:main][:alias]                 = make_alias(game[:additional][:data_source_url])
+      binding.pry
       games << game
       @parsed += 1
     rescue => e
