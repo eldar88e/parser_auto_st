@@ -46,7 +46,7 @@ class Parser < Hamster::Parser
       date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months|\d+ days/)
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
-
+      binding.pry
       if date_raw && (prise_discount || prise_bonus)
         game[:additional][:price_tl]          = get_price(prise_discount)
         game[:additional][:price]             = get_price(prise_discount, :ru)
@@ -66,8 +66,10 @@ class Parser < Hamster::Parser
       game[:additional][:type]            = translate_type(type_raw)
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
+      game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
       game[:main][:alias]                 = make_alias(game[:additional][:data_source_url])
+
       games << game
       @parsed += 1
     rescue => e

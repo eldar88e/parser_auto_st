@@ -14,6 +14,8 @@ class Keeper
   SMALL_SIZE     = '50&h=50'
   MIDDLE_SIZE    = '320&h=320'
   PATH_CATALOG   = 'katalog-tovarov/games/'
+  # https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/EP1018-PPSA07571_00-MKONEPREMIUM0000/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=720&h=720
+  # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
   def initialize
     @count   = 0
@@ -52,16 +54,14 @@ class Keeper
 
       if game_db
         check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+        #
+        game_db.update(janr: game[:additional][:janr])
+        #
         game_db.update(game[:additional]) if check_md5_hash
         data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
         sony_game       = SonyGame.find(game_db.id)
         check_menuindex = count != sony_game[:menuindex]
-        #
-        data[:longtitle]    = game[:main][:pagetitle]
-        data[:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
-        data[:pagetitle]    = game[:main][:pagetitle]
-        #
-        sony_game.update(data) #if check_menuindex
+        sony_game.update(data) if check_menuindex
         if check_md5_hash || check_menuindex
           @updated += 1
         else
@@ -75,7 +75,7 @@ class Keeper
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, SMALL_SIZE)
 
         crnt_time                  = Time.current
-        #game[:main][:longtitle]    = game[:main][:pagetitle]
+        game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:parent]       = PARENT
         game[:main][:publishedon]  = crnt_time.to_i
@@ -86,7 +86,7 @@ class Keeper
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = count
         game[:main][:published]    = 1
-        #game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
+        game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
         sony_game_id = SonyGame.store(game)
