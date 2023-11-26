@@ -1,4 +1,4 @@
-create table sony_game_products
+create table sony_game_additionals
 (
     `id`                           BIGINT(20) AUTO_INCREMENT PRIMARY KEY,
 
