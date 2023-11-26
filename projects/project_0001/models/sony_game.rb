@@ -12,12 +12,13 @@ class SonyGame < ApplicationRecord
       additional.merge!(id: sony_game_id)
       SonyGameAdditional.create!(additional)
       SonyGameCategories.store(product_id: sony_game_id, category_id: data[:main][:parent])
-      file   = data[:file].merge!(product_id: sony_game_id)
-      parent = 0
-      paths  = %w[/ /100x98/ /520x508/]
+      file     = data[:file].merge(product_id: sony_game_id)
+      parent   = 0
+      paths    = %w[/ /100x98/ /520x508/]
+      new_file = {}
+      new_file.merge!(file)
       paths.each_with_index do |item, idx|
-        new_file = {}
-        new_file.merge!(file).merge!(path: "#{sony_game_id}#{item}", parent: parent)
+        new_file.merge!(path: "#{sony_game_id}#{item}", parent: parent)
         if item == paths[1]
           new_file[:url] = file[:url].sub(/720&h=720/, SMALL_SIZE)
         elsif item == paths[2]
