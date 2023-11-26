@@ -86,12 +86,12 @@ class Keeper
 
         sony_game_id = SonyGame.store(game)
 
-        #md5              = MD5Hash.new(columns: %i[:time])
-        #md5_hash         = md5.generate(time: crnt_time)
+        md5              = MD5Hash.new(columns: %i[:time])
+        md5_hash         = md5.generate(time: crnt_time)
         file             = {}
         file[:source]    = SOURCE
-        #file[:name]      = "#{md5_hash}"
-        #file[:file]      = "#{md5_hash}.jpg"
+        file[:name]      = "#{md5_hash}"
+        file[:file]      = "#{md5_hash}.jpg"
         file[:type]      = FILE_TYPE
         file[:createdon] = crnt_time
         file[:createdby] = USER_ID
