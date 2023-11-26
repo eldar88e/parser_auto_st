@@ -82,21 +82,36 @@ class Keeper
         game[:main][:published]    = 1
         game[:main][:uri]          = "katalog-tovarov/games/#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
-
-        md5      = MD5Hash.new(columns: %i[:time])
-        md5_hash = md5.generate(time: crnt_time)
-        game[:file]             = {}
-        game[:file][:source]    = SOURCE
-        game[:file][:name]      = "#{md5_hash}"
-        game[:file][:file]      = "#{md5_hash}.jpg"
-        game[:file][:type]      = FILE_TYPE
-        game[:file][:createdon] = crnt_time
-        game[:file][:createdby] = USER_ID
-        game[:file][:url]       = game[:additional][:image_link_raw]
-
-        #возможно еще нужно добавить поля
         binding.pry
-        SonyGame.store(game)
+        sony_game_id = SonyGame.store(game)
+        binding.pry
+        md5              = MD5Hash.new(columns: %i[:time])
+        md5_hash         = md5.generate(time: crnt_time)
+        file             = {}
+        file[:source]    = SOURCE
+        file[:name]      = "#{md5_hash}"
+        file[:file]      = "#{md5_hash}.jpg"
+        file[:type]      = FILE_TYPE
+        file[:createdon] = crnt_time
+        file[:createdby] = USER_ID
+        file[:url]       = game[:additional][:image_link_raw]
+
+        file[:product_id] = sony_game_id
+        parent   = 0
+        paths    = %w[/ /100x98/ /520x508/]
+        new_file = {}
+        new_file.merge!(file)
+        paths.each_with_index do |item, idx|
+          new_file.merge!(path: "#{sony_game_id}#{item}", parent: parent)
+          if item == paths[1]
+            new_file[:url] = file[:url].sub(/720&h=720/, SMALL_SIZE)
+          elsif item == paths[2]
+            new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
+          end
+          file_db = SonyGameAdditionalFile.create!(new_file)
+          parent = file_db.id if idx.zero?
+        end
+        
         @saved += 1
       end
     rescue => e
