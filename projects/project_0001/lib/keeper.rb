@@ -84,7 +84,7 @@ class Keeper
         game[:main][:show_in_tree] = 0
         binding.pry
         sony_game_id = SonyGame.store(game)
-        binding.pry
+
         md5              = MD5Hash.new(columns: %i[:time])
         md5_hash         = md5.generate(time: crnt_time)
         file             = {}
@@ -108,6 +108,7 @@ class Keeper
           elsif item == paths[2]
             new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
           end
+          binding.pry
           file_db = SonyGameAdditionalFile.create!(new_file)
           parent = file_db.id if idx.zero?
         end
