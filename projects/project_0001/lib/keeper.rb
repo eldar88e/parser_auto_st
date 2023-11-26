@@ -56,7 +56,12 @@ class Keeper
         data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
         sony_game       = SonyGame.find(game_db.id)
         check_menuindex = count != sony_game[:menuindex]
-        sony_game.update(data) if check_menuindex
+        #
+        data[:longtitle]    = game[:main][:pagetitle]
+        data[:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
+        data[:pagetitle]    = game[:main][:pagetitle]
+        #
+        sony_game.update(data) #if check_menuindex
         if check_md5_hash || check_menuindex
           @updated += 1
         else
@@ -70,7 +75,7 @@ class Keeper
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, SMALL_SIZE)
 
         crnt_time                  = Time.current
-        game[:main][:longtitle]    = game[:main][:pagetitle]
+        #game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:parent]       = PARENT
         game[:main][:publishedon]  = crnt_time.to_i
@@ -81,7 +86,7 @@ class Keeper
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = count
         game[:main][:published]    = 1
-        game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
+        #game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
         sony_game_id = SonyGame.store(game)
