@@ -12,6 +12,7 @@ class SonyGame < ApplicationRecord
       additional.merge!(id: sony_game_id)
       SonyGameAdditional.create!(additional)
       SonyGameCategories.store(product_id: sony_game_id, category_id: data[:main][:parent])
+=begin
       file     = data[:file].merge(product_id: sony_game_id)
       parent   = 0
       paths    = %w[/ /100x98/ /520x508/]
@@ -27,7 +28,7 @@ class SonyGame < ApplicationRecord
         file_db = SonyGameAdditionalFile.create!(new_file)
         parent = file_db.id if idx.zero?
       end
-      1
+=end
     end
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error
