@@ -1,8 +1,6 @@
 require_relative './application_record'
 
 class SonyGame < ApplicationRecord
-  SMALL_SIZE      = '50&h=50'
-  MIDDLE_SIZE     = '320&h=320'
   self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
   def self.store(data)

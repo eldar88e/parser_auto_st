@@ -12,6 +12,7 @@ class Keeper
   USER_ID        = 1064
   FILE_TYPE      = 'image'
   SMALL_SIZE     = '50&h=50'
+  MIDDLE_SIZE    = '320&h=320'
 
   def initialize
     @count   = 0
