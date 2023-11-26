@@ -67,6 +67,7 @@ class Parser < Hamster::Parser
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
+      game[:main][:alias]                 = make_alias(game[:additional][:data_source_url])
       games << game
       @parsed += 1
     rescue => e
@@ -77,6 +78,14 @@ class Parser < Hamster::Parser
   end
 
   private
+
+  def make_alias(url)
+    alias_raw = url.split('/')[-2..-1].reverse.join('-')
+    return alias_raw unless alias_raw.match?(/%/)
+
+    alias_raw = URI.decode_www_form(alias_raw)[0][0]
+    alias_raw.gsub('ü','u').gsub('ö','o').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
+  end
 
   def get_price(raw_price, currency=:tr)
     return unless raw_price

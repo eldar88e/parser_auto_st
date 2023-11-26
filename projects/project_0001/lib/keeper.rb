@@ -77,7 +77,6 @@ class Keeper
         game[:main][:publishedby]  = USER_ID
         game[:main][:createdon]    = crnt_time.to_i
         game[:main][:createdby]    = USER_ID
-        game[:main][:alias]        = make_alias(game[:additional][:data_source_url])
         game[:main][:template]     = TEMPLATE_ID
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = count
@@ -119,9 +118,9 @@ class Keeper
 
           parent = SonyGameAdditionalFile.last.id if idx.zero?
         end
-        binding.pry
         @saved += 1
       end
+      binding.pry
     rescue => e
       notify e.message
       binding.pry
@@ -130,11 +129,6 @@ class Keeper
   end
 
   private
-
-  def make_alias(url)
-    alias_raw = url.split('/')[-2..-1].reverse.join('-')
-    alias_raw.gsub('ü','u').gsub('ö','o').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
-  end
 
   def form_description(title)
     <<~DESCR.gsub(/\n/, '')
