@@ -8,7 +8,6 @@ class SonyGame < ApplicationRecord
   def self.store(data)
     self.transaction do
       sony_game_id = self.create!(data[:main]).id
-      binding.pry
       additional   = data[:additional]
       additional.merge!(id: sony_game_id)
       SonyGameAdditional.create!(additional)
@@ -27,8 +26,6 @@ class SonyGame < ApplicationRecord
         file_db = SonyGameAdditionalFile.create!(new_file)
         parent = file_db.id if idx.zero?
       end
-
-      nil
     end
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error
