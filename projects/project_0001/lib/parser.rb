@@ -100,7 +100,7 @@ class Parser < Hamster::Parser
   end
 
   def round_up_price(price)
-    (price / ROUND_PRICE.to_f).round * ROUND_PRICE
+    (price.round / ROUND_PRICE.to_f).round * ROUND_PRICE
   end
 
   def get_discount_end_date(date_raw)
