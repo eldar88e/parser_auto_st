@@ -53,20 +53,7 @@ class Keeper
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
 
       if game_db
-        check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
-        game_db.update(game[:additional]) if check_md5_hash
-        #
-        game_db.update(type_game: game[:additional][:type_game])
-        #
-        data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
-        sony_game       = SonyGame.find(game_db.id)
-        check_menuindex = count != sony_game[:menuindex]
-        sony_game.update(data) if check_menuindex
-        if check_md5_hash || check_menuindex
-          @updated += 1
-        else
-          @skipped += 1
-        end
+        update_date(game, game_db, count)
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
@@ -102,6 +89,20 @@ class Keeper
   end
 
   private
+
+  def update_date(game, game_db, count)
+    check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+    game_db.update(game[:additional]) if check_md5_hash
+    data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
+    sony_game       = SonyGame.find(game_db.id)
+    check_menuindex = count != sony_game[:menuindex]
+    sony_game.update(data) if check_menuindex
+    if check_md5_hash || check_menuindex
+      @updated += 1
+    else
+      @skipped += 1
+    end
+  end
 
   def save_image_info(id, img)
     crnt_time = Time.current
