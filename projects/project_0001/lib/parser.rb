@@ -2,7 +2,7 @@ require_relative '../models/sony_game_additional'
 
 class Parser < Hamster::Parser
   EXCHANGE_RATE = 5.5
-  ROUND_PRICE   = 5
+  ROUND_PRICE   = 10
   SITE          = 'https://psdeals.net'
 
   def initialize(**page)
