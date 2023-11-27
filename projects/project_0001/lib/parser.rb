@@ -60,7 +60,7 @@ class Parser < Hamster::Parser
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
 
-      game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'version').gsub(/[P|p]aketi?/, 'bundle')
+      game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
       game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game]       = translate_type(type_raw)
@@ -86,7 +86,7 @@ class Parser < Hamster::Parser
     return alias_raw unless alias_raw.match?(/%/)
 
     alias_raw = URI.decode_www_form(alias_raw)[0][0]
-    alias_raw.gsub('sürümü', 'version').gsub('ü','u').gsub('ö','o').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
+    alias_raw.gsub('sürümü', 'edition').gsub('ü','u').gsub('ö','o').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
   end
 
   def get_price(raw_price, currency=:tr)

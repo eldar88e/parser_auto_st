@@ -96,6 +96,14 @@ class Keeper
     data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
     sony_game       = SonyGame.find(game_db.id)
     check_menuindex = count != sony_game[:menuindex]
+    #
+    data[:alias]        = game[:main][:alias]
+    data[:longtitle]    = game[:main][:pagetitle]
+    data[:pagetitle]    = game[:main][:pagetitle]
+    data[:description]  = form_description(game[:main][:pagetitle])
+    data[:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
+    sony_game.update(data)
+    #
     sony_game.update(data) if check_menuindex
     if check_md5_hash || check_menuindex
       @updated += 1
