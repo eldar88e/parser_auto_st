@@ -2,6 +2,7 @@ require_relative '../models/sony_game_additional'
 
 class Parser < Hamster::Parser
   EXCHANGE_RATE = 5.5
+  ROUND_PRICE   = 5
   SITE          = 'https://psdeals.net'
 
   def initialize(**page)
@@ -95,7 +96,11 @@ class Parser < Hamster::Parser
     price = raw_price.gsub(',', '').to_f
     return price if currency == :tr
 
-    price * EXCHANGE_RATE
+    round_up_price(price) * EXCHANGE_RATE
+  end
+
+  def round_up_price(price)
+    (price / ROUND_PRICE.to_f).round * ROUND_PRICE
   end
 
   def get_discount_end_date(date_raw)
