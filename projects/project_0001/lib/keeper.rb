@@ -55,6 +55,9 @@ class Keeper
       if game_db
         check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
         game_db.update(game[:additional]) if check_md5_hash
+        #
+        game_db.update(type_game: game[:additional][:type_game])
+        #
         data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
         sony_game       = SonyGame.find(game_db.id)
         check_menuindex = count != sony_game[:menuindex]
@@ -86,9 +89,8 @@ class Keeper
         game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
-        sony_game_id = SonyGame.store(game)
-
-        save_image_info(sony_game_id, game[:additional][:image_link_raw])
+        SonyGame.store(game) # sony_game_id =
+        # save_image_info(sony_game_id, game[:additional][:image_link_raw])
         @saved += 1
       end
     rescue => e
@@ -129,8 +131,7 @@ class Keeper
       end
 
       begin
-        binding.pry
-        #SonyGameAdditionalFile.create!(new_file)
+        SonyGameAdditionalFile.create!(new_file)
       rescue TypeError => e
         # e
       end

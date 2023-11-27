@@ -63,7 +63,7 @@ class Parser < Hamster::Parser
       game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'version')
       game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
-      game[:additional][:type]            = translate_type(type_raw)
+      game[:additional][:type_game]       = translate_type(type_raw)
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
