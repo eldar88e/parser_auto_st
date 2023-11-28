@@ -19,6 +19,35 @@ class Parser < Hamster::Parser
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
   end
 
+  def parse_lang
+    dl = @html.at('dl.psw-l-grid')
+    return if dl.nil?
+
+    dt_count = dl.css('dt').size
+    info     = {}
+    dt_count.times do
+      key   = dl.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
+      value = dl.at('dd').remove.text
+      next if key == :platform
+
+      info[key] = key == :release ? Date.parse(value) : value
+    rescue => e
+      notify e
+      binding.pry
+      next
+    end
+    need_keys = %i[publisher genre release]
+    lang      = info.slice!(*need_keys)
+    new_lang  = { voice: '', screen_lang: '' }
+    lang.each do |k, v|
+      new_lang[:voice]       += v if k.to_s.match?(/voice/)
+      new_lang[:screen_lang] += v if k.to_s.match?(/screen/)
+    end
+    info[:rus_voice]  = true if new_lang[:voice].downcase.match?(/rus/)
+    info[:rus_screen] = true if new_lang[:screen_lang].downcase.match?(/rus/)
+    info
+  end
+
   def get_last_page
     count_result   = @html.at('div.results').text.match(/\d+/).to_s.to_i
     games_per_page = @html.css('div.game-collection-item').size

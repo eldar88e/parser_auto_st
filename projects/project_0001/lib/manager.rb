@@ -3,8 +3,6 @@ require_relative '../lib/parser'
 require_relative '../lib/keeper'
 
 class Manager < Hamster::Harvester
-  SITE = 'https://psdeals.net'
-
   def initialize
     super
     @keeper = Keeper.new
@@ -23,6 +21,8 @@ class Manager < Hamster::Harvester
   end
 
   def store
+    parse_save_lang
+    binding.pry
     notify 'Parsing started'
     keeper.status = 'parsing'
     run_id        = keeper.run_id
@@ -55,6 +55,19 @@ class Manager < Hamster::Harvester
   private
 
   attr_reader :keeper
+
+  def parse_save_lang
+    ps_ids  = keeper.get_ps_ids
+    scraper = Scraper.new(keeper)
+    ps_ids.each do |id|
+      page   = scraper.scrape_lang(id[1])
+      parser = Parser.new(html: page)
+      lang   = parser.parse_lang
+      next if lang.nil?
+
+      keeper.save_lang_info(lang, id[0])
+    end
+  end
 
   def notify(message, color=:green, method_=:info)
     message = color.nil? ? message : message.send(color)

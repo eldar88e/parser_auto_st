@@ -1,8 +1,11 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
-  SITE   = 'https://psdeals.net'
-  PARAMS = '?sort=most-watchlisted&contentType%5B0%5D=games&contentType%5B1%5D=bundles&contentType%5B2%5D=dlc'
+  SITE    = 'https://psdeals.net'
+  PATH_TR = '/tr-store/all-games/'
+  PATH_RU = '/ru-store/all-games/'
+  PARAMS  = '?sort=most-watchlisted&contentType%5B0%5D=games&contentType%5B1%5D=bundles&contentType%5B2%5D=dlc'
+  PS_GAME = 'https://store.playstation.com/en-tr/product/'
 
   def initialize(keeper)
     super
@@ -14,12 +17,17 @@ class Scraper < Hamster::Scraper
 
   attr_reader :count
 
+  def scrape_lang(id)
+    url = PS_GAME + id
+    get_response(url).body
+  end
+
   def scrape_games_tr
-    first_page = "#{SITE}/tr-store/all-games/1#{PARAMS}"
-    last_page = make_last_page(first_page)
+    first_page = "#{SITE}#{PATH_TR}1#{PARAMS}"
+    last_page  = make_last_page(first_page)
     notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
     [*1..last_page].each do |page|
-      link = "#{SITE}/tr-store/all-games/#{page}#{PARAMS}"
+      link = "#{SITE}#{PATH_TR}#{page}#{PARAMS}"
       puts "Page #{page} of #{last_page}".green
       game_list = get_response(link).body
       sleep(rand(1..3))
@@ -29,11 +37,11 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_ru
-    first_page = "#{SITE}/ru-store/all-games/1#{PARAMS}"
-    last_page = make_last_page(first_page)
+    first_page = "#{SITE}#{PATH_RU}1#{PARAMS}"
+    last_page  = make_last_page(first_page)
     notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
     [*1..last_page].each do |page|
-      link        = "#{SITE}/ru-store/all-games/#{page}"
+      link        = "#{SITE}#{PATH_RU}#{page}"
       game_list   = get_response(link).body
       parser      = Parser.new(html: game_list)
       games_links = parser.parse_games_list
@@ -43,7 +51,7 @@ class Scraper < Hamster::Scraper
         game = get_response(url).body
         name = MD5Hash.new(columns: %i[path]).generate({ path: path })
         peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ru/game_list_#{page}")
-        sleep rand(3..7)
+        sleep rand(1..3)
         @count += 0
       end
     end

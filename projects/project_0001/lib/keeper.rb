@@ -7,6 +7,7 @@ require_relative '../models/sony_game_additional_file'
 class Keeper
   PARENT         = 218
   TEMPLATE_ID    = 10
+  LIMIT_UPD_LANG = 1000
   GAMES_PER_PAGE = 36
   SOURCE         = 3
   USER_ID        = 1064
@@ -40,12 +41,31 @@ class Keeper
     run.finish
   end
 
+  def get_ps_ids
+    sg_id = SonyGame.where(parent: PARENT, deleted: 0, published: 1).order(:menuindex).limit(LIMIT_UPD_LANG).pluck(:id)
+    SonyGameAdditional.where(id: sg_id).where.not(janr: [nil, '']).pluck(:id, :janr)
+  end
+
+  def save_lang_info(lang, id)
+    SonyGameAdditional.find(id).update(lang)
+  end
+
   def save_games(games, page)
     count = page > 0 ? GAMES_PER_PAGE * page : 0
     games.each do |game|
       count += 1
-      game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url]) # , deleted: 0
-      next if game_db && game_db[:deleted] == 1
+      game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+      if game_db
+        sony_game = SonyGame.find_by(id: game_db.id)
+        if sony_game
+          next if sony_game.deleted || !sony_game.published
+        else
+          notify "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_db.id}` удалена!\n"\
+                   "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, #{SonyGameCategories.table_name} "\
+                   "или добавте в основную таблицу под этим ID запись."
+          next
+        end
+      end
 
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus]
@@ -53,7 +73,7 @@ class Keeper
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
 
       if game_db
-        update_date(game, game_db, count)
+        update_date(game, game_db, count, sony_game)
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
@@ -90,20 +110,11 @@ class Keeper
 
   private
 
-  def update_date(game, game_db, count)
+  def update_date(game, game_db, count, sony_game)
     check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
     game_db.update(game[:additional]) if check_md5_hash
     data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
-    sony_game       = SonyGame.find(game_db.id)
     check_menuindex = count != sony_game[:menuindex]
-    #
-    data[:alias]        = game[:main][:alias]
-    data[:longtitle]    = game[:main][:pagetitle]
-    data[:pagetitle]    = game[:main][:pagetitle]
-    data[:description]  = form_description(game[:main][:pagetitle])
-    data[:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
-    sony_game.update(data)
-    #
     sony_game.update(data) if check_menuindex
     if check_md5_hash || check_menuindex
       @updated += 1
