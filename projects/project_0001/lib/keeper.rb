@@ -43,7 +43,8 @@ class Keeper
   end
 
   def save_desc(data)
-    alias_sg = SonyGame.all.pluck(:alias).find { |i| i.sub(/-\d+\z/, '') == data[:alias] }
+    # SonyGame.all.pluck(:alias).find { |i| i.sub(/-\d+\z/, '') == data[:alias] }
+    alias_sg = SonyGame.find_by("alias LIKE ?", "%#{data[:alias]}%")&.alias
     return unless alias_sg
 
     SonyGame.find_by(alias: alias_sg).update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID)
