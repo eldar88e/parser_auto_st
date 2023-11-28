@@ -19,14 +19,15 @@ class Keeper
   # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
   def initialize
-    @count   = 0
-    @run_id  = run.run_id
-    @saved   = 0
-    @updated = 0
-    @skipped = 0
+    @count        = 0
+    @run_id       = run.run_id
+    @saved        = 0
+    @updated      = 0
+    @skipped      = 0
+    @updated_lang = 0
   end
 
-  attr_reader :run_id, :saved, :updated, :skipped
+  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang
   attr_accessor :count
 
   def status=(new_status)
@@ -41,13 +42,24 @@ class Keeper
     run.finish
   end
 
-  def get_ps_ids
-    sg_id = SonyGame.where(parent: PARENT, deleted: 0, published: 1).order(:menuindex).limit(LIMIT_UPD_LANG).pluck(:id)
-    SonyGameAdditional.where(id: sg_id).where.not(janr: [nil, '']).pluck(:id, :janr)
+  def save_desc(data)
+    alias_sg = SonyGame.all.pluck(:alias).find { |i| i.sub(/-\d+\z/, '') == data[:alias] }
+    return unless alias_sg
+
+    SonyGame.find_by(alias: alias_sg).update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID)
+    @updated_lang += 1
+  end
+
+  def get_ps_ids(limit)
+    limit = LIMIT_UPD_LANG if limit.nil?
+    sg_id = SonyGame.where(parent: PARENT, deleted: 0, published: 1).order(:menuindex).limit(limit).pluck(:id)
+    SonyGameAdditional.where(id: sg_id).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_lang_info(lang, id)
+    lang.merge!(touched_run_id: run_id)
     SonyGameAdditional.find(id).update(lang)
+    @updated_lang += 1
   end
 
   def save_games(games, page)
@@ -81,13 +93,13 @@ class Keeper
         game[:additional][:image]     = game[:additional][:image_link_raw]
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, SMALL_SIZE)
 
-        crnt_time                  = Time.current
+        crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:parent]       = PARENT
-        game[:main][:publishedon]  = crnt_time.to_i
+        game[:main][:publishedon]  = crnt_time
         game[:main][:publishedby]  = USER_ID
-        game[:main][:createdon]    = crnt_time.to_i
+        game[:main][:createdon]    = crnt_time
         game[:main][:createdby]    = USER_ID
         game[:main][:template]     = TEMPLATE_ID
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
@@ -96,8 +108,7 @@ class Keeper
         game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
-        SonyGame.store(game) # sony_game_id =
-        # save_image_info(sony_game_id, game[:additional][:image_link_raw])
+        SonyGame.store(game)
         @saved += 1
       end
     rescue => e
@@ -105,7 +116,7 @@ class Keeper
       binding.pry
       retry
     end
-    binding.pry
+    #binding.pry
   end
 
   private

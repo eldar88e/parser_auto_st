@@ -21,17 +21,40 @@ class Manager < Hamster::Harvester
   end
 
   def store
-    parse_save_lang
-    binding.pry
     notify 'Parsing started'
     keeper.status = 'parsing'
-    run_id        = keeper.run_id
-    list_pages    = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
-    parser_count  = 0
-    othr_pl_count = 0
-    not_prc_count = 0
+
+    if commands[:lang]
+      parse_save_lang(commands[:lang].to_i)
+      notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
+      return
+    end
+
+    if commands[:desc]
+      parse_save_desc
+      notify "Completed parsing and updating of description for #{keeper.updated_lang} game(s)"
+      return
+    end
+
+    parser_count, othr_pl_count, not_prc_count = parse_save_main
+    #parse_save_lang
+    #keeper.finish
+    message = make_message(othr_pl_count, not_prc_count, parser_count)
+    notify message
+  end
+
+  private
+
+  attr_reader :keeper
+
+  def parse_save_main
+    run_id     = keeper.run_id
+    list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
+    parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
     list_pages.each_with_index do |name, idx|
       puts "#{name}".green
+      break if idx > 11
+
       file      = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser    = Parser.new(html: file)
       list_info = parser.parse_list_info
@@ -40,7 +63,25 @@ class Manager < Hamster::Harvester
       not_prc_count += parser.not_price
       keeper.save_games(list_info, idx)
     end
-    #keeper.finish
+    [parser_count, othr_pl_count, not_prc_count]
+  end
+
+  def parse_save_desc
+    run_id     = keeper.run_id
+    list_pages = peon.list(subfolder: "#{run_id}_games_ru").sort_by { |name| name.scan(/\d+/).first.to_i }
+    list_pages.each do |name_list_page|
+      list_games = peon.list(subfolder: "#{run_id}_games_ru/#{name_list_page}")
+      list_games.each do |name|
+        puts "#{name}".green
+        file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
+        parser    = Parser.new(html: file)
+        list_info = parser.parse_game_desc
+        keeper.save_desc(list_info) if list_info
+      end
+    end
+  end
+
+  def make_message(othr_pl_count, not_prc_count, parser_count)
     message = "Finish store!"
     message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated: #{keeper.updated} games;" unless keeper.updated.zero?
@@ -48,16 +89,12 @@ class Manager < Hamster::Harvester
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nParsed: #{parser_count} games." unless parser_count.zero?
-
-    notify message
+    message << "\nParsed and updated of lang info for #{keeper.updated_lang} game(s)" unless keeper.updated_lang.zero?
+    message
   end
 
-  private
-
-  attr_reader :keeper
-
-  def parse_save_lang
-    ps_ids  = keeper.get_ps_ids
+  def parse_save_lang(limit=nil)
+    ps_ids  = keeper.get_ps_ids(limit)
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
       page   = scraper.scrape_lang(id[1])
