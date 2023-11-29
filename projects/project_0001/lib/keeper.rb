@@ -17,6 +17,7 @@ class Keeper
   MIDDLE_SIZE    = '320&h=320'
   PATH_CATALOG   = 'katalog-tovarov/games/'
   NEW_TOUCHED_UPDATE_DESC = true
+  MONTH_SINCE_RELEASE     = 6
   # https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/EP1018-PPSA07571_00-MKONEPREMIUM0000/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=720&h=720
   # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
@@ -78,6 +79,7 @@ class Keeper
 
   def save_lang_info(lang, id)
     lang.merge!(touched_run_id: run_id)
+    lang[:new] = true if lang[:release] && lang[:release] > Date.current.prev_month(MONTH_SINCE_RELEASE)
     SonyGameAdditional.find(id).update(lang)
     @updated_lang += 1
   end
@@ -154,6 +156,8 @@ class Keeper
 
   def update_date(game, game_db, count, sony_game)
     check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+    release        = game[:additional][:release]
+    game[:additional][:new] = true if release && release > Date.current.prev_month(MONTH_SINCE_RELEASE)
     game_db.update(game[:additional]) if check_md5_hash
     data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
     check_menuindex = count != sony_game[:menuindex]
