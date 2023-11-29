@@ -6,6 +6,7 @@ class Scraper < Hamster::Scraper
   PATH_RU = '/ru-store/all-games/'
   PARAMS  = '?sort=most-watchlisted&contentType%5B0%5D=games&contentType%5B1%5D=bundles&contentType%5B2%5D=dlc'
   PS_GAME = 'https://store.playstation.com/en-tr/product/'
+  DD_GAME = 'https://ddostup.ru/product/ps-game-'
 
   def initialize(keeper)
     super
@@ -19,6 +20,13 @@ class Scraper < Hamster::Scraper
 
   def scrape_lang(id)
     url = PS_GAME + id
+    sleep rand(1..2)
+    get_response(url).body
+  end
+
+  def scrape_desc(id)
+    url = DD_GAME + id
+    #sleep rand(0.5..3)
     get_response(url).body
   end
 

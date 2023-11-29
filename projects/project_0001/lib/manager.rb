@@ -31,7 +31,8 @@ class Manager < Hamster::Harvester
     end
 
     if commands[:desc]
-      parse_save_desc
+      #parse_save_desc
+      parse_save_desc_dd
       notify "Completed parsing and updating of description for #{keeper.updated_lang} game(s)"
       return
     end
@@ -47,12 +48,25 @@ class Manager < Hamster::Harvester
 
   attr_reader :keeper
 
+  def parse_save_desc_dd
+    ps_ids  = keeper.get_ps_ids_without_desc
+    scraper = Scraper.new(keeper)
+    ps_ids.each do |id|
+      page   = scraper.scrape_desc(id[1])
+      parser = Parser.new(html: page)
+      desc   = parser.parse_desc_dd
+      next unless desc
+
+      keeper.save_desc_dd(desc, id[0])
+    end
+  end
+
   def parse_save_main
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      break if idx > 11
+      break if idx > 13
 
       puts "#{name}".green
       file      = peon.give(file: name, subfolder: "#{run_id}_games_tr")

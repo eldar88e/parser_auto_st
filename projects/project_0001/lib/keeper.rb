@@ -5,7 +5,8 @@ require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
 
 class Keeper
-  PARENT         = 218
+  PARENT_PS5     = 218
+  PARENT_PS4     = 217
   TEMPLATE_ID    = 10
   LIMIT_UPD_LANG = 1000
   GAMES_PER_PAGE = 36
@@ -15,6 +16,7 @@ class Keeper
   SMALL_SIZE     = '50&h=50'
   MIDDLE_SIZE    = '320&h=320'
   PATH_CATALOG   = 'katalog-tovarov/games/'
+  NEW_TOUCHED_UPDATE_DESC = true
   # https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/EP1018-PPSA07571_00-MKONEPREMIUM0000/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=720&h=720
   # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
@@ -42,18 +44,35 @@ class Keeper
     run.finish
   end
 
+  def get_ps_ids_without_desc
+    sg     = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, '', ]).pluck(:id)
+    search = { id: sg }
+    search[:touched_run_id] = run_id if NEW_TOUCHED_UPDATE_DESC
+    SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
+  end
+
   def save_desc(data)
-    # SonyGame.all.pluck(:alias).find { |i| i.sub(/-\d+\z/, '') == data[:alias] }
-    alias_sg = SonyGame.find_by("alias LIKE ?", "%#{data[:alias]}%")&.alias
+    alias_sg = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, ''])
+                       .find_by("alias LIKE ?", "%#{data[:alias]}%")
     return unless alias_sg
 
-    SonyGame.find_by(alias: alias_sg).update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID)
-    @updated_lang += 1
+    alias_sg.update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID)
+    @updated_lang += 1    # добавить другую переменную для save_desc
+  end
+
+  def save_desc_dd(data, id)
+    data.merge!({ editedon: Time.current.to_i, editedby: USER_ID })
+    begin
+      SonyGame.find(id).update(data)
+      @updated_lang += 1   # добавить другую переменную для save_desc_dd
+    rescue ActiveRecord::StatementInvalid => e
+      Hamster.logger.error "ID: #{id} | #{e.message}"
+    end
   end
 
   def get_ps_ids(limit)
     limit = LIMIT_UPD_LANG if limit.nil?
-    sg_id = SonyGame.where(parent: PARENT, deleted: 0, published: 1).order(:menuindex).limit(limit).pluck(:id)
+    sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex).limit(limit).pluck(:id)
     SonyGameAdditional.where(id: sg_id).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
@@ -97,7 +116,7 @@ class Keeper
         crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:description]  = form_description(game[:main][:pagetitle])
-        game[:main][:parent]       = PARENT
+        game[:main][:parent]       = make_parent(game[:additional][:platform])
         game[:main][:publishedon]  = crnt_time
         game[:main][:publishedby]  = USER_ID
         game[:main][:createdon]    = crnt_time
@@ -108,6 +127,11 @@ class Keeper
         game[:main][:published]    = 1
         game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
+
+        need_category   = check_need_category(game[:additional][:platform])
+        game[:category] = { category_id: PARENT_PS4 } if need_category
+
+        binding.pry
 
         SonyGame.store(game)
         @saved += 1
@@ -121,6 +145,14 @@ class Keeper
   end
 
   private
+
+  def make_parent(platform)
+    platform.downcase.match?(/ps5/) ? PARENT_PS5 : PARENT_PS4
+  end
+
+  def check_need_category(platform)
+    platform.downcase.match?(/ps4/) && platform.downcase.match?(/ps5/)
+  end
 
   def update_date(game, game_db, count, sony_game)
     check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]

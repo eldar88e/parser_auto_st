@@ -19,6 +19,20 @@ class Parser < Hamster::Parser
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
   end
 
+  def parse_desc_dd
+    script = @html.at('body script')
+    return unless script
+
+    json_raw = script.text.match(/{.*}/)
+    return unless json_raw
+
+    json    = JSON.parse(json_raw.to_s)
+    content = json.dig('product', 'product', 'description')
+    return unless content
+
+    { content: content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip }
+  end
+
   def parse_lang
     dl = @html.at('dl.psw-l-grid')
     return if dl.nil?
@@ -56,7 +70,7 @@ class Parser < Hamster::Parser
 
     binding.pry unless url
     alias_uri   = url['href'].split('/').last
-    description = desc_raw.children.to_html.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '')
+    description = desc_raw.children.to_html.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
     { desc: description, alias: alias_uri }
   end
 
@@ -80,7 +94,7 @@ class Parser < Hamster::Parser
       end
 
       platform = game_raw.at('.game-collection-item-top-platform').text
-      unless platform.match?(/PS5|PS4/)
+      unless platform.downcase.match?(/ps5|ps4/)
         @other_platform += 1
         next
       end
