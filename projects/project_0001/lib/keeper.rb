@@ -131,8 +131,6 @@ class Keeper
         need_category   = check_need_category(game[:additional][:platform])
         game[:category] = { category_id: PARENT_PS4 } if need_category
 
-        binding.pry
-
         SonyGame.store(game)
         @saved += 1
       end
