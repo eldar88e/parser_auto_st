@@ -6,6 +6,7 @@ require 'net/ftp'
 class Manager < Hamster::Harvester
   def initialize
     super
+    binding.pry
     @keeper = Keeper.new
     @debug  = commands[:debug]
     @pages  = 0
@@ -98,15 +99,15 @@ class Manager < Hamster::Harvester
       break if idx > limit
 
       puts "#{name}".green
-      file      = peon.give(file: name, subfolder: "#{run_id}_games_tr")
-      parser    = Parser.new(html: file)
-      list_info = parser.parse_list_info
+      file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
+      parser     = Parser.new(html: file)
+      list_games = parser.parse_list_games
       parser_count  += parser.parsed
       othr_pl_count += parser.other_platform
       not_prc_count += parser.not_price
       other_type_count += parser.other_type
       binding.pry
-      keeper.save_games(list_info, idx)
+      keeper.save_games(list_games, idx)
       @pages += 1
     end
     [parser_count, othr_pl_count, not_prc_count, other_type_count]

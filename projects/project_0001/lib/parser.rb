@@ -86,7 +86,8 @@ class Parser < Hamster::Parser
     last_page_f > last_page_bad ? last_page_bad + 1 : last_page_bad
   end
 
-  def parse_list_info
+  def parse_list_games
+    binding.pry
     games     = []
     games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
