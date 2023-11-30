@@ -68,7 +68,10 @@ class Parser < Hamster::Parser
 
      url = @html.at('link[rel="canonical"]')
 
+    #####
     binding.pry unless url
+    ######
+
     alias_uri   = url['href'].split('/').last
     description = desc_raw.children.to_html.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
     { desc: description, alias: alias_uri }
@@ -117,6 +120,12 @@ class Parser < Hamster::Parser
       end
 
       game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
+
+      if game[:main][:pagetitle] == 'UNO® Kış Teması'
+        binding.pry
+      end
+
+
       game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game]       = translate_type(type_raw)
