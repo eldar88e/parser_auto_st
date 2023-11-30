@@ -18,6 +18,7 @@ class Keeper
   PATH_CATALOG   = 'katalog-tovarov/games/'
   NEW_TOUCHED_UPDATE_DESC = true
   MONTH_SINCE_RELEASE     = 6
+  DAY_LANG_ALL_SCRAP      = 0
   # https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/EP1018-PPSA07571_00-MKONEPREMIUM0000/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=720&h=720
   # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
@@ -74,7 +75,9 @@ class Keeper
   def get_ps_ids(limit)
     limit = LIMIT_UPD_LANG if limit.nil?
     sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex).limit(limit).pluck(:id)
-    SonyGameAdditional.where(id: sg_id).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
+    params = { id: sg_id }
+    params[:genre] = [nil, ''] if DAY_LANG_ALL_SCRAP.zero? ||  DAY_LANG_ALL_SCRAP != Date.current.days #нужно переделать что бы в params клался touched_run_id
+    SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_lang_info(lang, id)
