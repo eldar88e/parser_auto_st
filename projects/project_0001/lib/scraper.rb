@@ -42,7 +42,7 @@ class Scraper < Hamster::Scraper
       game_list = get_response(link).body
       sleep(rand(1..3))
       peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_tr")
-      @count += 0
+      @count += 1
     end
   end
 
@@ -62,7 +62,7 @@ class Scraper < Hamster::Scraper
         name = MD5Hash.new(columns: %i[path]).generate({ path: path })
         peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ru/game_list_#{page}")
         sleep rand(1..3)
-        @count += 0
+        @count += 1
       end
     end
   end
