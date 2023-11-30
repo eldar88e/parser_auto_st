@@ -81,7 +81,7 @@ class Scraper < Hamster::Scraper
     referer                    = @referer.sample
     headers                    = { 'Referer' => referer }
     headers['Accept-Language'] = 'tr-TR' if ACCEPT_LANGUAGE_TR
-    connect_to(link, ssl_verify: false)
+    connect_to(link, ssl_verify: false, headers: headers)
   end
 
   def notify(message, color=:green, method_=:info)
