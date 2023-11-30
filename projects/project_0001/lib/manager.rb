@@ -25,7 +25,8 @@ class Manager < Hamster::Harvester
     keeper.status = 'parsing'
 
     if commands[:lang]
-      parse_save_lang(commands[:lang]&.to_i)
+      size = commands[:lang].is_a?(String) ? commands[:lang].to_i : nil
+      parse_save_lang(size)
       notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
       return
     end
