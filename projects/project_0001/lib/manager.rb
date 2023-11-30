@@ -60,7 +60,15 @@ class Manager < Hamster::Harvester
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
       filename_to_delete = 'context.cache.php'
-      ftp.delete(filename_to_delete)
+      try = 0
+      begin
+        try += 1
+        ftp.delete(filename_to_delete)
+      rescue => e
+        Hamster.logger.error e
+        binding.pry
+        retry if try > 3
+      end
       notify "The file '#{filename_to_delete}' was deleted."
     rescue => e
       Hamster.logger.error e
