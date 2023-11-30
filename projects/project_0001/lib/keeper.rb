@@ -23,15 +23,16 @@ class Keeper
   # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
   def initialize
-    @count        = 0
-    @run_id       = run.run_id
-    @saved        = 0
-    @updated      = 0
-    @skipped      = 0
-    @updated_lang = 0
+    @count           = 0
+    @run_id          = run.run_id
+    @saved           = 0
+    @updated         = 0
+    @updated_menu_id = 0
+    @skipped         = 0
+    @updated_lang    = 0
   end
 
-  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang
+  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id
   attr_accessor :count
 
   def status=(new_status)
@@ -161,15 +162,21 @@ class Keeper
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     release                 = game[:additional][:release]
     game[:additional][:new] = true if release && release > Date.current.prev_month(MONTH_SINCE_RELEASE)
-    game_db.update(game[:additional]) if check_md5_hash
-    data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
-    check_menuindex = count != sony_game[:menuindex]
-    sony_game.update(data) if check_menuindex
-    if check_md5_hash || check_menuindex
+
+    if check_md5_hash
+      game_db.update(game[:additional])
       @updated += 1
-    else
-      @skipped += 1
     end
+
+    data          = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
+    check_menu_id = count != sony_game[:menuindex]
+
+    if check_menu_id
+      sony_game.update(data)
+      @updated_menu_id += 1
+    end
+
+    @skipped += 1 if !check_md5_hash && !check_menu_id
   end
 
   def save_image_info(id, img)
