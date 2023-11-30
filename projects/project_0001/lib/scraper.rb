@@ -4,7 +4,7 @@ class Scraper < Hamster::Scraper
   SITE    = 'https://psdeals.net'
   PATH_TR = '/tr-store/all-games/'
   PATH_RU = '/ru-store/all-games/'
-  PARAMS  = '?sort=most-watchlisted&contentType%5B0%5D=games&contentType%5B1%5D=bundles&contentType%5B2%5D=dlc'
+  PARAMS  = '?sort=most-watchlisted'
   PS_GAME = 'https://store.playstation.com/en-tr/product/'
   DD_GAME = 'https://ddostup.ru/product/ps-game-'
   ACCEPT_LANGUAGE_TR = true
