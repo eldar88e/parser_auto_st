@@ -45,7 +45,7 @@ class Manager < Hamster::Harvester
     #keeper.finish
     message = make_message(othr_pl_count, not_prc_count, parser_count)
     notify message
-    clear_cache
+    clear_cache unless keeper.saved.zero?
   end
 
   private
@@ -60,6 +60,7 @@ class Manager < Hamster::Harvester
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
       filename_to_delete = 'context.cache.php'
+      binding.pry
       ftp.delete(filename_to_delete)
       notify "The file '#{filename_to_delete}' was deleted."
     end
