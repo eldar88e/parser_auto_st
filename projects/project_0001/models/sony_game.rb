@@ -7,8 +7,7 @@ class SonyGame < ApplicationRecord
 
   def self.store(data)
     self.transaction do
-      old             = self.find_by(alias: data[:main][:alias])  # нужно убрать!!! в проде
-      sony_game_id    = old ? old.id : self.create!(data[:main]).id
+      sony_game_id    = self.create!(data[:main]).id
       additional      = data[:additional]
       additional[:id] = sony_game_id
       SonyGameAdditional.create!(additional)
