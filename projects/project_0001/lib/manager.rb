@@ -66,6 +66,7 @@ class Manager < Hamster::Harvester
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
+    @pages = list_pages.size
     list_pages.each_with_index do |name, idx|
       limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
       break if idx > limit
@@ -104,7 +105,7 @@ class Manager < Hamster::Harvester
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
-    message << "\nParsed: #{parser_count} games." unless parser_count.zero?
+    message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message << "\nParsed and updated of lang info for #{keeper.updated_lang} game(s)" unless keeper.updated_lang.zero?
     message
   end
