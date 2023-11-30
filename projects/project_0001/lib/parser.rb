@@ -9,11 +9,12 @@ class Parser < Hamster::Parser
     super
     @html           = Nokogiri::HTML(page[:html])
     @other_platform = 0
+    @other_type     = 0
     @not_price      = 0
     @parsed         = 0
   end
 
-  attr_reader :parsed, :other_platform, :not_price
+  attr_reader :parsed, :other_platform, :not_price, :other_type
 
   def parse_games_list
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
@@ -91,7 +92,7 @@ class Parser < Hamster::Parser
     games_raw.each do |game_raw|
       game         = { main: {}, additional: {} }
       price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
-      unless price_tl_raw
+      if price_tl_raw.nil? || price_tl_raw.to_i.zero?
         @not_price += 0
         next
       end
@@ -120,15 +121,17 @@ class Parser < Hamster::Parser
       end
 
       game[:main][:pagetitle]             = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
-
-      if game[:main][:pagetitle] == 'UNO® Kış Teması'
-        binding.pry
-      end
-
-
       game[:additional][:platform]        = platform.gsub(' / ', ', ')
       type_raw                            = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game]       = translate_type(type_raw)
+
+      ##
+      unless ['Игра', 'Комплект', 'VR Игра'].include?(game[:additional][:type_game])
+        @other_type += 1
+        next
+      end
+      ##
+      #
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]

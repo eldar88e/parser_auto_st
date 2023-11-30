@@ -7,13 +7,15 @@ class Scraper < Hamster::Scraper
   PARAMS  = '?sort=most-watchlisted&contentType%5B0%5D=games&contentType%5B1%5D=bundles&contentType%5B2%5D=dlc'
   PS_GAME = 'https://store.playstation.com/en-tr/product/'
   DD_GAME = 'https://ddostup.ru/product/ps-game-'
+  ACCEPT_LANGUAGE_TR = true
 
   def initialize(keeper)
     super
-    @count  = 0
-    @keeper = keeper
-    @debug  = commands[:debug]   #!!!!???????
-    @run_id = @keeper.run_id
+    @referer = YAML.load_file('referer.yml')['referer']
+    @count   = 0
+    @keeper  = keeper
+    @debug   = commands[:debug]   #!!!!???????
+    @run_id  = @keeper.run_id
   end
 
   attr_reader :count
@@ -76,6 +78,9 @@ class Scraper < Hamster::Scraper
   end
 
   def get_response(link)
+    referer                    = @referer.sample
+    headers                    = { 'Referer' => referer }
+    headers['Accept-Language'] = 'tr-TR' if ACCEPT_LANGUAGE_TR
     connect_to(link, ssl_verify: false)
   end
 

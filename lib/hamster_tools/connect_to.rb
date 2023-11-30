@@ -5,11 +5,10 @@ module Hamster
     SSL_OPTS = { verify: true }
 
     def connect_to(*arguments, &block)
-      return nil if arguments.nil? || arguments.empty?
+      return if arguments.nil? || arguments.empty?
 
-      url             = arguments.first.is_a?(String) ? arguments.shift : arguments.first[:url]
-      
-      return nil if url.nil?
+      url = arguments.first.is_a?(String) ? arguments.shift : arguments.first[:url]
+      return if url.nil?
       
       arguments    = arguments.first.dup
       condition    = arguments.is_a?(Hash)
@@ -31,7 +30,7 @@ module Hamster
         exit 0
       end
 
-      headers       = headers.merge(user_agent: FakeAgent.new.any) unless headers.include?(:user_agent)
+      headers = headers.merge(user_agent: FakeAgent.new.any) unless headers.include?(:user_agent)
       headers.merge!(cookies) if cookies
 
       faraday_params = {

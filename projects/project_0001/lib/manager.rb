@@ -40,10 +40,10 @@ class Manager < Hamster::Harvester
       return
     end
 
-    parser_count, othr_pl_count, not_prc_count = parse_save_main
+    parser_count, othr_pl_count, not_prc_count, other_type_count = parse_save_main
     #parse_save_lang
     #keeper.finish
-    message = make_message(othr_pl_count, not_prc_count, parser_count)
+    message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     notify message
     clear_cache unless keeper.saved.zero?
   end
@@ -92,7 +92,7 @@ class Manager < Hamster::Harvester
   def parse_save_main
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
-    parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
+    parser_count, othr_pl_count, not_prc_count, other_type_count = [0, 0, 0, 0]
     list_pages.each_with_index do |name, idx|
       limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
       break if idx > limit
@@ -104,10 +104,11 @@ class Manager < Hamster::Harvester
       parser_count  += parser.parsed
       othr_pl_count += parser.other_platform
       not_prc_count += parser.not_price
+      other_type_count += parser.other_type
       keeper.save_games(list_info, idx)
       @pages += 1
     end
-    [parser_count, othr_pl_count, not_prc_count]
+    [parser_count, othr_pl_count, not_prc_count, other_type_count]
   end
 
   def parse_save_desc
@@ -125,13 +126,14 @@ class Manager < Hamster::Harvester
     end
   end
 
-  def make_message(othr_pl_count, not_prc_count, parser_count)
+  def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = "Finish store!"
     message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated: #{keeper.updated} games;" unless keeper.updated.zero?
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
+    message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
     message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message << "\nParsed and updated of lang info for #{keeper.updated_lang} game(s)" unless keeper.updated_lang.zero?
     message
