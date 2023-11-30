@@ -67,7 +67,7 @@ class Manager < Hamster::Harvester
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      break if idx > 14
+      break if idx > 15
 
       puts "#{name}".green
       file      = peon.give(file: name, subfolder: "#{run_id}_games_tr")
