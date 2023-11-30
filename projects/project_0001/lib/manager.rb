@@ -7,6 +7,7 @@ class Manager < Hamster::Harvester
     super
     @keeper = Keeper.new
     @debug  = commands[:debug]
+    @pages  = 0
   end
 
   def download
@@ -66,7 +67,6 @@ class Manager < Hamster::Harvester
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
-    @pages = list_pages.size
     list_pages.each_with_index do |name, idx|
       limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
       break if idx > limit
@@ -79,6 +79,7 @@ class Manager < Hamster::Harvester
       othr_pl_count += parser.other_platform
       not_prc_count += parser.not_price
       keeper.save_games(list_info, idx)
+      @pages += 1
     end
     [parser_count, othr_pl_count, not_prc_count]
   end
