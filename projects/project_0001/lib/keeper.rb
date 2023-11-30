@@ -158,7 +158,7 @@ class Keeper
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     release                 = game[:additional][:release]
     game[:additional][:new] = true if release && release > Date.current.prev_month(MONTH_SINCE_RELEASE)
-    game_db.update(game[:additional]) #if check_md5_hash  нужно вернуть проверку на место
+    game_db.update(game[:additional]) if check_md5_hash
     data            = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
     check_menuindex = count != sony_game[:menuindex]
     sony_game.update(data) if check_menuindex
