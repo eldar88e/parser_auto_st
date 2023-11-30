@@ -47,7 +47,7 @@ class Parser < Hamster::Parser
 
       info[key] = key == :release ? Date.parse(value) : value
     rescue => e
-      notify e
+      notify e.message
       binding.pry
       next
     end
@@ -87,7 +87,6 @@ class Parser < Hamster::Parser
   end
 
   def parse_list_games
-    binding.pry
     games     = []
     games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
@@ -121,8 +120,8 @@ class Parser < Hamster::Parser
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
 
-      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').gsub('ü','u').gsub('ö','o')
-                                              .text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
+      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text.gsub('ü','u')
+                                              .gsub('ö','o').gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
@@ -143,8 +142,8 @@ class Parser < Hamster::Parser
       games << game
       @parsed += 1
     rescue => e
+      notify e.message
       binding.pry
-      notify e
     end
     games
   end
