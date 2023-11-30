@@ -93,7 +93,7 @@ class Parser < Hamster::Parser
       game         = { main: {}, additional: {} }
       price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
       if price_tl_raw.nil? || price_tl_raw.to_i.zero?
-        @not_price += 0
+        @not_price += 1
         next
       end
 
@@ -119,9 +119,7 @@ class Parser < Hamster::Parser
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
-      ####
-      binding.pry
-      ###
+
       game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title')
                                               .text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
