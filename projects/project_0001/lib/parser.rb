@@ -128,6 +128,7 @@ class Parser < Hamster::Parser
 
       unless ['Игра', 'Комплект', 'VR Игра'].include?(game[:additional][:type_game])
         @other_type += 1
+        binding.pry
         next
       end
 
