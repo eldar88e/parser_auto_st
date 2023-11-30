@@ -7,6 +7,7 @@ class SonyGame < ApplicationRecord
 
   def self.store(data)
     self.transaction do
+      binding.pry
       sony_game_id = self.create!(data[:main]).id
       additional   = data[:additional]
       additional.merge!(id: sony_game_id)
