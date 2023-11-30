@@ -126,7 +126,7 @@ class Parser < Hamster::Parser
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
 
-      unless ['Игра', 'Комплект', 'VR игра', 'PSN игра'].include?(game[:additional][:type_game])
+      unless ['Игра', 'Комплект', 'VR игра', 'PSN игра', 'Контент'].include?(game[:additional][:type_game])
         @other_type += 1
         binding.pry
         next
@@ -189,6 +189,8 @@ class Parser < Hamster::Parser
       'VR игра'
     when 'PSN Game'
       'PSN игра'
+    when 'Game Content'
+      'Контент'
     else
       type_raw
     end
