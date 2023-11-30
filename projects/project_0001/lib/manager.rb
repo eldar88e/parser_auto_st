@@ -67,7 +67,7 @@ class Manager < Hamster::Harvester
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      limit = commands[:store].is_a?(String) ? commands[:store].to_i : 5
+      limit = commands[:count] && commands[:count].is_a?(String) ? commands[:count].to_i : 5
       break if idx > limit
 
       puts "#{name}".green
