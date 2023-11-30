@@ -35,7 +35,7 @@ class Scraper < Hamster::Scraper
   def scrape_games_tr
     first_page = "#{SITE}#{PATH_TR}1#{PARAMS}"
     last_page  = make_last_page(first_page)
-    notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
+    notify "Found #{last_page} pages with a list of games (36 games/page) on the website #{first_page}"
     [*1..last_page].each do |page|
       link = "#{SITE}#{PATH_TR}#{page}#{PARAMS}"
       puts "Page #{page} of #{last_page}".green
