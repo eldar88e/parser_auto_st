@@ -60,9 +60,11 @@ class Manager < Hamster::Harvester
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
       filename_to_delete = 'context.cache.php'
-      binding.pry
       ftp.delete(filename_to_delete)
       notify "The file '#{filename_to_delete}' was deleted."
+    rescue => e
+      Hamster.logger.error e
+      notify "Please delete the ModX cache file manually!"
     end
   end
 
