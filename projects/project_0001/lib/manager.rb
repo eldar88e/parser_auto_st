@@ -101,11 +101,10 @@ class Manager < Hamster::Harvester
       file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser     = Parser.new(html: file)
       list_games = parser.parse_list_games
-      parser_count  += parser.parsed
-      othr_pl_count += parser.other_platform
-      not_prc_count += parser.not_price
+      parser_count     += parser.parsed
+      othr_pl_count    += parser.other_platform
+      not_prc_count    += parser.not_price
       other_type_count += parser.other_type
-      binding.pry
       keeper.save_games(list_games, idx)
       @pages += 1
     end
