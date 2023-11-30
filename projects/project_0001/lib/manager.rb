@@ -64,9 +64,10 @@ class Manager < Hamster::Harvester
       begin
         try += 1
         ftp.delete(filename_to_delete)
-      rescue => e
+      rescue Net::FTPPermError => e
         Hamster.logger.error e
-        binding.pry
+        puts e.message.red
+        sleep 5 * try
         retry if try > 3
       end
       notify "The file '#{filename_to_delete}' was deleted."
