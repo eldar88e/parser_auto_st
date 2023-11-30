@@ -25,7 +25,7 @@ class Manager < Hamster::Harvester
     keeper.status = 'parsing'
 
     if commands[:lang]
-      size = commands[:lang].is_a?(String) ? commands[:lang].to_i : nil
+      size = commands[:lang].is_a?(Integer) ? commands[:lang] : nil
       parse_save_lang(size)
       notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
       return
@@ -67,7 +67,7 @@ class Manager < Hamster::Harvester
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count = [0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      limit = commands[:count] && commands[:count].is_a?(String) ? commands[:count].to_i : 5
+      limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
       break if idx > limit
 
       puts "#{name}".green
