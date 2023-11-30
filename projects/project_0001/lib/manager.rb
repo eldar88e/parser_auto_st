@@ -1,6 +1,7 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
+require 'net/ftp'
 
 class Manager < Hamster::Harvester
   def initialize
@@ -44,11 +45,25 @@ class Manager < Hamster::Harvester
     #keeper.finish
     message = make_message(othr_pl_count, not_prc_count, parser_count)
     notify message
+    clear_cache
   end
 
   private
 
   attr_reader :keeper
+
+  def clear_cache
+    ftp_host = 'eldarap0.beget.tech'
+    ftp_user = 'eldarap0_openps'
+    ftp_pass = '&4&J&Stx'
+
+    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
+      ftp.chdir('/core/cache/context_settings/web')
+      filename_to_delete = 'context.cache.php'
+      ftp.delete(filename_to_delete)
+      notify "The file '#{filename_to_delete}' was deleted."
+    end
+  end
 
   def parse_save_desc_dd
     ps_ids  = keeper.get_ps_ids_without_desc

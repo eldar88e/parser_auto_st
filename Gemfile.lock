@@ -17,6 +17,7 @@ GEM
     colorize (1.1.0)
     concurrent-ruby (1.2.2)
     csv (3.2.7)
+    date (3.3.4)
     dotenv (2.8.1)
     dry-core (1.0.1)
       concurrent-ruby (~> 1.0)
@@ -52,6 +53,11 @@ GEM
     minitest (5.20.0)
     multipart-post (2.0.0)
     mysql2 (0.5.5)
+    net-ftp (0.2.0)
+      net-protocol
+      time
+    net-protocol (0.2.2)
+      timeout
     nokogiri (1.15.4-arm64-darwin)
       racc (~> 1.4)
     nokogiri (1.15.4-x86_64-linux)
@@ -66,6 +72,9 @@ GEM
       faraday (~> 2.0)
       faraday-multipart (~> 1.0)
       zeitwerk (~> 2.6)
+    time (0.3.0)
+      date
+    timeout (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     zeitwerk (2.6.12)
@@ -83,6 +92,7 @@ DEPENDENCIES
   faraday
   hashie
   mysql2
+  net-ftp
   nokogiri
   pry
   telegram-bot-ruby

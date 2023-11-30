@@ -13,7 +13,7 @@ class Keeper
   SOURCE         = 3
   USER_ID        = 1064
   FILE_TYPE      = 'image'
-  SMALL_SIZE     = '50&h=50'
+  SMALL_SIZE     = '40&h=40'
   MIDDLE_SIZE    = '320&h=320'
   PATH_CATALOG   = 'katalog-tovarov/games/'
   NEW_TOUCHED_UPDATE_DESC = true
