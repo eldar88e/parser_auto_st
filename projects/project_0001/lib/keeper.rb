@@ -93,6 +93,11 @@ class Keeper
     games.each do |game|
       count += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+      game[:additional][:touched_run_id] = run_id
+      keys = %i[data_source_url price old_price price_bonus]
+      md5  = MD5Hash.new(columns: keys)
+      game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
+
       if game_db
         sony_game = SonyGame.find_by(id: game_db.id)
         if sony_game
@@ -103,14 +108,6 @@ class Keeper
                    "или добавте в основную таблицу под этим ID запись."
           next
         end
-      end
-
-      game[:additional][:touched_run_id] = run_id
-      keys = %i[data_source_url price old_price price_bonus]
-      md5  = MD5Hash.new(columns: keys)
-      game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
-
-      if game_db
         update_date(game, game_db, count, sony_game)
       else
         game[:additional][:run_id]    = run_id
@@ -145,7 +142,6 @@ class Keeper
       binding.pry
       retry
     end
-    #binding.pry
   end
 
   private

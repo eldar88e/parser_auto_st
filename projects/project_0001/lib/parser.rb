@@ -120,12 +120,12 @@ class Parser < Hamster::Parser
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
 
-      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title')
+      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').gsub('ü','u').gsub('ö','o')
                                               .text.gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
       type_raw                      = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_raw)
-
+      binding.pry
       ##
       unless ['Игра', 'Комплект', 'VR Игра'].include?(game[:additional][:type_game])
         @other_type += 1
