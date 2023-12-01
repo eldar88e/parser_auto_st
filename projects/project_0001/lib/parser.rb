@@ -1,10 +1,6 @@
 require_relative '../models/sony_game_additional'
 
 class Parser < Hamster::Parser
-  EXCHANGE_RATE = 5.5
-  ROUND_PRICE   = 10
-  SITE          = 'https://psdeals.net'
-
   def initialize(**page)
     super
     @html           = Nokogiri::HTML(page[:html])
@@ -127,7 +123,7 @@ class Parser < Hamster::Parser
       end
 
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
-      game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
+      game[:additional][:data_source_url] = settings['site'] + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
       game[:additional][:article]         = game[:additional][:data_source_url].split('/')[-2]
       game[:main][:alias]                 = make_alias(game[:additional][:data_source_url])
@@ -158,11 +154,11 @@ class Parser < Hamster::Parser
     price = raw_price.gsub(',', '').to_f
     return price if currency == :tr
 
-    round_up_price(price * EXCHANGE_RATE)
+    round_up_price(price * settings['exchange_rate'])
   end
 
   def round_up_price(price)
-    (price / ROUND_PRICE.to_f).round * ROUND_PRICE
+    (price / settings['round_price'].to_f).round * settings['round_price']
   end
 
   def get_discount_end_date(date_raw)

@@ -20,10 +20,14 @@ bundle exec ruby hamster.rb --grab=0001 --store --lang for parsing language, dat
 
 bundle exec ruby hamster.rb --grab=0001 --store --desc  for parsing description the game
 
-**Description**:
+**Description:**
 
 This parser is written to parsing Sony Playstation games, prepare
 this data and saving it into MySQL tables for the MODX Revolution website.
 
-_November 2022_
+**MODX used with next extentions:**
+- miniShop2
+- msaddfield
+- msearch2
 
+_November 2022_

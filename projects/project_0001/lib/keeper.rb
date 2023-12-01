@@ -5,24 +5,13 @@ require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
 
-class Keeper
-  PARENT_PS5     = 218
-  PARENT_PS4     = 217
-  TEMPLATE_ID    = 10
-  LIMIT_UPD_LANG = 100_000  # нужно уменьшить до 500-1000
-  GAMES_PER_PAGE = 36
-  SOURCE         = 3
-  USER_ID        = 1064
-  FILE_TYPE      = 'image'
-  SMALL_SIZE     = '40&h=40'
-  MIDDLE_SIZE    = '320&h=320'
-  PATH_CATALOG   = 'katalog-tovarov/games/'
-  NEW_TOUCHED_UPDATE_DESC = true
-  MONTH_SINCE_RELEASE     = 6
-  DAY_LANG_ALL_SCRAP      = 0
+class Keeper < Hamster::Keeper
+  SOURCE = 3
 
   def initialize
+    super
     @count           = 0
+    @menu_id_count   = 0
     @run_id          = run.run_id
     @saved           = 0
     @updated         = 0
@@ -48,13 +37,13 @@ class Keeper
   end
 
   def get_games_without_content
-    SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, ''])
+    SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).where(content: [nil, ''])
   end
 
   def get_ps_ids_without_desc
     sg     = get_games_without_content.pluck(:id)
     search = { id: sg }
-    search[:touched_run_id] = run_id if NEW_TOUCHED_UPDATE_DESC
+    search[:touched_run_id] = run_id if settings['new_touched_update_desc']
     SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
@@ -64,11 +53,11 @@ class Keeper
     game = get_games_without_content.find { |i| i[:alias].gsub(/-\d+\z/, '') == data[:alias] }
     return unless game
 
-    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID) && @updated_desc += 1
+    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: settings['user_id']) && @updated_desc += 1
   end
 
   def save_desc_dd(data, id)
-    data.merge!({ editedon: Time.current.to_i, editedby: USER_ID })
+    data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
     begin
       SonyGame.find(id).update(data) && @updated_desc += 1
     rescue ActiveRecord::StatementInvalid => e
@@ -77,25 +66,23 @@ class Keeper
   end
 
   def get_ps_ids
-    sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex)
-                    .limit(LIMIT_UPD_LANG).pluck(:id)
+    sg_id = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).order(:menuindex)
+                    .limit(settings['limit_upd_lang']).pluck(:id)
     params                  = { id: sg_id }
-    params[:touched_run_id] = run_id if DAY_LANG_ALL_SCRAP != Date.current.day
-    #params[:genre]          = [nil, ''] #нужно при финале убрать
+    params[:touched_run_id] = run_id if settings['day_lang_all_scrap'] != Date.current.day
     SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_lang_info(lang, id)
     lang.merge!(touched_run_id: run_id)
-    lang[:new] = true if lang[:release] && lang[:release] > Date.current.prev_month(MONTH_SINCE_RELEASE)
+    lang[:new] = true if lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
     SonyGameAdditional.find(id).update(lang)
     @updated_lang += 1
   end
 
-  def save_games(games, page)
-    count = page > 0 ? GAMES_PER_PAGE * page : 0
+  def save_games(games)
     games.each do |game|
-      count += 1
+      @menu_id_count += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus]
@@ -112,33 +99,33 @@ class Keeper
                    "или добавте в основную таблицу под этим ID запись."
           next
         end
-        update_date(game, game_db, count, sony_game)
+        update_date(game, game_db, sony_game)
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
         game[:additional][:image]     = game[:additional][:image_link_raw]
-        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, SMALL_SIZE)
+        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
 
         crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:parent]       = make_parent(game[:additional][:platform])
         game[:main][:publishedon]  = crnt_time
-        game[:main][:publishedby]  = USER_ID
+        game[:main][:publishedby]  = settings['user_id']
         game[:main][:createdon]    = crnt_time
-        game[:main][:createdby]    = USER_ID
-        game[:main][:template]     = TEMPLATE_ID
+        game[:main][:createdby]    = settings['user_id']
+        game[:main][:template]     = settings['template_id']
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
-        game[:main][:menuindex]    = count
+        game[:main][:menuindex]    = @menu_id_count
         game[:main][:published]    = 1
-        game[:main][:uri]          = "#{PATH_CATALOG}#{game[:main][:alias]}"
+        game[:main][:uri]          = "#{settings['path_catalog']}#{game[:main][:alias]}"
         game[:main][:show_in_tree] = 0
 
         need_category   = check_need_category(game[:additional][:platform])
-        game[:category] = { category_id: PARENT_PS4 } if need_category
+        game[:category] = { category_id: settings['parent_ps4'] } if need_category
         game[:intro]    = prepare_intro(game[:main])
-
+        binding.pry
         SonyGame.store(game)
         @saved += 1
       end
@@ -152,29 +139,22 @@ class Keeper
   private
 
   def make_parent(platform)
-    platform.downcase.match?(/ps5/) ? PARENT_PS5 : PARENT_PS4
+    platform.downcase.match?(/ps5/) ? settings['parent_ps5'] : settings['parent_ps4']
   end
 
   def check_need_category(platform)
     platform.downcase.match?(/ps4/) && platform.downcase.match?(/ps5/)
   end
 
-  def update_date(game, game_db, count, sony_game)
+  def update_date(game, game_db, sony_game)
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     release                 = game[:additional][:release]
-    game[:additional][:new] = true if release && release > Date.current.prev_month(MONTH_SINCE_RELEASE)
+    game[:additional][:new] = true if release && release > Date.current.prev_month(settings['month_since_release'])
 
     game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
-
-    data          = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
-    check_menu_id = count != sony_game[:menuindex]
-
+    data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
+    check_menu_id = @menu_id_count != sony_game[:menuindex]
     sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
-
-    ####################################
-    #intro = prepare_intro(sony_game)
-    #SonyGameIntro.store(intro.merge(resource: sony_game.id))
-    ###################################
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end
@@ -192,9 +172,9 @@ class Keeper
     file[:source]     = SOURCE
     file[:name]       = md5_hash
     file[:file]       = "#{md5_hash}.jpg"
-    file[:type]       = FILE_TYPE
+    file[:type]       = settings['file_type']
     file[:createdon]  = crnt_time
-    file[:createdby]  = USER_ID
+    file[:createdby]  = settings['user_id']
     file[:url]        = img
     file[:product_id] = id
 
@@ -205,9 +185,9 @@ class Keeper
     paths.each_with_index do |item, idx|
       new_file.merge!(path: "#{id}#{item}", parent: parent)
       if item == paths[1]
-        new_file[:url] = file[:url].sub(/720&h=720/, SMALL_SIZE)
+        new_file[:url] = file[:url].sub(/720&h=720/, settings['small_size'])
       elsif item == paths[2]
-        new_file[:url] = file[:url].sub(/720&h=720/, MIDDLE_SIZE)
+        new_file[:url] = file[:url].sub(/720&h=720/, settings['middle_size'])
       end
 
       begin

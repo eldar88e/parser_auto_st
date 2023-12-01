@@ -9,6 +9,7 @@ require_relative 'hamster/wakeup'   # gets command-line arguments and runs the m
 require_relative 'hamster/console'  # launch console for the given project number
 require_relative 'hamster/logger'   # create a new logger
 require_relative 'hamster/loggable' # inject the logger object
+require_relative 'hamster/setting'
 
 module Hamster
   PROJECT_DIR_NAME = 'project'

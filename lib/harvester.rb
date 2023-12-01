@@ -9,6 +9,10 @@ module Hamster
     def commands
       @_commands_
     end
+
+    def settings
+      @settings
+    end
     
     # @return [String] path Hamster storehouse directory
     def storehouse
@@ -23,11 +27,13 @@ module Hamster
     private
     
     def initialize(*_)
-      #s              = Storage.new
-      @_storehouse_  = "#{ENV['HOME']}/my_parsing/project_#{Hamster.project_number}/"
-      @_peon_        = Hamster::Harvester::Peon.new(storehouse)
-      @_commands_    = Hamster.commands
-      @logger        = Hamster.logger
+      #s             = Storage.new
+      @_storehouse_ = "#{ENV['HOME']}/my_parsing/project_#{Hamster.project_number}/"
+      @_peon_       = Hamster::Harvester::Peon.new(storehouse)
+      @_commands_   = Hamster.commands
+      @logger       = Hamster.logger
+      @settings     = Hamster.settings
+      Hamster.close_connection(Setting)
     end
   end
 end

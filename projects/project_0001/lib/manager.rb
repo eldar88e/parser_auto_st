@@ -12,7 +12,7 @@ class Manager < Hamster::Harvester
   end
 
   def download
-    notify 'Scraping started'
+    notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
     notify "Scraping finish!\nScraped: #{scraper.count} pages"
@@ -25,7 +25,7 @@ class Manager < Hamster::Harvester
   end
 
   def store
-    notify 'Parsing started'
+    notify 'Parsing started' if @debug
     keeper.status = 'parsing'
 
     if commands[:lang]
@@ -91,8 +91,8 @@ class Manager < Hamster::Harvester
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count, other_type_count = [0, 0, 0, 0]
-    list_pages.each_with_index do |name, idx|
-      puts "#{name}".green if @debug
+    list_pages.each do |name|
+      puts name.green if @debug
       file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser     = Parser.new(html: file)
       list_games = parser.parse_list_games
@@ -100,7 +100,7 @@ class Manager < Hamster::Harvester
       othr_pl_count    += parser.other_platform
       not_prc_count    += parser.not_price
       other_type_count += parser.other_type
-      keeper.save_games(list_games, idx)
+      keeper.save_games(list_games)
       @pages += 1
     end
     message = make_message(parser_count, othr_pl_count, not_prc_count, other_type_count)
@@ -113,7 +113,7 @@ class Manager < Hamster::Harvester
     list_pages.each do |name_list_page|
       list_games = peon.list(subfolder: "#{run_id}_games_ru/#{name_list_page}")
       list_games.each do |name|
-        puts "#{name}".green
+        puts name.green
         file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
         parser    = Parser.new(html: file)
         list_info = parser.parse_game_desc
