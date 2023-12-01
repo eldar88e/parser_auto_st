@@ -180,7 +180,7 @@ class Keeper
   end
 
   def prepare_intro(game)
-    intro = game.pagetitle + ' ' + game.longtitle + ' ' + game.description
+    intro = game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description]
     { resource: game.id, intro: intro }
   end
 
