@@ -27,8 +27,7 @@ class Manager < Hamster::Harvester
     keeper.status = 'parsing'
 
     if commands[:lang]
-      size = commands[:lang].is_a?(Integer) ? commands[:lang] : nil
-      parse_save_lang(size)
+      parse_save_lang
       notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
       return
     end
@@ -140,8 +139,8 @@ class Manager < Hamster::Harvester
     message
   end
 
-  def parse_save_lang(limit=nil)
-    ps_ids  = keeper.get_ps_ids(limit)
+  def parse_save_lang
+    ps_ids  = keeper.get_ps_ids
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
       page   = scraper.scrape_lang(id[1])

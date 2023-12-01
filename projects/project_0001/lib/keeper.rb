@@ -8,7 +8,7 @@ class Keeper
   PARENT_PS5     = 218
   PARENT_PS4     = 217
   TEMPLATE_ID    = 10
-  LIMIT_UPD_LANG = 1000
+  LIMIT_UPD_LANG = 100_000  # нужно уменьшить до 500-1000
   GAMES_PER_PAGE = 36
   SOURCE         = 3
   USER_ID        = 1064
@@ -19,8 +19,6 @@ class Keeper
   NEW_TOUCHED_UPDATE_DESC = true
   MONTH_SINCE_RELEASE     = 6
   DAY_LANG_ALL_SCRAP      = 0
-  # https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/EP1018-PPSA07571_00-MKONEPREMIUM0000/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=720&h=720
-  # https://store.playstation.com/en-tr/product/EP9000-CUSA00917_00-U4UTLLBUNDLE0000
 
   def initialize
     @count           = 0
@@ -77,11 +75,12 @@ class Keeper
     end
   end
 
-  def get_ps_ids(limit)
-    limit = LIMIT_UPD_LANG if limit.nil?
-    sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex).limit(limit).pluck(:id)
-    params = { id: sg_id }
-    params[:genre] = [nil, ''] if DAY_LANG_ALL_SCRAP.zero? ||  DAY_LANG_ALL_SCRAP != Date.current.days #нужно переделать что бы в params клался touched_run_id
+  def get_ps_ids
+    all_parse = DAY_LANG_ALL_SCRAP == Date.current.days
+    sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex).limit(LIMIT_UPD_LANG).pluck(:id)
+    params                  = { id: sg_id }
+    params[:touched_run_id] = run_id unless all_parse
+    params[:genre]          = [nil, ''] #нужно при финале убрать
     SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
