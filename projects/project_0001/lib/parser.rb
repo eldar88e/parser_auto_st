@@ -110,7 +110,6 @@ class Parser < Hamster::Parser
         game[:additional][:old_price_tl]      = get_price(price_tl_raw)
         game[:additional][:old_price]         = get_price(price_tl_raw, :ru)
         game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
-        binding.pry
       else
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
@@ -124,9 +123,10 @@ class Parser < Hamster::Parser
 
       unless ['Игра', 'Комплект', 'VR игра', 'PSN игра', 'Контент'].include?(game[:additional][:type_game])
         @other_type += 1
-        binding.pry
         next
       end
+
+      binding.pry
 
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
