@@ -15,9 +15,13 @@ class Manager < Hamster::Harvester
     notify 'Scraping started'
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
-
-    scraper.scrape_games_ru if commands[:ru]
     notify "Scraping finish!\nScraped: #{scraper.count} pages"
+
+    if commands[:ru]
+      scraper_ru = Scraper.new(keeper)
+      scraper_ru.scrape_games_ru
+      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages"
+    end
   end
 
   def store
@@ -27,9 +31,7 @@ class Manager < Hamster::Harvester
     if commands[:lang]
       parse_save_lang
       return
-    end
-
-    if commands[:desc]
+    elsif commands[:desc]
       #parse_save_desc
       parse_save_desc_dd
       return
