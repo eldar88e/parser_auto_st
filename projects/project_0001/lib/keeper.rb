@@ -76,7 +76,7 @@ class Keeper
   end
 
   def get_ps_ids
-    all_parse = DAY_LANG_ALL_SCRAP == Date.current.days
+    all_parse = DAY_LANG_ALL_SCRAP == Date.current.day
     sg_id = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).order(:menuindex).limit(LIMIT_UPD_LANG).pluck(:id)
     params                  = { id: sg_id }
     params[:touched_run_id] = run_id unless all_parse
