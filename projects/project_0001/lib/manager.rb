@@ -33,15 +33,16 @@ class Manager < Hamster::Harvester
     end
 
     if commands[:desc]
-      parse_save_desc
-      #parse_save_desc_dd
+      #parse_save_desc
+      parse_save_desc_dd
       notify "Completed parsing and updating of description for #{keeper.updated_desc} game(s)"
       return
     end
 
     parser_count, othr_pl_count, not_prc_count, other_type_count = parse_save_main
-    #parse_save_lang
-    #keeper.finish
+    parse_save_lang
+    parse_save_desc_dd
+    keeper.finish
     message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     notify message
     clear_cache unless keeper.saved.zero?
@@ -52,9 +53,9 @@ class Manager < Hamster::Harvester
   attr_reader :keeper
 
   def clear_cache
-    ftp_host = 'eldarap0.beget.tech'
-    ftp_user = 'eldarap0_openps'
-    ftp_pass = '&4&J&Stx'
+    ftp_host = ENV.fetch('FTP_HOST')
+    ftp_user = ENV.fetch('FTP_LOGIN')
+    ftp_pass = ENV.fetch('FTP_PASS')
 
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
@@ -93,9 +94,8 @@ class Manager < Hamster::Harvester
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count, other_type_count = [0, 0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
-      break if idx > limit
-
+      #limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
+      #break if idx > limit
       puts "#{name}".green
       file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser     = Parser.new(html: file)
