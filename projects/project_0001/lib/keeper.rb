@@ -30,9 +30,10 @@ class Keeper
     @updated_menu_id = 0
     @skipped         = 0
     @updated_lang    = 0
+    @updated_desc    = 0
   end
 
-  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id
+  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc
   attr_accessor :count
 
   def status=(new_status)
@@ -47,27 +48,30 @@ class Keeper
     run.finish
   end
 
+  def get_games_without_content
+    SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, ''])
+  end
+
   def get_ps_ids_without_desc
-    sg     = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, '', ]).pluck(:id)
+    sg     = get_games_without_content.pluck(:id)
     search = { id: sg }
     search[:touched_run_id] = run_id if NEW_TOUCHED_UPDATE_DESC
     SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_desc(data)
-    alias_sg = SonyGame.active_games([PARENT_PS4, PARENT_PS5]).where(content: [nil, ''])
-                       .find_by("alias LIKE ?", "%#{data[:alias]}%")
-    return unless alias_sg
+    return unless data
 
-    alias_sg.update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID)
-    @updated_lang += 1    # добавить другую переменную для save_desc
+    game = get_games_without_content.find { |i| i[:alias].gsub(/-\d+\z/, '') == data[:alias] }
+    return unless game
+
+    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: USER_ID) && @updated_desc += 1
   end
 
   def save_desc_dd(data, id)
     data.merge!({ editedon: Time.current.to_i, editedby: USER_ID })
     begin
-      SonyGame.find(id).update(data)
-      @updated_lang += 1   # добавить другую переменную для save_desc_dd
+      SonyGame.find(id).update(data) && @updated_desc += 1
     rescue ActiveRecord::StatementInvalid => e
       Hamster.logger.error "ID: #{id} | #{e.message}"
     end

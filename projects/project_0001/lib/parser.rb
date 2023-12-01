@@ -70,6 +70,7 @@ class Parser < Hamster::Parser
      url = @html.at('link[rel="canonical"]')
 
     #####
+    notify "Url is nil"
     binding.pry unless url
     ######
 

@@ -34,9 +34,9 @@ class Manager < Hamster::Harvester
     end
 
     if commands[:desc]
-      #parse_save_desc
-      parse_save_desc_dd
-      notify "Completed parsing and updating of description for #{keeper.updated_lang} game(s)"
+      parse_save_desc
+      #parse_save_desc_dd
+      notify "Completed parsing and updating of description for #{keeper.updated_desc} game(s)"
       return
     end
 
@@ -121,7 +121,7 @@ class Manager < Hamster::Harvester
         file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
         parser    = Parser.new(html: file)
         list_info = parser.parse_game_desc
-        keeper.save_desc(list_info) if list_info
+        keeper.save_desc(list_info)
       end
     end
   end
