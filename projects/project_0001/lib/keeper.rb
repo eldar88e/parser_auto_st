@@ -1,5 +1,6 @@
 require_relative '../models/sony_game_run'
 require_relative '../models/sony_game'
+require_relative '../models/sony_game_intro'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
@@ -136,6 +137,7 @@ class Keeper
 
         need_category   = check_need_category(game[:additional][:platform])
         game[:category] = { category_id: PARENT_PS4 } if need_category
+        game[:intro]    = prepare_intro(game[:main])
 
         SonyGame.store(game)
         @saved += 1
@@ -162,20 +164,24 @@ class Keeper
     release                 = game[:additional][:release]
     game[:additional][:new] = true if release && release > Date.current.prev_month(MONTH_SINCE_RELEASE)
 
-    if check_md5_hash
-      game_db.update(game[:additional])
-      @updated += 1
-    end
+    game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
 
     data          = { menuindex: count, editedon: Time.current.to_i, editedby: USER_ID }
     check_menu_id = count != sony_game[:menuindex]
 
-    if check_menu_id
-      sony_game.update(data)
-      @updated_menu_id += 1
-    end
+    sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
+
+    ####################################
+    intro = prepare_intro(sony_game)
+    SonyGameIntro.store(intro)
+    ###################################
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
+  end
+
+  def prepare_intro(game)
+    intro = game.pagetitle + ' ' + game.longtitle + ' ' + game.description
+    { resource: game.id, intro: intro }
   end
 
   def save_image_info(id, img)
