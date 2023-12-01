@@ -67,16 +67,8 @@ class Parser < Hamster::Parser
     desc_raw = @html.at('div#game-details-right div.col-xs-12 span[itemprop="description"]')
     return unless desc_raw
 
-     url = @html.at('link[rel="canonical"]')
-
-    #####
-    unless url
-      notify "Url is nil"
-      binding.pry
-    end
-    ######
-
-    alias_uri   = url['href'].split('/').last
+    url         = @html.at('link[rel="canonical"]')['href']
+    alias_uri   = url.split('/').last
     description = desc_raw.children.to_html.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
     { desc: description, alias: alias_uri }
   end
@@ -106,7 +98,7 @@ class Parser < Hamster::Parser
         next
       end
 
-      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months|\d+ days/)
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months?|\d+ days?/)
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -118,6 +110,7 @@ class Parser < Hamster::Parser
         game[:additional][:old_price_tl]      = get_price(price_tl_raw)
         game[:additional][:old_price]         = get_price(price_tl_raw, :ru)
         game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
+        binding.pry
       else
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
