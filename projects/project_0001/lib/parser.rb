@@ -126,8 +126,6 @@ class Parser < Hamster::Parser
         next
       end
 
-      binding.pry
-
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = SITE + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
