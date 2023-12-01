@@ -172,8 +172,8 @@ class Keeper
     sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
 
     ####################################
-    intro = prepare_intro(sony_game)
-    SonyGameIntro.store(intro.merge(resource: sony_game.id))
+    #intro = prepare_intro(sony_game)
+    #SonyGameIntro.store(intro.merge(resource: sony_game.id))
     ###################################
 
     @skipped += 1 if !check_md5_hash && !check_menu_id

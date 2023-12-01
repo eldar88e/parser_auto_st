@@ -14,11 +14,9 @@ class Manager < Hamster::Harvester
   def download
     notify 'Scraping started'
     scraper = Scraper.new(keeper)
-    if commands[:tr]
-      scraper.scrape_games_tr
-    elsif commands[:ru]
-      scraper.scrape_games_ru
-    end
+    scraper.scrape_games_tr
+
+    scraper.scrape_games_ru if commands[:ru]
     notify "Scraping finish!\nScraped: #{scraper.count} pages"
   end
 
@@ -28,24 +26,21 @@ class Manager < Hamster::Harvester
 
     if commands[:lang]
       parse_save_lang
-      notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
       return
     end
 
     if commands[:desc]
       #parse_save_desc
       parse_save_desc_dd
-      notify "Completed parsing and updating of description for #{keeper.updated_desc} game(s)"
       return
     end
 
-    parser_count, othr_pl_count, not_prc_count, other_type_count = parse_save_main
+    parse_save_main
+    clear_cache unless keeper.saved.zero?
     parse_save_lang
     parse_save_desc_dd
     keeper.finish
-    message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
-    notify message
-    clear_cache unless keeper.saved.zero?
+    notify 'Finish store!'
   end
 
   private
@@ -87,6 +82,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
+    notify "Completed parsing and updating of description for #{keeper.updated_desc} game(s)"
   end
 
   def parse_save_main
@@ -94,9 +90,7 @@ class Manager < Hamster::Harvester
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
     parser_count, othr_pl_count, not_prc_count, other_type_count = [0, 0, 0, 0]
     list_pages.each_with_index do |name, idx|
-      #limit = commands[:count] && commands[:count].is_a?(Integer) ? commands[:count] : 5
-      #break if idx > limit
-      puts "#{name}".green
+      puts "#{name}".green if @debug
       file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser     = Parser.new(html: file)
       list_games = parser.parse_list_games
@@ -107,7 +101,8 @@ class Manager < Hamster::Harvester
       keeper.save_games(list_games, idx)
       @pages += 1
     end
-    [parser_count, othr_pl_count, not_prc_count, other_type_count]
+    message = make_message(parser_count, othr_pl_count, not_prc_count, other_type_count)
+    notify message
   end
 
   def parse_save_desc
@@ -126,7 +121,7 @@ class Manager < Hamster::Harvester
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
-    message = "Finish store!"
+    message = ""
     message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated: #{keeper.updated} games;" unless keeper.updated.zero?
     message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
@@ -135,7 +130,6 @@ class Manager < Hamster::Harvester
     message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
     message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
-    message << "\nParsed and updated of lang info for #{keeper.updated_lang} game(s)" unless keeper.updated_lang.zero?
     message
   end
 
@@ -150,6 +144,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
+    notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
   end
 
   def notify(message, color=:green, method_=:info)

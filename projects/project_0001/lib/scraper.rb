@@ -14,7 +14,7 @@ class Scraper < Hamster::Scraper
     @referer = YAML.load_file('referer.yml')['referer']
     @count   = 0
     @keeper  = keeper
-    @debug   = commands[:debug]   #!!!!???????
+    @debug   = commands[:debug]
     @run_id  = @keeper.run_id
   end
 
@@ -22,13 +22,13 @@ class Scraper < Hamster::Scraper
 
   def scrape_lang(id)
     url = PS_GAME + id
-    sleep rand(0.2..2)
+    sleep rand(0.2..2.1)
     get_response(url).body
   end
 
   def scrape_desc(id)
     url = DD_GAME + id
-    #sleep rand(0.5..3)
+    sleep rand(0.2..2.1)
     get_response(url).body
   end
 
@@ -38,9 +38,9 @@ class Scraper < Hamster::Scraper
     notify "Found #{last_page} pages with a list of games (36 games/page) on the website #{first_page}"
     [*1..last_page].each do |page|
       link = "#{SITE}#{PATH_TR}#{page}#{PARAMS}"
-      puts "Page #{page} of #{last_page}".green
+      puts "Page #{page} of #{last_page}".green if @debug
       game_list = get_response(link).body
-      sleep(rand(1..3))
+      sleep(rand(0.3..2.5))
       peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_tr")
       @count += 1
     end
@@ -56,7 +56,7 @@ class Scraper < Hamster::Scraper
       parser      = Parser.new(html: game_list)
       games_links = parser.parse_games_list
       games_links.each_with_index do |path, index|
-        puts "List page: #{page}, game page: #{index}".green
+        puts "List page: #{page}, game page: #{index}".green if @debug
         url  = SITE + path
         game = get_response(url).body
         name = MD5Hash.new(columns: %i[path]).generate({ path: path })
