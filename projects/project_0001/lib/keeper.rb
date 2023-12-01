@@ -173,15 +173,14 @@ class Keeper
 
     ####################################
     intro = prepare_intro(sony_game)
-    SonyGameIntro.store(intro)
+    SonyGameIntro.store(intro.merge(resource: sony_game.id))
     ###################################
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end
 
   def prepare_intro(game)
-    intro = game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description]
-    { resource: game.id, intro: intro }
+   { intro: game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description] }
   end
 
   def save_image_info(id, img)
