@@ -70,8 +70,10 @@ class Parser < Hamster::Parser
      url = @html.at('link[rel="canonical"]')
 
     #####
-    puts "Url is nil"
-    binding.pry unless url
+    unless url
+      notify "Url is nil"
+      binding.pry
+    end
     ######
 
     alias_uri   = url['href'].split('/').last
