@@ -31,6 +31,9 @@ module Hamster
             text_part     = splitted_text.shift(message_limit).join
             bot.api.send_message(chat_id: user_id, text: escape(text_part), parse_mode: 'MarkdownV2')
           end
+        rescue => e
+          Hamster.logger.error e.message
+          puts e.message.red if commands[:debug]
         end
       end
       nil

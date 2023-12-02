@@ -1,6 +1,8 @@
 require_relative '../models/sony_game_additional'
 
 class Parser < Hamster::Parser
+  MIN_PRICE = 15
+
   def initialize(**page)
     super
     @html           = Nokogiri::HTML(page[:html])
@@ -109,6 +111,11 @@ class Parser < Hamster::Parser
       else
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
+      end
+
+      if game[:additional][:price_tl] < MIN_PRICE
+        @not_price += 1
+        next
       end
 
       game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text.gsub('ü','u')

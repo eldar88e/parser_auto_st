@@ -34,17 +34,17 @@ class Manager < Hamster::Harvester
       parse_save_lang
       return
     elsif commands[:desc]
-      #parse_save_desc
+      #parse_save_desc_ru
       parse_save_desc_dd
       return
     end
 
     parse_save_main
-    clear_cache unless keeper.saved.zero?
-    parse_save_lang
-    parse_save_desc_dd
+    clear_cache        unless keeper.saved.zero?
+    parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
+    parse_save_desc_dd unless keeper.saved.zero?
     keeper.finish
-    notify 'Finish store!'
+    notify 'The parser completed its work successfully!'
   end
 
   private
@@ -75,20 +75,6 @@ class Manager < Hamster::Harvester
     notify(message, :red, :error)
   end
 
-  def parse_save_desc_dd
-    ps_ids  = keeper.get_ps_ids_without_desc
-    scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_desc(id[1])
-      parser = Parser.new(html: page)
-      desc   = parser.parse_desc_dd
-      next unless desc
-
-      keeper.save_desc_dd(desc, id[0])
-    end
-    notify "Completed parsing and updating of description for #{keeper.updated_desc} game(s)"
-  end
-
   def parse_save_main
     run_id     = keeper.run_id
     list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
@@ -109,7 +95,35 @@ class Manager < Hamster::Harvester
     notify message
   end
 
-  def parse_save_desc
+  def parse_save_lang
+    ps_ids  = keeper.get_ps_ids
+    scraper = Scraper.new(keeper)
+    ps_ids.each do |id|
+      page   = scraper.scrape_lang(id[1])
+      parser = Parser.new(html: page)
+      lang   = parser.parse_lang
+      next if lang.nil?
+
+      keeper.save_lang_info(lang, id[0])
+    end
+    notify "Parsed and updated lang info for #{keeper.updated_lang} game(s)"
+  end
+
+  def parse_save_desc_dd
+    ps_ids  = keeper.get_ps_ids_without_desc
+    scraper = Scraper.new(keeper)
+    ps_ids.each do |id|
+      page   = scraper.scrape_desc(id[1])
+      parser = Parser.new(html: page)
+      desc   = parser.parse_desc_dd
+      next unless desc
+
+      keeper.save_desc_dd(desc, id[0])
+    end
+    notify "Parsed and updated description for #{keeper.updated_desc} game(s)"
+  end
+
+  def parse_save_desc_ru
     run_id     = keeper.run_id
     list_pages = peon.list(subfolder: "#{run_id}_games_ru").sort_by { |name| name.scan(/\d+/).first.to_i }
     list_pages.each do |name_list_page|
@@ -131,24 +145,10 @@ class Manager < Hamster::Harvester
     message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
-    message << "\nNot parsed without price: #{not_prc_count} games;" unless not_prc_count.zero?
+    message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
     message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message
-  end
-
-  def parse_save_lang
-    ps_ids  = keeper.get_ps_ids
-    scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_lang(id[1])
-      parser = Parser.new(html: page)
-      lang   = parser.parse_lang
-      next if lang.nil?
-
-      keeper.save_lang_info(lang, id[0])
-    end
-    notify "Completed parsing and updating of language information for #{keeper.updated_lang} game(s)"
   end
 
   def notify(message, color=:green, method_=:info)
