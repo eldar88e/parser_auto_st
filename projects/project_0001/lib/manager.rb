@@ -64,15 +64,15 @@ class Manager < Hamster::Harvester
         try += 1
         ftp.delete(filename_to_delete)
       rescue Net::FTPPermError => e
-        Hamster.logger.error e
+        Hamster.logger.error e.message
         sleep 5 * try
         retry if try > 3
       end
       notify "The file '#{filename_to_delete}' was deleted."
-    rescue => e
-      Hamster.logger.error e
-      notify "Please delete the ModX cache file manually!"
     end
+  rescue => e
+    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
+    notify(message, :red, :error)
   end
 
   def parse_save_desc_dd
@@ -105,7 +105,7 @@ class Manager < Hamster::Harvester
       keeper.save_games(list_games)
       @pages += 1
     end
-    message = make_message(parser_count, othr_pl_count, not_prc_count, other_type_count)
+    message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     notify message
   end
 
@@ -152,9 +152,8 @@ class Manager < Hamster::Harvester
   end
 
   def notify(message, color=:green, method_=:info)
-    message = color.nil? ? message : message.send(color)
     Hamster.logger.send(method_, message)
     Hamster.report message: message
-    puts message.send(color) if @debug
+    puts color.nil? ? message : message.send(color) if @debug
   end
 end

@@ -187,9 +187,8 @@ class Parser < Hamster::Parser
   end
 
   def notify(message, color=:green, method_=:info)
-    message = color.nil? ? message : message.send(color)
     Hamster.logger.send(method_, message)
     Hamster.report message: message
-    puts message.send(color) if @debug
+    puts color.nil? ? message : message.send(color) if @debug
   end
 end

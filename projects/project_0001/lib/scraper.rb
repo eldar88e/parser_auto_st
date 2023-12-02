@@ -27,7 +27,7 @@ class Scraper < Hamster::Scraper
   def scrape_games_tr
     first_page = "#{settings['site']}#{settings['path_tr']}1#{settings['params']}"
     last_page  = make_last_page(first_page)
-    notify "Found #{last_page} pages with a list of games (36 games/page) on the website #{first_page}" if @debug
+    puts "Found #{last_page} pages with a list of games (36 games/page) on the website #{first_page}" if @debug
     [*1..last_page].each do |page|
       link = "#{settings['site']}#{settings['path_tr']}#{page}#{settings['params']}"
       puts "Page #{page} of #{last_page}".green if @debug
@@ -41,7 +41,6 @@ class Scraper < Hamster::Scraper
   def scrape_games_ru
     first_page = "#{settings['site']}#{settings['path_ru']}1#{settings['params']}"
     last_page  = make_last_page(first_page)
-    notify "Найденно #{last_page} страниц по 36 игр на странице #{first_page}"
     [*1..last_page].each do |page|
       link        = "#{settings['site']}#{settings['path_ru']}#{page}"
       game_list   = get_response(link).body
@@ -74,12 +73,5 @@ class Scraper < Hamster::Scraper
     headers                    = { 'Referer' => referer }
     headers['Accept-Language'] = 'tr-TR' if settings['accept_language_tr']
     connect_to(link, ssl_verify: false, headers: headers)
-  end
-
-  def notify(message, color=:green, method_=:info)
-    message = color.nil? ? message : message.send(color)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts message.send(color) if @debug
   end
 end

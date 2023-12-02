@@ -88,15 +88,16 @@ class Keeper < Hamster::Keeper
       keys = %i[data_source_url price old_price price_bonus]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
+      game[:additional][:popular]  = @menu_id_count < 151 ? true : false
 
       if game_db
-        sony_game = SonyGame.find_by(id: game_db.id)
+        sony_game = SonyGame.find(game_db.id)
         if sony_game
           next if sony_game.deleted || !sony_game.published
         else
-          notify "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_db.id}` удалена!\n"\
-                   "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, #{SonyGameCategories.table_name} "\
-                   "или добавте в основную таблицу под этим ID запись."
+          Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_db.id}` удалена!\n"\
+                                 "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
+                                 "#{SonyGameCategories.table_name} или добавте в основную таблицу под этим ID запись."
           next
         end
         update_date(game, game_db, sony_game)
@@ -130,9 +131,7 @@ class Keeper < Hamster::Keeper
         @saved += 1
       end
     rescue => e
-      notify e.message
-      binding.pry
-      retry
+      Hamster.logger.error e.message
     end
   end
 
@@ -149,7 +148,7 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_db, sony_game)
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     release                 = game[:additional][:release]
-    game[:additional][:new] = true if release && release > Date.current.prev_month(settings['month_since_release'])
+    game[:additional][:new] = release && release > Date.current.prev_month(settings['month_since_release']) ? true : false
 
     game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
@@ -189,14 +188,8 @@ class Keeper < Hamster::Keeper
       elsif item == paths[2]
         new_file[:url] = file[:url].sub(/720&h=720/, settings['middle_size'])
       end
-
-      begin
-        SonyGameAdditionalFile.create!(new_file)
-      rescue TypeError => e
-        # e
-      end
-
-      parent = SonyGameAdditionalFile.last.id if idx.zero?
+      sga    = SonyGameAdditionalFile.create!(new_file)
+      parent = sga.id if idx.zero?
     end
   end
 
@@ -210,18 +203,5 @@ class Keeper < Hamster::Keeper
 
   def run
     RunId.new(SonyGameRun)
-  end
-
-  def correct_date(date)
-    year_raw = date.match(/-\d{4}$/).to_s
-    date.sub!(year_raw, '')
-    (year_raw.sub('-', '') + '-' + date).to_date
-  end
-
-  def notify(message, color=:green, method_=:info)
-    message = color.nil? ? message : message.send(color)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts message.send(color) if @debug
   end
 end
