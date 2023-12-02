@@ -128,8 +128,14 @@ module Hamster
         subfolder = check_dir_path(subfolder)
         dest_path = "#{@trash}#{subfolder}"
 
-        FileUtils.makedirs dest_path
-        FileUtils.move Dir.glob("#{@store}*"), dest_path
+        begin
+          FileUtils.makedirs dest_path
+          FileUtils.move Dir.glob("#{@store}*"), dest_path
+        rescue Errno::EEXIST => e
+          Hamster.logger.error e
+          dest_path += "copy_#{Time.current.to_i}/"
+          retry
+        end
       end
 
       # @peon.give(file: "id_347_d_2020_05_13.html", subfolder: "run_id_2")
@@ -175,7 +181,8 @@ module Hamster
         subfolder = check_dir_path(args[:subfolder])
         store_path = "#{@store}#{subfolder}"
         year = args[:year]
-        Dir.glob("#{store_path}/*").select { |p| (p[-3..-1] == '.gz' &&  p[-17..-14] == year.to_s ) }.map { |p| File.basename(p) }
+        Dir.glob("#{store_path}/*").select { |p| (p[-3..-1] == '.gz' &&  p[-17..-14] == year.to_s ) }
+           .map { |p| File.basename(p) }
       end
 
       # @peon.move(file: "id_347_d_2020_05_13.html", s_subfolder: "run_id_2", t_subfolder: "run_id_2_2020_05_13/0_10k")
@@ -254,7 +261,13 @@ module Hamster
         res = ['start']
 
         until res.empty? || res.size == Dir.glob("#{@trash}**/*").size
-          res = Dir.glob("#{@trash}**/*").sort_by { |p| [-p.count('/'), p.length] }.map { |p| [p, File.ctime(p), Dir.empty?(p)] }.each { |a| FileUtils.remove_dir(a.first) if (Date.today - Date.parse(a[1].to_s)).to_i >= days && (a.first[-3..-1] == '.gz' || a.last) }
+          res = Dir.glob("#{@trash}**/*").sort_by { |p| [-p.count('/'), p.length] }
+                   .map { |p| [p, File.ctime(p), Dir.empty?(p)] }
+                   .each do |a|
+                     if (Date.today - Date.parse(a[1].to_s)).to_i >= days && (a.first[-3..-1] == '.gz' || a.last)
+                       FileUtils.remove_dir(a.first)
+                     end
+          end
         end
       end
 

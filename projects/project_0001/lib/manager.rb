@@ -12,6 +12,8 @@ class Manager < Hamster::Harvester
   end
 
   def download
+    peon.move_all_to_trash
+    peon.throw_trash(10)
     notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
