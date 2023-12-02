@@ -13,6 +13,6 @@ def scrape(options)
   end
 rescue => error
   puts error.backtrace
+  Hamster.logger.error error.message
   Hamster.report message: error.message
-  Hamster.logger.error error
 end
