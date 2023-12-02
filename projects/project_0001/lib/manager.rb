@@ -17,7 +17,7 @@ class Manager < Hamster::Harvester
     notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
-    notify "Scraping finish!\nScraped: #{scraper.count} pages"
+    notify "Scraping finish! Scraped: #{scraper.count} pages"
 
     if commands[:ru]
       scraper_ru = Scraper.new(keeper)
