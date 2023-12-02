@@ -5,6 +5,7 @@ require 'net/ftp'
 
 class Manager < Hamster::Harvester
   def initialize
+    binding.pry
     super
     @keeper = Keeper.new
     @debug  = commands[:debug]
