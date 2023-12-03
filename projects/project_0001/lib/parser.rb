@@ -46,8 +46,6 @@ class Parser < Hamster::Parser
       info[key] = key == :release ? Date.parse(value) : value
     rescue => e
       notify e.message
-      binding.pry
-      next
     end
     need_keys = %i[publisher genre release]
     lang      = info.slice!(*need_keys)
@@ -139,7 +137,6 @@ class Parser < Hamster::Parser
       @parsed += 1
     rescue => e
       notify e.message
-      binding.pry
     end
     games
   end
