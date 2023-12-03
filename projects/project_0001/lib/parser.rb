@@ -98,11 +98,9 @@ class Parser < Hamster::Parser
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
-      if date_raw && (prise_discount || prise_bonus)
+      if date_raw && prise_discount
         game[:additional][:price_tl]          = get_price(prise_discount)
         game[:additional][:price]             = get_price(prise_discount, :ru)
-        game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
-        game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
         game[:additional][:old_price_tl]      = get_price(price_tl_raw)
         game[:additional][:old_price]         = get_price(price_tl_raw, :ru)
         game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
@@ -110,6 +108,9 @@ class Parser < Hamster::Parser
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
+
+      game[:additional][:price_bonus_tl] = get_price(prise_bonus)              if date_raw
+      game[:additional][:price_bonus]    = get_price(prise_bonus, :ru) if date_raw
 
       if game[:additional][:price_tl] < MIN_PRICE
         @not_price += 1
