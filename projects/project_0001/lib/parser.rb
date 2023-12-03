@@ -118,8 +118,8 @@ class Parser < Hamster::Parser
         next
       end
 
-      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text.gsub('ü','u')
-                                              .gsub('ö','o').gsub(/[S|s]ürümü?/, 'edition').gsub(/[P|p]aketi?/, 'bundle')
+      game[:main][:pagetitle] = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'edition')
+                                        .gsub(/[P|p]aketi?/, 'bundle').gsub('ü','u').gsub('ö','o')
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
