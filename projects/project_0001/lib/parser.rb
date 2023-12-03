@@ -124,6 +124,10 @@ class Parser < Hamster::Parser
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
 
+      if game[:main][:pagetitle].match?(/Alan Wake/)
+        binding.pry
+      end
+
       unless ['Игра', 'Комплект', 'VR игра', 'PSN игра', 'Контент'].include?(game[:additional][:type_game])
         @other_type += 1
         next
