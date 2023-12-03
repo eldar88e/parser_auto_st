@@ -108,6 +108,7 @@ class Parser < Hamster::Parser
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
+      binding.pry
 
       game[:additional][:price_bonus_tl] = get_price(prise_bonus)              if date_raw
       game[:additional][:price_bonus]    = get_price(prise_bonus, :ru) if date_raw
