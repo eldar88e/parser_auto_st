@@ -30,4 +30,48 @@ this data and saving it into MySQL tables for the MODX Revolution website.
 - msaddfield
 - msearch2
 
+**To run the script, fill in the following columns in the settings table:**
+
+- site                    (example: 'https://example.com')
+- path_tr                 (example: '/tr-store/all-games/')
+- path_ru                 (example: '/ru-store/all-games/')
+- params                  (example: '?sort=most-watchlisted')
+- ps_game                 (example: 'https://example.com/product/ps-game')
+- dd_game                 (example: 'https://example.com/product/ps-game')
+- accept_language_tr      (default: false, preferably: true)
+- exchange_rate           (example: 5.5)
+- round_price             (default: 1, preferably: 10)
+- parent_ps5              (example: 12)
+- parent_ps4              (example: 13)
+- template_id             (example: 10)
+- limit_upd_lang          (default: 0, preferably: 1000)
+- user_id                 (default: 1)
+- file_type               (default: 'image')
+- small_size              (example: '40&h=40')
+- middle_size             (example: '320&h=320')
+- path_catalog            (example: 'katalog-tovarov/games/')
+- new_touched_update_desc (true or false(default: false))
+- month_since_release     (1 - 12 months(default: 6 moths))
+- day_lang_all_scrap      (1 - 31 day)
+- telegram_chat_id        (fill out this column to send you a report in Telegram)
+
+**To run the script, fill in the following columns in the .env file:**
+
+- ADAPTER
+- HOST
+- DATABASE
+- USERNAME
+- PASSWORD
+- BD_TABLE_NAME_MAIN
+- BD_TABLE_NAME_ADDITIONAL
+- BD_TABLE_NAME_RUNS
+- BD_TABLE_NAME_INTRO
+- BD_TABLE_NAME_CATEGORIES
+- BD_TABLE_NAME_ADDITIONAL_FILES
+- BD_TABLE_NAME_SETTING
+- TELEGRAM_BOT_TOKEN
+- FTP_HOST
+- FTP_LOGIN
+- FTP_PASS
+
 _November 2022_
