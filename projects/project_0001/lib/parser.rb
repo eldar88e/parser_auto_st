@@ -160,7 +160,24 @@ class Parser < Hamster::Parser
     price = raw_price.gsub(',', '').to_f
     return price if currency == :tr
 
-    round_up_price(price * settings['exchange_rate'])
+    exchange_rate = make_exchange_rate(price)
+    round_up_price(price * exchange_rate)
+  end
+
+  def make_exchange_rate(price)
+    #От 1 до 300 лир курс - 5.5
+    # от 300 до 800 лир курс 5
+    # от 800 до 1600 курс 4.5
+    # от 1600 курс 4.3
+    if price >= 1 && price < 300
+      settings['exchange_rate']
+    elsif price >= 300 && price < 800
+      settings['exchange_rate'] - 0.5
+    elsif price >= 800 && price < 1600
+      settings['exchange_rate'] - 1
+    elsif price >= 1600
+      settings['exchange_rate'] - 1.2
+    end
   end
 
   def round_up_price(price)
