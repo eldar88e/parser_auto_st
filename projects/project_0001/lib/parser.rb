@@ -94,7 +94,8 @@ class Parser < Hamster::Parser
         next
       end
 
-      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ months?|\d+ days?/)
+      match_date     = %r[\d+ months?|\d+ days?|\d month?|\d day?|\d+ дней|\d день|\d месяц|\d+ месяцев]
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date)
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -108,7 +109,6 @@ class Parser < Hamster::Parser
         game[:additional][:price_tl] = get_price(price_tl_raw)
         game[:additional][:price]    = get_price(price_tl_raw, :ru)
       end
-      binding.pry
 
       game[:additional][:price_bonus_tl] = get_price(prise_bonus)              if date_raw
       game[:additional][:price_bonus]    = get_price(prise_bonus, :ru) if date_raw
@@ -169,7 +169,7 @@ class Parser < Hamster::Parser
 
   def get_discount_end_date(date_raw)
     date_raw      = date_raw.to_s
-    day_month     = date_raw.match?(/day/) ? :days : :months
+    day_month     = date_raw.match?(/day|days|день|дней/) ? :days : :months
     num_day_month = date_raw.to_i
     today         = Date.today
     today + num_day_month.send(day_month)
