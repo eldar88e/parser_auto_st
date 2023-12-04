@@ -186,7 +186,7 @@ class Keeper < Hamster::Keeper
     check_menu_id = @menu_id_count != sony_game[:menuindex]
     ##
     # sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
-    sony_game.update(game[:main].merge(data)) && @updated_menu_id += 1 if check_menu_id
+    sony_game.update(game[:main].merge(data)) && @updated_menu_id += 1
     ###
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end
