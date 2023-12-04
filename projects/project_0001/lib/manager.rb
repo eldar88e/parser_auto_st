@@ -60,21 +60,29 @@ class Manager < Hamster::Harvester
 
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
-      filename_to_delete = 'context.cache.php'
+      delete_files(ftp)
+      ftp.chdir('/core/cache/resource/web/resources')
+      delete_files(ftp)
+    end
+    notify "The cache has been emptied."
+  rescue => e
+    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
+    notify(message, :red, :error)
+  end
+
+  def delete_files(ftp)
+    list = ftp.nlst
+    list.each do |i|
       try = 0
       begin
         try += 1
-        ftp.delete(filename_to_delete)
+        ftp.delete(i)
       rescue Net::FTPPermError => e
         Hamster.logger.error e.message
         sleep 5 * try
         retry if try > 3
       end
-      notify "The file '#{filename_to_delete}' was deleted."
     end
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
   end
 
   def parse_save_main
