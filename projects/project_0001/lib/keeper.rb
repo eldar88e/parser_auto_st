@@ -185,16 +185,20 @@ class Keeper < Hamster::Keeper
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
     check_menu_id = @menu_id_count != sony_game[:menuindex]
     #sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
-
     #
-    sony_game.update(game.merge(data)) && @updated_menu_id += 1
+    binding.pry
+    sony_game.update(game[:main].merge(data)) && @updated_menu_id += 1
+    intro = prepare_intro(game[:main])
+    SonyGameIntro.find_by(resource: sony_game.id).update(intro)
     #
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end
 
   def prepare_intro(game)
-   { intro: game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description] }
+    data = { intro: game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description] }
+    data[:intro] += game[:content] if game[:content].present?
+    data
   end
 
   def save_image_info(id, img)
