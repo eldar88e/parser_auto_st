@@ -118,8 +118,7 @@ class Parser < Hamster::Parser
         next
       end
 
-      game[:main][:pagetitle] = game_raw.at('.game-collection-item-details-title').text.gsub(/[S|s]ürümü?/, 'edition')
-                                        .gsub(/[P|p]aketi?/, 'bundle').gsub('ü','u').gsub('ö','o')
+      game[:main][:pagetitle]       = prepare_page_title(game_raw.at('.game-collection-item-details-title').text)
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
@@ -146,15 +145,28 @@ class Parser < Hamster::Parser
 
   private
 
+  def prepare_page_title(page_title_raw)
+    page_title_raw.gsub!(/[Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'edition')
+    page_title_raw.gsub!(/[Pp][aA][kK][eE][tT][iİI]?/, 'bundle')
+    page_title_raw = replace_turk_small_letters(page_title_raw)
+    page_title_raw.gsub('Ü','U').gsub('Ö', 'O').gsub('İ', 'I').gsub('Ç', 'C')
+                  .gsub('Ş', 'S').gsub('Ğ', 'G').gsub('™', '').gsub('®', '').gsub(' ve ', ' and ')
+  end
+
   def make_alias(url)
-    alias_raw = url.split('/')[-2..-1]
+    alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..99]
-    alias_raw = alias_raw.reverse.join('-')[0..99]
+    alias_raw     = alias_raw.reverse.join('-')[0..99]
     return alias_raw unless alias_raw.match?(/%/)
 
     alias_raw = URI.decode_www_form(alias_raw)[0][0]
-    alias_raw.gsub('sürümü', 'edition').gsub('ü','u').gsub('ö','o')
-             .gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('ı', 'i')
+    alias_raw.gsub!('sürümü', 'edition')
+    alias_raw.gsub!(/paketi?/, 'bundle')
+    replace_turk_small_letters(alias_raw)
+  end
+
+  def replace_turk_small_letters(str)
+    str.gsub('ü','u').gsub('ö','o').gsub('ı', 'i').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s')
   end
 
   def get_price(raw_price, currency=:tr)
