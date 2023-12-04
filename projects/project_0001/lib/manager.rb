@@ -42,7 +42,7 @@ class Manager < Hamster::Harvester
     end
 
     parse_save_main
-    clear_cache        unless keeper.saved.zero?
+    clear_cache        if !keeper.saved.zero? || !keeper.updated.zero?
     parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.finish
