@@ -139,6 +139,7 @@ class Parser < Hamster::Parser
       @parsed += 1
     rescue => e
       notify e.message
+      binding.pry
     end
     games
   end
