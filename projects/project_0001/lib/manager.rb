@@ -102,7 +102,7 @@ class Manager < Hamster::Harvester
       @pages += 1
     end
     message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
-    notify message
+    notify message if message.present?
   end
 
   def parse_save_lang

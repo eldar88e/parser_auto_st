@@ -10,6 +10,11 @@ module Hamster
         log 'The recipient of the report cannot be found!', :red
         return
       end
+
+      unless message.present?
+        log 'An empty message has been sent to Telegram!', :red
+        return
+      end
       
       case use
       when :telegram
