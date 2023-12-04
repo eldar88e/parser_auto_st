@@ -12,7 +12,7 @@ class Manager < Hamster::Harvester
   end
 
   def download
-    #peon.move_all_to_trash
+    peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(10)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
