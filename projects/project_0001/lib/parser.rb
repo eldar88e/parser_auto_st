@@ -129,6 +129,10 @@ class Parser < Hamster::Parser
         next
       end
 
+      if game[:main][:pagetitle].match?(/ELDEN RING PS4 and PS5/)
+        binding.pry
+      end
+
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = settings['site'] + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]

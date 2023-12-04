@@ -13,16 +13,18 @@ class Manager < Hamster::Harvester
 
   def download
     #peon.move_all_to_trash
-    #peon.throw_trash(10)
+    puts 'The Store has been emptied.' if @debug
+    peon.throw_trash(10)
+    puts 'The Trash has been emptied of files older than 10 days.' if @debug
     notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
-    notify "Scraping finish! Scraped: #{scraper.count} pages"
+    notify "Scraping finish! Scraped: #{scraper.count} pages."
 
     if commands[:ru]
       scraper_ru = Scraper.new(keeper)
       scraper_ru.scrape_games_ru
-      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages"
+      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages."
     end
   end
 
@@ -106,7 +108,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "Parsed and updated lang info for #{keeper.updated_lang} game(s)"
+    notify "Parsed and updated lang info for #{keeper.updated_lang} game(s)."
   end
 
   def parse_save_desc_dd
@@ -120,7 +122,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "Parsed and updated description for #{keeper.updated_desc} game(s)"
+    notify "Parsed and updated description for #{keeper.updated_desc} game(s)."
   end
 
   def parse_save_desc_ru
