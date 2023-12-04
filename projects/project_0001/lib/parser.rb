@@ -139,7 +139,6 @@ class Parser < Hamster::Parser
       @parsed += 1
     rescue => e
       notify e.message
-      binding.pry
     end
     games
   end
@@ -156,9 +155,9 @@ class Parser < Hamster::Parser
   end
 
   def get_price(raw_price, currency=:tr)
-    return unless raw_price
+    return if raw_price.nil? || raw_price.strip.to_i.zero?
 
-    price = raw_price.gsub(',', '').to_f
+    price = raw_price.strip.gsub(',', '').to_f
     return price if currency == :tr
 
     exchange_rate = make_exchange_rate(price)
