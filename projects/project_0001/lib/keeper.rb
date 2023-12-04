@@ -75,7 +75,7 @@ class Keeper < Hamster::Keeper
 
   def save_lang_info(lang, id)
     lang.merge!(touched_run_id: run_id)
-    lang[:new] = true if lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
+    lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
     SonyGameAdditional.find(id).update(lang)
     @updated_lang += 1
   end
@@ -88,7 +88,7 @@ class Keeper < Hamster::Keeper
       keys = %i[data_source_url price old_price price_bonus]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
-      game[:additional][:popular]  = @menu_id_count < 151 ? true : false
+      game[:additional][:popular]  = @menu_id_count < 151
 
       if game_db
         sony_game = SonyGame.find(game_db.id)
@@ -147,9 +147,8 @@ class Keeper < Hamster::Keeper
 
   def update_date(game, game_db, sony_game)
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
-    release                 = game[:additional][:release]
-    game[:additional][:new] = release && release > Date.current.prev_month(settings['month_since_release']) ? true : false
-    binding.pry
+    start_new_date          = Date.current.prev_month(settings['month_since_release'])
+    game[:additional][:new] = game_db[:release] && game_db[:release] > start_new_date
     game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
 
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }

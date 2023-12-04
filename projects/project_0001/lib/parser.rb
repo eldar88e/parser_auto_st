@@ -54,8 +54,8 @@ class Parser < Hamster::Parser
       new_lang[:voice]       += v if k.to_s.match?(/voice/)
       new_lang[:screen_lang] += v if k.to_s.match?(/screen/)
     end
-    info[:rus_voice]  = true if new_lang[:voice].downcase.match?(/rus/)
-    info[:rus_screen] = true if new_lang[:screen_lang].downcase.match?(/rus/)
+    info[:rus_voice]  = new_lang[:voice].downcase.match?(/rus/)
+    info[:rus_screen] = new_lang[:screen_lang].downcase.match?(/rus/)
     info
   end
 
