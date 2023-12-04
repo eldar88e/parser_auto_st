@@ -186,18 +186,17 @@ class Keeper < Hamster::Keeper
     check_menu_id = @menu_id_count != sony_game[:menuindex]
     #sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
     #
-    binding.pry
     sony_game.update(game[:main].merge(data)) && @updated_menu_id += 1
-    intro = prepare_intro(game[:main])
+    intro = prepare_intro(game[:main], sony_game[:content])
     SonyGameIntro.find_by(resource: sony_game.id).update(intro)
     #
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end
 
-  def prepare_intro(game)
+  def prepare_intro(game, content=nil)
     data = { intro: game[:pagetitle] + ' ' + game[:longtitle] + ' ' + game[:description] }
-    data[:intro] += game[:content] if game[:content].present?
+    data[:intro] += " #{content}" if content.present?
     data
   end
 
