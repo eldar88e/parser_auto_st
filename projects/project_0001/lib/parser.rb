@@ -147,7 +147,9 @@ class Parser < Hamster::Parser
   private
 
   def make_alias(url)
-    alias_raw = url.split('/')[-2..-1].reverse.join('-')
+    alias_raw = url.split('/')[-2..-1]
+    alias_raw[-1] = alias_raw[-1][0..99]
+    alias_raw = alias_raw.reverse.join('-')[0..99]
     return alias_raw unless alias_raw.match?(/%/)
 
     alias_raw = URI.decode_www_form(alias_raw)[0][0]
