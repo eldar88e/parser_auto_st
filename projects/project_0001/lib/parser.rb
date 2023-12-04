@@ -149,7 +149,7 @@ class Parser < Hamster::Parser
     page_title_raw.gsub!(/[yY][öÖ][nN][eE][tT][mM][eE][nN][iİ][nN] [Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'режиссерская версия')
     page_title_raw.gsub!(/[Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'edition')
     page_title_raw.gsub!(/[Pp][aA][kK][eE][tT][iİI]?/, 'bundle')
-    page_title_raw.gsub!(/[sS]ony[pP]laystation|[pP]lay[sS]tation/, 'PS')
+    page_title_raw.gsub!(/[Pp]lay[Ss]tation/, 'PS')
     page_title_raw.gsub!(/[Dd]ijital/, 'digital')
     page_title_raw = replace_turk_small_letters(page_title_raw)
     page_title_raw.gsub('Ü','U').gsub('Ö', 'O').gsub('İ', 'I').gsub('Ç', 'C')
@@ -158,7 +158,7 @@ class Parser < Hamster::Parser
 
   def make_alias(url)
     alias_raw     = url.split('/')[-2..-1]
-    alias_raw[-1] = alias_raw[-1][0..99]
+    alias_raw[-1] = alias_raw[-1][0..120]
     alias_raw     = alias_raw.reverse.join('-')[0..99]
     alias_raw.gsub!('sürümü', 'edition')
     alias_raw.gsub!(/paketi?/, 'bundle')
