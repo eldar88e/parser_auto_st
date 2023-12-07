@@ -18,20 +18,21 @@ module Hamster
       end
     end
 
-    def report_csv(csv_string, message)
+    def send_file(csv_string, message, type=:csv)
       initialize
 
+      type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
+      file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
       [@raw_users.to_s.split(',')].flatten.each do |user_id|
         Telegram::Bot::Client.run(@token_) do |bot|
           bot.api.send_document(
             chat_id: user_id,
-            document: Faraday::UploadIO.new(StringIO.new(csv_string), 'text/csv', 'games.csv'),
+            document: Faraday::UploadIO.new(StringIO.new(csv_string), type_, file_name),
             caption: message
           )
         end
       end
     rescue => e
-      binding.pry
       Hamster.logger.error e.message
       puts e.message.red if commands[:debug]
     end

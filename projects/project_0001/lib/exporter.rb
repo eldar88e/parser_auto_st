@@ -21,7 +21,7 @@ class Exporter < Hamster::Harvester
     games_list = convert_objects_list(games_raw)
     csv_string = CSV.generate { |csv| games_list.each { |row| csv << row } }
 
-    peon.put(file: "games.csv", content: csv_string)
+    peon.put(file: "#{@keeper.run_id}_games.csv", content: csv_string)
   end
 
   private

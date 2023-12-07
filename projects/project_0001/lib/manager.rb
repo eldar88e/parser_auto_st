@@ -13,15 +13,17 @@ class Manager < Hamster::Harvester
   end
 
   def export
-    message   = 'CSV file with PlayStation games.'
-    file_path = 'games.csv.gz'
-    csv_str   = peon.give(file: file_path) rescue nil
-    return Hamster.report_csv(csv_str, message) if csv_str
-
-    exporter = Exporter.new(keeper)
+    keeper.status = 'exporting'
+    file_name = "#{keeper.run_id}_games.csv.gz"
+    exporter  = Exporter.new(keeper)
     exporter.make_csv
-    csv_str = peon.give(file: file_path)
-    Hamster.report_csv(csv_str, message)
+    #csv_str = peon.give(file: file_name)
+
+    file_path    = "#{@_storehouse_}store/#{file_name}"
+    gz_file_data = IO.binread(file_path)
+    message      = 'CSV file with PlayStation games.'
+    Hamster.send_file(gz_file_data, message, :gz)
+    notify "Exporting finish!" if @debug
   end
 
   def download
@@ -58,6 +60,7 @@ class Manager < Hamster::Harvester
     clear_cache        if !keeper.saved.zero? || !keeper.updated.zero?
     parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
     parse_save_desc_dd unless keeper.saved.zero?
+    export
     keeper.finish
     notify 'The parser completed its work successfully!'
   end
