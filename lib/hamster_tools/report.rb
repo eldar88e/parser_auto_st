@@ -18,11 +18,13 @@ module Hamster
       end
     end
 
-    def send_file(csv_string, message, type=:csv)
+    def send_file(csv_string, type=:csv)
       initialize
 
       type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
       file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
+      message   = 'CSV file containing PlayStation games.'
+      message   = 'Archived ' + message if type == :gz
       [@raw_users.to_s.split(',')].flatten.each do |user_id|
         Telegram::Bot::Client.run(@token_) do |bot|
           bot.api.send_document(

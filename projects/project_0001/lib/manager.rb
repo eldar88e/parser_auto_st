@@ -21,8 +21,7 @@ class Manager < Hamster::Harvester
 
     file_path    = "#{@_storehouse_}store/#{file_name}"
     gz_file_data = IO.binread(file_path)
-    message      = 'Archived CSV file containing PlayStation games.'
-    Hamster.send_file(gz_file_data, message, :gz)
+    Hamster.send_file(gz_file_data, :gz)
     notify "Exporting finish!" if @debug
   end
 
