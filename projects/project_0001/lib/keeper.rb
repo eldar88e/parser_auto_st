@@ -36,6 +36,10 @@ class Keeper < Hamster::Keeper
     run.finish
   end
 
+  def list_last_popular_game(limit, parent)
+    SonyGame.includes(:sony_game_additional, :sony_game_intro).active_games(parent).order(menuindex: :asc).limit(limit)
+  end
+
   def get_games_without_content
     SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).where(content: [nil, ''])
   end

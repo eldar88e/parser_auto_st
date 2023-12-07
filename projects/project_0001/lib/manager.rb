@@ -1,6 +1,7 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
+require_relative '../lib/exporter'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
@@ -11,6 +12,18 @@ class Manager < Hamster::Harvester
     @pages  = 0
   end
 
+  def export
+    message   = 'CSV file with PlayStation games.'
+    file_path = 'games.csv.gz'
+    csv_str   = peon.give(file: file_path) rescue nil
+    return Hamster.report_csv(csv_str, message) if csv_str
+
+    exporter = Exporter.new(keeper)
+    exporter.make_csv
+    csv_str = peon.give(file: file_path)
+    Hamster.report_csv(csv_str, message)
+  end
+
   def download
     peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
@@ -19,12 +32,12 @@ class Manager < Hamster::Harvester
     notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape_games_tr
-    notify "Scraping finish! Scraped: #{scraper.count} pages."
+    notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
 
     if commands[:ru]
       scraper_ru = Scraper.new(keeper)
       scraper_ru.scrape_games_ru
-      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages."
+      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages." if @debug
     end
   end
 
@@ -64,7 +77,7 @@ class Manager < Hamster::Harvester
       ftp.chdir('/core/cache/resource/web/resources')
       delete_files(ftp)
     end
-    notify "The cache has been emptied."
+    notify "The cache has been emptied." if @debug
   rescue => e
     message = "Please delete the ModX cache file manually!\nError: #{e.message}"
     notify(message, :red, :error)

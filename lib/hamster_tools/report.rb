@@ -3,13 +3,7 @@
 module Hamster
   module HamsterTools
     def report(to: nil, message:, use: :telegram)
-      @token_    ||= ENV['TELEGRAM_BOT_TOKEN']
-      @raw_users ||= to || settings['telegram_chat_id']
-
-      unless @raw_users
-        log 'The recipient of the report cannot be found!', :red
-        return
-      end
+      initialize
 
       unless message.present?
         log 'An empty message has been sent to Telegram!', :red
@@ -23,8 +17,33 @@ module Hamster
         log "Cannot use such messenger as #{use.to_s.capitalize}!", :red
       end
     end
+
+    def report_csv(csv_string, message)
+      initialize
+
+      [@raw_users.to_s.split(',')].flatten.each do |user_id|
+        Telegram::Bot::Client.run(@token_) do |bot|
+          bot.api.send_document(
+            chat_id: user_id,
+            document: Faraday::UploadIO.new(StringIO.new(csv_string), 'text/csv', 'games.csv'),
+            caption: message
+          )
+        end
+      end
+    rescue => e
+      binding.pry
+      Hamster.logger.error e.message
+      puts e.message.red if commands[:debug]
+    end
     
     private
+
+    def initialize
+      @token_    ||= ENV['TELEGRAM_BOT_TOKEN']
+      @raw_users ||= settings['telegram_chat_id']
+
+      log 'The recipient of the report cannot be found!', :red unless @raw_users
+    end
     
     def tg_send(text)
       [@raw_users.to_s.split(',')].flatten.each do |user_id|
