@@ -82,6 +82,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 6.1)
+  activesupport
   colorize
   csv
   dotenv

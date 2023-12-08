@@ -91,7 +91,7 @@ class Keeper < Hamster::Keeper
       @menu_id_count += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
-      keys = %i[data_source_url price old_price price_bonus]
+      keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
