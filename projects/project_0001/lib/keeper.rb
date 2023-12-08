@@ -6,7 +6,8 @@ require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
 
 class Keeper < Hamster::Keeper
-  SOURCE = 3
+  SOURCE    = 3
+  FILE_TYPE = 'image'
 
   def initialize
     super
@@ -202,7 +203,7 @@ class Keeper < Hamster::Keeper
     file[:source]     = SOURCE
     file[:name]       = md5_hash
     file[:file]       = "#{md5_hash}.jpg"
-    file[:type]       = settings['file_type']
+    file[:type]       = FILE_TYPE
     file[:createdon]  = crnt_time
     file[:createdby]  = settings['user_id']
     file[:url]        = img
