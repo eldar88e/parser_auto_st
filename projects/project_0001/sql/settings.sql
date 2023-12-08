@@ -7,7 +7,7 @@ create table settings
     params                     VARCHAR(255)       DEFAULT NULL,
     ps_game                    VARCHAR(255)       DEFAULT NULL,
     dd_game                    VARCHAR(255)       DEFAULT NULL,
-    accept_language_tr         tinyint(1)          DEFAULT 0,
+    accept_language_tr         tinyint(1)         DEFAULT 0,
     exchange_rate              decimal(3,1)       DEFAULT 1,
     round_price                INT(10)            DEFAULT 1,
     parent_ps5                 INT(10)            DEFAULT NULL,
@@ -18,9 +18,10 @@ create table settings
     limit_export               INT(10)            DEFAULT 0,
     small_size                 VARCHAR(255)       DEFAULT NULL,
     middle_size                VARCHAR(255)       DEFAULT NULL,
-    new_touched_update_desc    tinyint(1)          DEFAULT 0,
+    new_touched_update_desc    tinyint(1)         DEFAULT 0,
     month_since_release        INT(10)            DEFAULT 6,
     day_lang_all_scrap         INT(10)            DEFAULT 0,
+    telegram_chat_id           VARCHAR(255)       DEFAULT NULL,
     `created_at`               DATETIME           DEFAULT CURRENT_TIMESTAMP,
     `updated_at`               TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) DEFAULT CHARSET = `utf8mb4`
