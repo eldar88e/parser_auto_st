@@ -206,7 +206,7 @@ class Parser < Hamster::Parser
     return unless date_raw
 
     date_raw      = date_raw.to_s
-    day_month     = date_raw.match?(/day|days|день|дней/) ? :days : :months
+    day_month     = date_raw.match?(/день|дня|дней|day|days/) ? :days : :months
     num_day_month = date_raw.to_i
     today         = Date.today
     today + num_day_month.send(day_month)
