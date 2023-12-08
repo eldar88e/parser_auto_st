@@ -95,7 +95,7 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
-
+      binding.pry
       if game_db
         sony_game = SonyGame.find(game_db.id)
         if sony_game
