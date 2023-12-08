@@ -112,7 +112,7 @@ class Parser < Hamster::Parser
       game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
       game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
       game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
-
+      binding.pry
       if game[:additional][:price_tl] < MIN_PRICE
         @not_price += 1
         next
