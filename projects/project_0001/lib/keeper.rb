@@ -4,8 +4,11 @@ require_relative '../models/sony_game_intro'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
+require_relative '../modules/support_methods'
 
 class Keeper < Hamster::Keeper
+  include SupportMethods
+
   SOURCE    = 3
   FILE_TYPE = 'image'
 
@@ -223,14 +226,6 @@ class Keeper < Hamster::Keeper
       sga    = SonyGameAdditionalFile.create!(new_file)
       parent = sga.id if idx.zero?
     end
-  end
-
-  def form_description(title)
-    <<~DESCR.gsub(/\n/, '')
-      Игра #{title}. Купить игру #{title[0..100]} сегодня по выгодной цене. Доставка - СПБ, Москва и вся Россия. 
-      Вы искали игру #{title[0..100]} где купить? - Конечно же в Open-PS.ru! >> 100% гарантия от блокировок. 
-      Поддержка и консультация, акции и скидки.
-    DESCR
   end
 
   def run
