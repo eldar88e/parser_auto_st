@@ -1,8 +1,6 @@
-require_relative '../modules/support_methods'
+require_relative 'seo'
 
 class Exporter < Hamster::Harvester
-  include SupportMethods
-
   HEAD = ["SKU",
           'Mark',
           "Название товара",
@@ -23,17 +21,16 @@ class Exporter < Hamster::Harvester
     @keeper = keeper
   end
 
-  def make_csv
+  def make_csv(domen)
     games_raw  = @keeper.list_last_popular_game(settings['limit_export'], [settings['parent_ps5'], settings['parent_ps4']])
-    games_list = convert_objects_list(games_raw)
-    csv_string = CSV.generate { |csv| games_list.each { |row| csv << row } }
-
-    peon.put(file: "#{@keeper.run_id}_games.csv", content: csv_string)
+    games_list = convert_objects_list(games_raw, domen)
+    CSV.generate { |csv| games_list.each { |row| csv << row } }
   end
 
   private
 
-  def convert_objects_list(games_raw)
+  def convert_objects_list(games_raw, domen)
+    seo = Seo.new(domen)
     games = []
     games << HEAD
     games_raw.each do |game|
@@ -50,10 +47,10 @@ class Exporter < Hamster::Harvester
       item[7]  = game.sony_game_additional.rus_voice ? 'Да' : 'Нет'
       item[8]  = game.sony_game_additional.genre
       item[9]  = game.content
-      item[10] = game.sony_game_additional.platform
+      item[10] = game.sony_game_additional.platform.gsub(/, PS3 ?V?i?t?a?/, '')
       item[11] = 'Игры PlayStation'
-      item[12] = game.pagetitle
-      item[13] = form_description(game.pagetitle)
+      item[12] = seo.title(game.pagetitle)
+      item[13] = seo.desc(game.pagetitle)
 
       games << item
     end

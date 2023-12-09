@@ -18,18 +18,18 @@ module Hamster
       end
     end
 
-    def send_file(csv_string, type=:csv)
+    def send_file(csv_string, file_name)
       initialize
 
-      type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
-      file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
-      message   = "CSV file containing the #{settings['limit_export']} most popular PlayStation games."
-      message   = 'Archived ' + message if type == :gz
+      #type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
+      #file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
+      message   = "Archived CSV file containing the #{settings['limit_export']} most popular PlayStation games."
+      #message   = 'Archived ' + message if type == :gz
       [@raw_users.to_s.split(',')].flatten.each do |user_id|
         Telegram::Bot::Client.run(@token_) do |bot|
           bot.api.send_document(
             chat_id: user_id,
-            document: Faraday::UploadIO.new(StringIO.new(csv_string), type_, file_name),
+            document: Faraday::UploadIO.new(StringIO.new(csv_string), 'application/x-gzip', file_name),
             caption: message
           )
         end

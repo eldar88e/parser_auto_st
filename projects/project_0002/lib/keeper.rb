@@ -10,8 +10,6 @@ require_relative '../models/sony_game_additional_file'
 require_relative '../modules/support_methods'
 
 class Keeper < Hamster::Keeper
-  include SupportMethods
-
   SOURCE    = 3
   FILE_TYPE = 'image'
 

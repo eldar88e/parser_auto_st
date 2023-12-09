@@ -1,7 +1,6 @@
 require_relative '../modules/support_methods'
 
 class Exporter < Hamster::Harvester
-  include SupportMethods
 
   HEAD = ["SKU",
           'Mark',

@@ -14,14 +14,19 @@ class Manager < Hamster::Harvester
 
   def export
     keeper.status = 'exporting'
-    file_name = "#{keeper.run_id}_games.csv.gz"
-    exporter  = Exporter.new(keeper)
-    exporter.make_csv
-    #csv_str = peon.give(file: file_name)
+    exporter      = Exporter.new(keeper)
+    domens        = %i[open_ps ps_try reloc ps_store]
+    domens.each do |domen|
+      csv       = exporter.make_csv(domen)
+      file_name = "#{keeper.run_id}_#{domen.to_s}_games.csv.gz"
+      peon.put(file: file_name, content: csv)
+      #csv_str = peon.give(file: file_name)
 
-    file_path    = "#{@_storehouse_}store/#{file_name}"
-    gz_file_data = IO.binread(file_path)
-    Hamster.send_file(gz_file_data, :gz)
+      file_path    = "#{@_storehouse_}store/#{file_name}"
+      gz_file_data = IO.binread(file_path)
+      Hamster.send_file(gz_file_data, file_name)
+    end
+
     notify "Exporting finish!" if @debug
   end
 
