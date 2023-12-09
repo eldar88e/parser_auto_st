@@ -1,5 +1,10 @@
+require_relative '../modules/support_methods'
+
 class Exporter < Hamster::Harvester
+  include SupportMethods
+
   HEAD = ["SKU",
+          'Mark',
           "Название товара",
           "Цена",
           "Price Old",
@@ -9,7 +14,9 @@ class Exporter < Hamster::Harvester
           "Жанр игры",
           "Подробное описание",
           "Платформа",
-          "Раздел"]
+          "Раздел",
+          'SEO title',
+          'SEO descr']
 
   def initialize(keeper)
     super
@@ -32,18 +39,21 @@ class Exporter < Hamster::Harvester
     games_raw.each do |game|
       item    = []
       item[0] = game.sony_game_additional.article
-      item[1] = game.pagetitle
-      item[2] = game.sony_game_additional.price.to_f.round
-      item[3] = game.sony_game_additional.old_price&.to_f&.round
+      item[1] = game.sony_game_additional.new ? 'Новинка' : ''
+      item[2] = game.pagetitle
+      item[3] = game.sony_game_additional.price.to_f.round
+      item[4] = game.sony_game_additional.old_price&.to_f&.round
       sony_id = game.sony_game_additional.janr
-      item[4] = "https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/"\
+      item[5] = "https://store.playstation.com/store/api/chihiro/00_09_000/container/TR/tr/99/"\
         "#{sony_id}/0/image?_version=00_09_000&platform=chihiro&bg_color=000000&opacity=100&w=586&h=586"
-      item[5]  = game.sony_game_additional.rus_screen ? 'Да' : 'Нет'
-      item[6]  = game.sony_game_additional.rus_voice ? 'Да' : 'Нет'
-      item[7]  = game.sony_game_additional.genre
-      item[8]  = game.content
-      item[9]  = game.sony_game_additional.platform
-      item[10] = 'Игры PlayStation'
+      item[6]  = game.sony_game_additional.rus_screen ? 'Да' : 'Нет'
+      item[7]  = game.sony_game_additional.rus_voice ? 'Да' : 'Нет'
+      item[8]  = game.sony_game_additional.genre
+      item[9]  = game.content
+      item[10] = game.sony_game_additional.platform
+      item[11] = 'Игры PlayStation'
+      item[12] = game.pagetitle
+      item[13] = form_description(game.pagetitle)
 
       games << item
     end

@@ -164,6 +164,7 @@ class Parser < Hamster::Parser
     alias_raw.gsub!(/s[uü]r[uü]m[uü]?/, 'edition')
     alias_raw.gsub!(/paketi?/, 'bundle')
     alias_raw.gsub!(/y[oö]netmeni?n?/, 'director')
+    alias_raw.gsub!(/-ve-/, '-and-')
     replace_turk_small_letters(alias_raw)
   end
 
