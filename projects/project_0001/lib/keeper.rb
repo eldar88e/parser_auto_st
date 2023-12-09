@@ -96,6 +96,9 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
+      ###
+      game[:main][:uri] = make_uri(game[:main][:alias], game[:additional][:platform])
+      ###
 
       if game_db
         sony_game = SonyGame.find(game_db.id)
@@ -127,7 +130,7 @@ class Keeper < Hamster::Keeper
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    = @menu_id_count
         game[:main][:published]    = 1
-        game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
+        #game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
         game[:main][:show_in_tree] = 0
 
         need_category   = check_need_category(game[:additional][:platform])
@@ -183,7 +186,9 @@ class Keeper < Hamster::Keeper
 
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
     check_menu_id = @menu_id_count != sony_game[:menuindex]
-    sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
+    #sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
+    sony_game.update(data.merge(game[:main])) && @updated_menu_id += 1
+    #####
 
     @skipped += 1 if !check_md5_hash && !check_menu_id
   end

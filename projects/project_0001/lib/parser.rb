@@ -159,13 +159,12 @@ class Parser < Hamster::Parser
   def make_alias(url)
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
-    alias_raw     = alias_raw.reverse.join('-')[0..99]
-    alias_raw.gsub!('sürümü', 'edition')
+    alias_raw     = alias_raw.reverse.join('-')[0..120]
+    alias_raw     = URI.decode_www_form(alias_raw)[0][0] if alias_raw.match?(/%/)
+    alias_raw.gsub!(/s[uü]r[uü]m[uü]?/, 'edition')
     alias_raw.gsub!(/paketi?/, 'bundle')
-    alias_raw = replace_turk_small_letters(alias_raw)
-    return alias_raw unless alias_raw.match?(/%/)
-
-    URI.decode_www_form(alias_raw)[0][0]
+    alias_raw.gsub!(/y[oö]netmeni?n?/, 'director')
+    replace_turk_small_letters(alias_raw)
   end
 
   def replace_turk_small_letters(str)
