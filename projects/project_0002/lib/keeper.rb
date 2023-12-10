@@ -22,7 +22,7 @@ class Keeper < Hamster::Keeper
     @run_id          = run.run_id
     @saved           = 0
     @updated         = 0
-    @updated_menu_id = 0
+    @sort_order      = 0
     @skipped         = 0
     @updated_lang    = 0
     @updated_desc    = 0
@@ -48,12 +48,15 @@ class Keeper < Hamster::Keeper
             .active_games([settings['parent_ps5'], settings['parent_ps4']])
             .order(menuindex: :asc).limit(10) # !!! limit => settings['limit_export']
     sg.each do |game|
-      oc_product = OcProduct.create(price: game.sony_game_additional.price, model: game.sony_game_additional.article,
-                                   sku: 'sdfsdf', upc: 'cvcvcv', ean: 'yuyuyu', jan: 'klklkl', isbn: 'mxnc',
-                                   mpn: 'pcpcpcp', location: 'America', stock_status_id: 2, manufacturer_id: 4,
-                                   tax_class_id: 3, date_added: Time.now, date_modified: Time.now)
+      @sort_order += 1
+      oc_product = OcProduct.create(
+        price: game.sony_game_additional.price, model: game.sony_game_additional.article,
+        sku: game.sony_game_additional.article, upc: game.sony_game_additional.janr, ean: 'yuyuyu', jan: 'klklkl',
+        isbn: 'mxnc', mpn: 'pcpcpcp', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
+        date_added: Time.now, date_modified: Time.now, sort_order: @sort_order, status: 1
+      )
       desc = oc_product.build_oc_product_description(
-        language_id: 1, name: game.pagetitle, description: game.description, tag: game.pagetitle,
+        language_id: 1, name: game.pagetitle, description: game.content, tag: game.pagetitle,
         meta_title: game.pagetitle, meta_description: game.description[0..50], meta_keyword: game.pagetitle,
         meta_h1: game.pagetitle
       )
