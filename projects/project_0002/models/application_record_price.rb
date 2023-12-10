@@ -3,7 +3,7 @@ class ApplicationRecordPrice < ActiveRecord::Base
                        host: ENV.fetch('HOST') { 'localhost' },
                        database: ENV.fetch('OC_DATABASE'),
                        username: ENV.fetch('OC_USERNAME'),
-                       password: ENV.fetch('OC_PASSWORD'))
+                       password: ENV.fetch('PASSWORD'))
 
   self.abstract_class     = true
   self.inheritance_column = :_type_disabled
