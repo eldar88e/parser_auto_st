@@ -1,13 +1,12 @@
 require_relative '../models/oc_run'
 require_relative '../models/oc_product'
+require_relative '../models/oc_product_description'
 
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_intro'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game_additional_file'
-
-require_relative '../modules/support_methods'
 
 class Keeper < Hamster::Keeper
   SOURCE    = 3
@@ -45,7 +44,20 @@ class Keeper < Hamster::Keeper
     sg = SonyGame.includes(:sony_game_additional, :sony_game_intro)
             .active_games([settings['parent_ps5'], settings['parent_ps4']])
             .order(menuindex: :asc).limit(settings['limit_export'])
-    binding.pry
+    sg.each do |game|
+      binding.pry
+      oc_product = OcProduct.create(price: game.sony_game_additional.price, model: game.sony_game_additional.article,
+                                   sku: 'sdfsdf', upc: 'cvcvcv', ean: 'yuyuyu', jan: 'klklkl', isbn: 'mxnc',
+                                   mpn: 'pcpcpcp', location: 'America', stock_status_id: 2, manufacturer_id: 4,
+                                   tax_class_id: 3, date_added: Time.now, date_modified: Time.now)
+      desc = oc_product.build_oc_product_description(
+        language_id: 1, name: game.pagetitle, description: game.description, tag: game.pagetitle,
+        meta_title: game.pagetitle, meta_description: game.description, meta_keyword: game.pagetitle,
+        meta_h1: game.pagetitle
+      )
+      binding.pry
+      desc.save
+    end
   end
 
   def get_games_without_content

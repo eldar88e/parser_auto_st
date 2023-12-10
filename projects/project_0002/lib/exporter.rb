@@ -1,5 +1,3 @@
-require_relative '../modules/support_methods'
-
 class Exporter < Hamster::Harvester
 
   HEAD = ["SKU",

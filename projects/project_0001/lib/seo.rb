@@ -14,7 +14,6 @@ class Seo
   private
 
   def seo(name)
-
     @seo ||= send(@domen, name)
   end
 

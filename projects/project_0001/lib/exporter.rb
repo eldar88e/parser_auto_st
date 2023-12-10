@@ -15,6 +15,7 @@ class Exporter < Hamster::Harvester
           "Раздел",
           'SEO title',
           'SEO descr']
+  MAIN_CATEGORY = 'Игры PlayStation'
 
   def initialize(keeper)
     super
@@ -30,7 +31,7 @@ class Exporter < Hamster::Harvester
   private
 
   def convert_objects_list(games_raw, domen)
-    seo = Seo.new(domen)
+    seo   = Seo.new(domen)
     games = []
     games << HEAD
     games_raw.each do |game|
@@ -48,7 +49,7 @@ class Exporter < Hamster::Harvester
       item[8]  = game.sony_game_additional.genre
       item[9]  = game.content
       item[10] = game.sony_game_additional.platform.gsub(/, PS3 ?V?i?t?a?/, '')
-      item[11] = 'Игры PlayStation'
+      item[11] = MAIN_CATEGORY
       item[12] = seo.title(game.pagetitle)
       item[13] = seo.desc(game.pagetitle)
 
