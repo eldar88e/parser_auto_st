@@ -46,7 +46,7 @@ class Keeper < Hamster::Keeper
   def list_last_popular_game
     sg = SonyGame.includes(:sony_game_additional, :sony_game_intro)
             .active_games([settings['parent_ps5'], settings['parent_ps4']])
-            .order(menuindex: :asc).limit(settings['limit_export'])
+            .order(menuindex: :asc).limit(10) # !!! limit => settings['limit_export']
     sg.each do |game|
       oc_product = OcProduct.create(price: game.sony_game_additional.price, model: game.sony_game_additional.article,
                                    sku: 'sdfsdf', upc: 'cvcvcv', ean: 'yuyuyu', jan: 'klklkl', isbn: 'mxnc',
