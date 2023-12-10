@@ -65,15 +65,15 @@ class Keeper < Hamster::Keeper
       store.save
 
       if game.sony_game_additional.platform.match?(/PS5, PS4/)
-        category_ps5 = oc_product.build_oc_product_to_store(category_id: PS5_CATEGORY_ID, main_category: 1)
+        category_ps5 = oc_product.oc_product_to_category.build(category_id: PS5_CATEGORY_ID, main_category: 1)
         category_ps5.save
-        category_ps4 = oc_product.build_oc_product_to_store(category_id: PS4_CATEGORY_ID)
+        category_ps4 = oc_product.oc_product_to_category.build(category_id: PS4_CATEGORY_ID)
         category_ps4.save
       elsif game.sony_game_additional.platform.match?(/PS5/)
-        category_ps5 = oc_product.build_oc_product_to_store(category_id: PS5_CATEGORY_ID, main_category: 1)
+        category_ps5 = oc_product.oc_product_to_category.build(category_id: PS5_CATEGORY_ID, main_category: 1)
         category_ps5.save
       elsif game.sony_game_additional.platform.match?(/PS4/)
-        category_ps4 = oc_product.build_oc_product_to_store(category_id: PS4_CATEGORY_ID, main_category: 1)
+        category_ps4 = oc_product.oc_product_to_category.build(category_id: PS4_CATEGORY_ID, main_category: 1)
         category_ps4.save
       end
       binding.pry
