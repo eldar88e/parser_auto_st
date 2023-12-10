@@ -77,6 +77,9 @@ class Keeper < Hamster::Keeper
         category_ps4.save
       end
       binding.pry
+    rescue => e
+      puts e.message.red
+      binding.pry
     end
   end
 
