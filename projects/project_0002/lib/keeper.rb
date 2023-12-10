@@ -58,7 +58,7 @@ class Keeper < Hamster::Keeper
       desc = oc_product.build_oc_product_description(
         language_id: 1, name: game.pagetitle, description: game.content, tag: game.pagetitle,
         meta_title: game.pagetitle, meta_description: game.description[0..50], meta_keyword: game.pagetitle,
-        meta_h1: game.pagetitle
+        meta_h1: game.pagetitle, quantity: 9999
       )
       desc.save
       layout = oc_product.build_oc_product_to_layout(store_id: 0, layout_id: 0)

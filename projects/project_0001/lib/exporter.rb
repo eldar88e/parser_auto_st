@@ -48,7 +48,7 @@ class Exporter < Hamster::Harvester
       item[7]  = game.sony_game_additional.rus_voice ? 'Да' : 'Нет'
       item[8]  = game.sony_game_additional.genre
       item[9]  = game.content
-      item[10] = game.sony_game_additional.platform.gsub(/, PS3 ?V?i?t?a?/, '')
+      item[10] = game.sony_game_additional.platform.gsub(/, PS Vita|, PS3/, '')
       item[11] = MAIN_CATEGORY
       item[12] = seo.title(game.pagetitle)
       item[13] = seo.desc(game.pagetitle)
