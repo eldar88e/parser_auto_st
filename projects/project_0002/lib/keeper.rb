@@ -63,7 +63,6 @@ class Keeper < Hamster::Keeper
 
       store = oc_product.build_oc_product_to_store
       store.save
-      binding.pry
       if game.sony_game_additional.platform.match?(/PS5, PS4/)
         category_ps5 = oc_product.oc_product_to_category.build(category_id: PS5_CATEGORY_ID, main_category: 1)
         category_ps5.save
@@ -76,7 +75,6 @@ class Keeper < Hamster::Keeper
         category_ps4 = oc_product.oc_product_to_category.build(category_id: PS4_CATEGORY_ID, main_category: 1)
         category_ps4.save
       end
-      binding.pry
     rescue => e
       puts e.message.red
       binding.pry
