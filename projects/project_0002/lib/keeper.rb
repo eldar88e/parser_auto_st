@@ -54,6 +54,7 @@ class Keeper < Hamster::Keeper
 
       if oc_product_db
         puts "Game #{game.pagetitle} is exist".red if @debug
+        sleep 0.5
         next
       end
 
@@ -64,9 +65,10 @@ class Keeper < Hamster::Keeper
         date_added: Time.at(game.publishedon), date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
       )
 
+      description = game.content ? game.content : ''
       desc = oc_product.build_oc_product_description(
-        language_id: 1, name: game.pagetitle, description: game.content, tag: game.pagetitle,
-        meta_title: game.pagetitle, meta_description: game.description[0..50], meta_keyword: game.pagetitle,
+        language_id: 1, name: game.pagetitle, description: description, tag: game.pagetitle,
+        meta_title: game.pagetitle, meta_description: description[0..100], meta_keyword: game.pagetitle,
         meta_h1: game.pagetitle
       )
       desc.save
