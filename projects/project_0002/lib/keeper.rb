@@ -53,12 +53,12 @@ class Keeper < Hamster::Keeper
         price: game.sony_game_additional.price, model: game.sony_game_additional.janr,
         sku: game.sony_game_additional.article, upc: '', ean: '', jan: '',
         isbn: '', mpn: '', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
-        date_added: Time.now, date_modified: Time.now, sort_order: @sort_order, status: 1
+        date_added: Time.now, date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
       )
       desc = oc_product.build_oc_product_description(
         language_id: 1, name: game.pagetitle, description: game.content, tag: game.pagetitle,
         meta_title: game.pagetitle, meta_description: game.description[0..50], meta_keyword: game.pagetitle,
-        meta_h1: game.pagetitle, quantity: 9999
+        meta_h1: game.pagetitle
       )
       desc.save
       layout = oc_product.build_oc_product_to_layout(store_id: 0, layout_id: 0)
