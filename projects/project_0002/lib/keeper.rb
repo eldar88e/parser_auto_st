@@ -50,9 +50,9 @@ class Keeper < Hamster::Keeper
     sg.each do |game|
       @sort_order += 1
       oc_product = OcProduct.create(
-        price: game.sony_game_additional.price, model: game.sony_game_additional.article,
-        sku: game.sony_game_additional.article, upc: game.sony_game_additional.janr, ean: 'yuyuyu', jan: 'klklkl',
-        isbn: 'mxnc', mpn: 'pcpcpcp', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
+        price: game.sony_game_additional.price, model: game.sony_game_additional.janr,
+        sku: game.sony_game_additional.article, upc: '', ean: '', jan: '',
+        isbn: '', mpn: '', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
         date_added: Time.now, date_modified: Time.now, sort_order: @sort_order, status: 1
       )
       desc = oc_product.build_oc_product_description(
