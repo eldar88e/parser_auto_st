@@ -26,6 +26,7 @@ class Keeper < Hamster::Keeper
     @skipped         = 0
     @updated_lang    = 0
     @updated_desc    = 0
+    @debug           = commands[:debug]
   end
 
   attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc
@@ -46,15 +47,23 @@ class Keeper < Hamster::Keeper
   def list_last_popular_game
     sg = SonyGame.includes(:sony_game_additional, :sony_game_intro)
             .active_games([settings['parent_ps5'], settings['parent_ps4']])
-            .order(menuindex: :asc).limit(10) # !!! limit => settings['limit_export']
+            .order(menuindex: :asc).limit(100) # !!! limit => settings['limit_export']
     sg.each do |game|
       @sort_order += 1
+      oc_product_db = OcProduct.find_by(model: game.sony_game_additional.janr)
+
+      if oc_product_db
+        puts "Game #{game.pagetitle} is exist".red if @debug
+        next
+      end
+
       oc_product = OcProduct.create(
         price: game.sony_game_additional.price, model: game.sony_game_additional.janr,
         sku: game.sony_game_additional.article, upc: '', ean: '', jan: '',
         isbn: '', mpn: '', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
-        date_added: Time.now, date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
+        date_added: Time.at(game.publishedon), date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
       )
+
       desc = oc_product.build_oc_product_description(
         language_id: 1, name: game.pagetitle, description: game.content, tag: game.pagetitle,
         meta_title: game.pagetitle, meta_description: game.description[0..50], meta_keyword: game.pagetitle,
