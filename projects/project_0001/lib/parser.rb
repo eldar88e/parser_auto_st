@@ -105,8 +105,10 @@ class Parser < Hamster::Parser
         game[:additional][:old_price_tl] = get_price(price_tl_raw)
         game[:additional][:old_price]    = get_price(price_tl_raw, :ru)
       else
-        game[:additional][:price_tl] = get_price(price_tl_raw)
-        game[:additional][:price]    = get_price(price_tl_raw, :ru)
+        game[:additional][:price_tl]     = get_price(price_tl_raw)
+        game[:additional][:price]        = get_price(price_tl_raw, :ru)
+        game[:additional][:old_price_tl] = nil
+        game[:additional][:old_price]    = nil
       end
 
       game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
