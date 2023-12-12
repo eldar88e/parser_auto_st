@@ -38,7 +38,6 @@ this data and saving it into MySQL tables for the MODX Revolution website.
 - params                  (example: '?platforms=ps5%2Cps4&sort=most-watchlisted&minPrice=15')
 - ps_game                 (example: 'https://example.com/product/ps-game')
 - dd_game                 (example: 'https://example.com/product/ps-game')
-- accept_language_tr      (default: false, preferably: true)
 - exchange_rate           (example: 5.5)
 - round_price             (default: 1, preferably: 10)
 - parent_ps5              (example: 12)

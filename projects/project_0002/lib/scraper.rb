@@ -3,11 +3,11 @@ require_relative '../lib/parser'
 class Scraper < Hamster::Scraper
   def initialize(keeper)
     super
-    @referer = YAML.load_file('referer.yml')['referer']
-    @count   = 0
-    @keeper  = keeper
-    @debug   = commands[:debug]
-    @run_id  = @keeper.run_id
+    @referers = YAML.load_file('referer.yml')['referer']
+    @count    = 0
+    @keeper   = keeper
+    @debug    = commands[:debug]
+    @run_id   = @keeper.run_id
   end
 
   attr_reader :count
@@ -69,9 +69,7 @@ class Scraper < Hamster::Scraper
   end
 
   def get_response(link)
-    referer                    = @referer.sample
-    headers                    = { 'Referer' => referer }
-    headers['Accept-Language'] = 'tr-TR' if settings['accept_language_tr']
+    headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
     connect_to(link, ssl_verify: false, headers: headers)
   end
 end

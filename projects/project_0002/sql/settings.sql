@@ -7,7 +7,6 @@ create table settings
     params                     VARCHAR(255)       DEFAULT NULL,
     ps_game                    VARCHAR(255)       DEFAULT NULL,
     dd_game                    VARCHAR(255)       DEFAULT NULL,
-    accept_language_tr         tinyint(1)         DEFAULT 0,
     exchange_rate              decimal(3,1)       DEFAULT 1,
     round_price                INT(10)            DEFAULT 1,
     parent_ps5                 INT(10)            DEFAULT NULL,
