@@ -3,11 +3,11 @@ require_relative '../lib/parser'
 class Scraper < Hamster::Scraper
   def initialize(keeper)
     super
-    @referer = YAML.load_file('referer.yml')['referer']
-    @count   = 0
-    @keeper  = keeper
-    @debug   = commands[:debug]
-    @run_id  = @keeper.run_id
+    @referers = YAML.load_file('referer.yml')['referer']
+    @count    = 0
+    @keeper   = keeper
+    @debug    = commands[:debug]
+    @run_id   = @keeper.run_id
   end
 
   attr_reader :count
@@ -32,7 +32,7 @@ class Scraper < Hamster::Scraper
       link = "#{settings['site']}#{settings['path_tr']}#{page}#{settings['params']}"
       puts "Page #{page} of #{last_page}".green if @debug
       game_list = get_response(link).body
-      sleep(rand(0.3..2.5))
+      sleep(rand(0.3..2.3))
       peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_tr")
       @count += 1
     end
@@ -69,9 +69,7 @@ class Scraper < Hamster::Scraper
   end
 
   def get_response(link)
-    referer                    = @referer.sample
-    headers                    = { 'Referer' => referer }
-    headers['Accept-Language'] = 'tr-TR' if settings['accept_language_tr']
+    headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
     connect_to(link, ssl_verify: false, headers: headers)
   end
 end

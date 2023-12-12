@@ -17,7 +17,7 @@ create table settings
     user_id                    INT(10)            DEFAULT 1,
     limit_export               INT(10)            DEFAULT 0,
     small_size                 VARCHAR(255)       DEFAULT NULL,
-    middle_size                VARCHAR(255)       DEFAULT NULL,
+    medium_size                VARCHAR(255)       DEFAULT NULL,
     new_touched_update_desc    tinyint(1)         DEFAULT 0,
     month_since_release        INT(10)            DEFAULT 6,
     day_lang_all_scrap         INT(10)            DEFAULT 0,

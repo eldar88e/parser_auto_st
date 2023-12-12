@@ -54,7 +54,7 @@ class Keeper < Hamster::Keeper
 
       if oc_product_db
         puts "Game #{game.pagetitle} is exist".red if @debug
-        sleep 0.5
+        sleep 0.3
         next
       end
 

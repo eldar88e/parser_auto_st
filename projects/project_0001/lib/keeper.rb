@@ -112,7 +112,7 @@ class Keeper < Hamster::Keeper
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
-        game[:additional][:image]     = game[:additional][:image_link_raw]
+        game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
 
         crnt_time                  = Time.current.to_i
@@ -218,7 +218,7 @@ class Keeper < Hamster::Keeper
       if item == paths[1]
         new_file[:url] = file[:url].sub(/720&h=720/, settings['small_size'])
       elsif item == paths[2]
-        new_file[:url] = file[:url].sub(/720&h=720/, settings['middle_size'])
+        new_file[:url] = file[:url].sub(/720&h=720/, settings['medium_size'])
       end
       sga    = SonyGameAdditionalFile.create!(new_file)
       parent = sga.id if idx.zero?
