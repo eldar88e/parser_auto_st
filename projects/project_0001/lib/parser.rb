@@ -111,6 +111,7 @@ class Parser < Hamster::Parser
         game[:additional][:old_price]    = nil
       end
 
+      game[:additional][:old_price]         = nil if game[:additional][:old_price] == game[:additional][:price]
       game[:additional][:price_bonus_tl]    = get_price(prise_bonus)
       game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
       game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
