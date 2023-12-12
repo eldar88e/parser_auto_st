@@ -73,13 +73,11 @@ class Keeper < Hamster::Keeper
   def get_ps_ids
     params = { rus_voice: 0 }
     if settings['day_lang_all_scrap'] == Date.current.day
-      sg_id = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']])
-                      .order(:menuindex).pluck(:id)
-      params[:id] = sg_id
+      params[:id] = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']])
+                            .order(:menuindex).pluck(:id)
     else
       params[:run_id] = run_id
     end
-    binding.pry
     SonyGameAdditional.where(params).where.not(janr: [nil, '']).limit(settings['limit_upd_lang']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
