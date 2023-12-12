@@ -182,7 +182,7 @@ class Keeper < Hamster::Keeper
     check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = game_db[:release] && game_db[:release] > start_new_date
-    game_db.update(game[:additional]) && @updated += 1 #if check_md5_hash
+    game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
 
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
     check_menu_id = @menu_id_count != sony_game[:menuindex]
