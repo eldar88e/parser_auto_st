@@ -71,12 +71,16 @@ class Keeper < Hamster::Keeper
   end
 
   def get_ps_ids
-    sg_id = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).order(:menuindex)
-                    .limit(settings['limit_upd_lang']).pluck(:id)
-    params                  = { id: sg_id, rus_voice: 0 }
-    params[:touched_run_id] = run_id if settings['day_lang_all_scrap'] != Date.current.day
+    params = { rus_voice: 0 }
+    if settings['day_lang_all_scrap'] == Date.current.day
+      sg_id = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']])
+                      .order(:menuindex).pluck(:id)
+      params[:id] = sg_id
+    else
+      params[:run_id] = run_id
+    end
     binding.pry
-    SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
+    SonyGameAdditional.where(params).where.not(janr: [nil, '']).limit(settings['limit_upd_lang']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_lang_info(lang, id)
