@@ -9,7 +9,6 @@ require_relative '../models/sony_game'
 require_relative '../models/sony_game_intro'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
-require_relative '../models/sony_game_additional_file'
 
 class Keeper < Hamster::Keeper
   PS5_CATEGORY_ID = 181
