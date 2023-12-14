@@ -70,7 +70,7 @@ class Keeper < Hamster::Keeper
       if oc_product_db
         puts "Game #{game.pagetitle} is exist.".red if @debug
         oc_product_db.update(product)
-        puts "The #{game.pagetitle} is updated.".yellow is @debug
+        puts "The #{game.pagetitle} is updated.".yellow if @debug
         next
       end
 
