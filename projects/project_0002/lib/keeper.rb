@@ -52,18 +52,30 @@ class Keeper < Hamster::Keeper
       @sort_order += 1
       oc_product_db = OcProduct.find_by(model: game.sony_game_additional.janr)
 
+      product = {
+        price: game.sony_game_additional.price,
+        model: game.sony_game_additional.janr,
+        sku: game.sony_game_additional.article,
+        upc: game.sony_game_additional.platform,
+        ean: game.sony_game_additional.type_game,
+        jan: game.sony_game_additional.rus_voice ? 'Есть' : 'Нет',
+        isbn: game.sony_game_additional.rus_screen ? 'Есть' : 'Нет',
+        mpn: '',
+        location: 'Turkish',
+        stock_status_id: 2,
+        manufacturer_id: 4,
+        tax_class_id: 3,
+        date_added: Time.at(game.publishedon), date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
+      }
+
       if oc_product_db
-        puts "Game #{game.pagetitle} is exist".red if @debug
-        sleep 0.3
+        puts "Game #{game.pagetitle} is exist.".red if @debug
+        oc_product_db.update(product)
+        puts "The #{game.pagetitle} is updated.".yellow is @debug
         next
       end
 
-      oc_product = OcProduct.create(
-        price: game.sony_game_additional.price, model: game.sony_game_additional.janr,
-        sku: game.sony_game_additional.article, upc: '', ean: '', jan: '',
-        isbn: '', mpn: '', location: 'Turkish', stock_status_id: 2, manufacturer_id: 4, tax_class_id: 3,
-        date_added: Time.at(game.publishedon), date_modified: Time.now, quantity: 9999, sort_order: @sort_order, status: 1
-      )
+      oc_product = OcProduct.create(product)
 
       description = game.content ? game.content : ''
       desc = oc_product.build_oc_product_description(
