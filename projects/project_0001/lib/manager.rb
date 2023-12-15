@@ -61,10 +61,10 @@ class Manager < Hamster::Harvester
     end
 
     parse_save_main
-    clear_cache        if !keeper.saved.zero? || !keeper.updated.zero?
     parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.delete_not_touched
+    clear_cache if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.deleted.zero?
     notify "Deleted: #{keeper.deleted} old games"
     export
     keeper.finish
