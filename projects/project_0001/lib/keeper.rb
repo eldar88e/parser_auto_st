@@ -18,11 +18,12 @@ class Keeper < Hamster::Keeper
     @updated         = 0
     @updated_menu_id = 0
     @skipped         = 0
+    @deleted         = 0
     @updated_lang    = 0
     @updated_desc    = 0
   end
 
-  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc
+  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc, :deleted
   attr_accessor :count
 
   def status=(new_status)
@@ -45,10 +46,19 @@ class Keeper < Hamster::Keeper
     SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).where(content: [nil, ''])
   end
 
+  def delete_not_touched
+    #sg = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).pluck(:id)
+    #sga = SonyGameAdditional.where(id: sg).where.not(touched_run_id: run_id)
+    sg = SonyGame.includes(:sony_game_additional).active_games([settings['parent_ps5'], settings['parent_ps4']])
+                 .where.not(sony_game_additional: { touched_run_id: run_id })
+    @deleted += sg.size
+    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings[:user_id])
+  end
+
   def get_ps_ids_without_desc
-    sg     = get_games_without_content.pluck(:id)
-    search = { id: sg }
-    search[:touched_run_id] = run_id if settings['new_touched_update_desc']
+    games_ids       = get_games_without_content.pluck(:id)
+    search          = { id: games_ids }
+    search[:run_id] = run_id if settings['new_touched_update_desc']
     SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
@@ -179,16 +189,16 @@ class Keeper < Hamster::Keeper
   end
 
   def update_date(game, game_db, sony_game)
-    check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
+    #check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = game_db[:release] && game_db[:release] > start_new_date
-    game_db.update(game[:additional]) && @updated += 1 if check_md5_hash
+    game[:additional][:new] = !game_db[:release].nil? && game_db[:release] > start_new_date
+    game_db.update(game[:additional]) && @updated += 1 #if check_md5_hash
 
-    data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
-    check_menu_id = @menu_id_count != sony_game[:menuindex]
-    sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
+    data = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
+    #check_menu_id = @menu_id_count != sony_game[:menuindex]
+    sony_game.update(data) && @updated_menu_id += 1 # if check_menu_id
 
-    @skipped += 1 if !check_md5_hash && !check_menu_id
+    #@skipped += 1 if !check_md5_hash # && !check_menu_id
   end
 
   def prepare_intro(game, content=nil)
