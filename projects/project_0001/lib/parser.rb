@@ -172,7 +172,7 @@ class Parser < Hamster::Parser
   end
 
   def replace_turk_small_letters(str)
-    str.gsub('ü','u').gsub('ö','o').gsub('ı', 'i').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s')
+    str.gsub('ü','u').gsub('ö','o').gsub('ı', 'i').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('â', 'a')
   end
 
   def get_price(raw_price, currency=:tr)
