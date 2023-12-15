@@ -52,7 +52,7 @@ class Keeper < Hamster::Keeper
     sg = SonyGame.includes(:sony_game_additional).active_games([settings['parent_ps5'], settings['parent_ps4']])
                  .where.not(sony_game_additional: { touched_run_id: run_id })
     @deleted += sg.size
-    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings[:user_id])
+    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id'])
   end
 
   def get_ps_ids_without_desc
