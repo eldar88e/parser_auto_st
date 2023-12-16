@@ -150,8 +150,6 @@ class Keeper < Hamster::Keeper
         SonyGame.store(game)
         @saved += 1
       end
-    rescue => e
-      Hamster.logger.error e.message
     end
   end
 
