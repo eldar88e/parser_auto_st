@@ -71,5 +71,9 @@ class Scraper < Hamster::Scraper
   def get_response(link)
     headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
     connect_to(link, ssl_verify: false, headers: headers)
+  rescue => e
+    puts e
+    report e.message
+    binding.pry
   end
 end
