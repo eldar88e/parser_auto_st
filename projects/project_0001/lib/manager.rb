@@ -65,10 +65,19 @@ class Manager < Hamster::Harvester
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.delete_not_touched
     notify "Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
-    clear_cache if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.deleted.zero?
+    cleared_cache = false
+    if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.deleted.zero?
+      clear_cache
+      cleared_cache = true
+    end
     export
     keeper.finish
     notify 'The parser completed its work successfully!'
+  rescue => error
+    Hamster.logger.error error.message
+    Hamster.report message: error.message
+    @debug = true
+    clear_cache if !cleared_cache && (!keeper.saved.zero? || !keeper.updated.zero? || !keeper.deleted.zero?)
   end
 
   private
@@ -173,7 +182,7 @@ class Manager < Hamster::Harvester
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
     message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
-    message << "\nUpdated: #{keeper.updated} games;" unless keeper.updated.zero?
+    message << "\nUpdated prices: #{keeper.updated} games;" unless keeper.updated.zero?
     message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?

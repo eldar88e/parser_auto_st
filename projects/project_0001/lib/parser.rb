@@ -183,11 +183,14 @@ class Parser < Hamster::Parser
   end
 
   def make_exchange_rate(price)
-    #От 1 до 300 лир курс - 5.5
+    #от 1 до 50 лир курс - 10
+    #От 51 до 300 лир курс - 5.5
     # от 300 до 800 лир курс 5
     # от 800 до 1600 курс 4.5
     # от 1600 курс 4.3
-    if price >= 1 && price < 300
+    if price >= 1 && price < 51
+      settings['exchange_rate'] + 4.5
+    elsif price >= 51 && price < 300
       settings['exchange_rate']
     elsif price >= 300 && price < 800
       settings['exchange_rate'] - 0.5
