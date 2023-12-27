@@ -46,9 +46,9 @@ class Manager < Hamster::Harvester
     parse_save_lang    if !keeper.count[:saved].zero? || settings['day_lang_all_scrap'] == Date.current.day
     parse_save_desc_dd unless keeper.count[:saved].zero?
     keeper.delete_not_touched
-    notify "Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
+    notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
     cleared_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.deleted.zero?
+    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
       clear_cache
       cleared_cache = true
     end
@@ -58,7 +58,7 @@ class Manager < Hamster::Harvester
     Hamster.logger.error error.message
     Hamster.report message: error.message
     @debug = true
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.deleted.zero?)
+    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?)
   end
 
   private
