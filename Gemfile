@@ -5,6 +5,7 @@ ruby '3.2.2'
 
 gem 'activerecord', '~> 6.1'
 gem 'activesupport'
+gem 'babosa'
 gem 'colorize'
 gem 'csv'
 gem 'dotenv'

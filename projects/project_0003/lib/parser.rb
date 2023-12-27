@@ -150,7 +150,12 @@ class Parser < Hamster::Parser
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
     alias_raw     = alias_raw.reverse.join('-')[0..120]
-    alias_raw.match?(/%/) ? URI.decode_www_form(alias_raw)[0][0] : alias_raw
+    if alias_raw.match?(/%/)
+      url = URI.decode_www_form(alias_raw)[0][0]
+      Babosa::Transliterator.transliterate(url)
+    else
+      alias_raw
+    end
   end
 
   def get_price(raw_price, currency=:ua)
