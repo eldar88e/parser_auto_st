@@ -15,7 +15,6 @@ class Keeper < Hamster::Keeper
     @deleted         = 0
     @updated_lang    = 0
     @updated_desc    = 0
-    binding.pry
   end
 
   attr_reader :run_id, :count
@@ -88,6 +87,7 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
+    binding.pry
     games.each do |game|
       @count[:menu_id_count] += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
