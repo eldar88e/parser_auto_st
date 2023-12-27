@@ -139,7 +139,7 @@ class Keeper < Hamster::Keeper
         need_category   = check_need_category(game[:additional][:platform])
         game[:category] = { category_id: PARENT_PS4 } if need_category
         game[:intro]    = prepare_intro(game[:main])
-        binding.pry
+
         SonyGame.store(game)
         @count[:saved] += 1
       end
