@@ -84,7 +84,7 @@ class Keeper < Hamster::Keeper
     @updated_lang += 1
   end
 
-  def save_games(games)
+  def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
     games.each do |game|

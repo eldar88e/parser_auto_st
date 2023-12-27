@@ -112,7 +112,7 @@ class Manager < Hamster::Harvester
       not_prc_count    += parser.not_price
       other_type_count += parser.other_type
       binding.pry
-      keeper.save_games(list_games)
+      keeper.save_ua_games(list_games)
       @pages += 1
     end
     message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
