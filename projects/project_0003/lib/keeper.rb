@@ -1,3 +1,5 @@
+require_relative '../models/sony_game'
+
 class Keeper < Hamster::Keeper
   SOURCE     = 3
   FILE_TYPE  = 'image'
@@ -87,7 +89,6 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
-    binding.pry
     games.each do |game|
       @count[:menu_id_count] += 1
       game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
