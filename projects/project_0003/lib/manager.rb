@@ -43,8 +43,8 @@ class Manager < Hamster::Harvester
     end
 
     parse_save_main
-    parse_save_lang    if !keeper.count[:saved].zero? || settings['day_lang_all_scrap'] == Date.current.day
-    parse_save_desc_dd unless keeper.count[:saved].zero?
+    #parse_save_lang    if !keeper.count[:saved].zero? || settings['day_lang_all_scrap'] == Date.current.day
+    #parse_save_desc_dd unless keeper.count[:saved].zero?
     keeper.delete_not_touched
     notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
     cleared_cache = false
@@ -128,7 +128,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "Parsed and updated lang info for #{keeper.updated_lang} game(s)."
+    notify "Parsed and updated lang info for #{keeper.count[:updated_lang]} game(s)."
   end
 
   def parse_save_desc_dd
@@ -142,7 +142,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "Parsed and updated description for #{keeper.updated_desc} game(s)."
+    notify "Parsed and updated description for #{keeper.count[:updated_desc]} game(s)."
   end
 
   def parse_save_desc_ru
@@ -165,7 +165,7 @@ class Manager < Hamster::Harvester
     message << "\nSaved: #{keeper.count[:saved]} games;" unless keeper.count[:saved].zero?
     message << "\nUpdated prices: #{keeper.count[:updated]} games;" unless keeper.count[:updated].zero?
     message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} games;" unless keeper.updated_menu_id.zero?
-    message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
+    message << "\nSkipped: #{keeper.count[:skipped]} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?

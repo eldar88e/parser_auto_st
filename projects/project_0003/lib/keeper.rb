@@ -16,10 +16,6 @@ class Keeper < Hamster::Keeper
     @run_id = run.run_id
     @count  = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
                 skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
-
-    @skipped         = 0
-    @updated_lang    = 0
-    @updated_desc    = 0
   end
 
   attr_reader :run_id, :count
@@ -60,13 +56,13 @@ class Keeper < Hamster::Keeper
     game = get_games_without_content.find { |i| i[:alias].gsub(/-\d+\z/, '') == data[:alias] }
     return unless game
 
-    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: settings['user_id']) && @updated_desc += 1
+    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: settings['user_id']) && @count[:updated_desc] += 1
   end
 
   def save_desc_dd(data, id)
     data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
     begin
-      SonyGame.find(id).update(data) && @updated_desc += 1
+      SonyGame.find(id).update(data) && @count[:updated_desc] += 1
     rescue ActiveRecord::StatementInvalid => e
       Hamster.logger.error "ID: #{id} | #{e.message}"
     end
@@ -86,7 +82,7 @@ class Keeper < Hamster::Keeper
     lang.merge!(touched_run_id: run_id)
     lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
     SonyGameAdditional.find(id).update(lang)
-    @updated_lang += 1
+    @count[:updated_lang] += 1
   end
 
   def save_ua_games(games)
