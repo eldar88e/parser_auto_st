@@ -13,6 +13,13 @@ class Manager < Hamster::Harvester
   end
 
   def download
+    if commands[:desc]
+      scraper_ru = Scraper.new(keeper)
+      scraper_ru.scrape_games_desc
+      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages." if @debug
+      return
+    end
+
     peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(10)
@@ -21,12 +28,6 @@ class Manager < Hamster::Harvester
     scraper = Scraper.new(keeper)
     scraper.scrape_games_ua
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
-
-    if commands[:desc]
-      scraper_ru = Scraper.new(keeper)
-      scraper_ru.scrape_games_desc
-      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages." if @debug
-    end
   end
 
   def store
