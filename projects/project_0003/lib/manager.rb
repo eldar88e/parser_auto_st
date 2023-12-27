@@ -53,7 +53,7 @@ class Manager < Hamster::Harvester
       cleared_cache = true
     end
     keeper.finish
-    notify 'The parser completed its work successfully!'
+    notify 'The parser UA completed its work successfully!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
