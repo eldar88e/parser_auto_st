@@ -73,7 +73,7 @@ class Scraper < Hamster::Scraper
     connect_to(link, ssl_verify: false, headers: headers)
   rescue => e
     puts e
-    report e.message
+    Hamster.report message: e.message + "\n #{link}"
     binding.pry
   end
 end
