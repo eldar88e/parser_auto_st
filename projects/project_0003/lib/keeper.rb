@@ -138,11 +138,11 @@ class Keeper < Hamster::Keeper
         SonyGame.store(game)
         @count[:saved] += 1
       end
+    rescue ActiveRecord::RecordInvalid => e
+      Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
     rescue => e
       puts e
       binding.pry
-    rescue ActiveRecord::RecordInvalid => e
-      Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
     end
   end
 
