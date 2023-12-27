@@ -1,7 +1,6 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
-require_relative '../lib/exporter'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
