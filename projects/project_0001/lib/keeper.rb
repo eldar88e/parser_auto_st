@@ -8,6 +8,7 @@ require_relative '../models/sony_game_additional_file'
 class Keeper < Hamster::Keeper
   SOURCE    = 3
   FILE_TYPE = 'image'
+  MADE_IN   = 'Turkish'
 
   def initialize
     super
@@ -127,6 +128,7 @@ class Keeper < Hamster::Keeper
         game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
         game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
+        game[:additional][:made_in]   = MADE_IN
 
         crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]

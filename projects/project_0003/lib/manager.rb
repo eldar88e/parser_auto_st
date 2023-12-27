@@ -110,7 +110,6 @@ class Manager < Hamster::Harvester
       othr_pl_count    += parser.other_platform
       not_prc_count    += parser.not_price
       other_type_count += parser.other_type
-      binding.pry
       keeper.save_ua_games(list_games)
       @pages += 1
     end
