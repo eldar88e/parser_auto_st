@@ -134,7 +134,7 @@ class Parser < Hamster::Parser
 
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       data_source_url                     = settings['site'] + game_raw.at('a')['href']
-      game[:additional][:data_source_url] = translate data_source_url
+      game[:additional][:data_source_url] = transliterate data_source_url
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
       game[:additional][:article]         = data_source_url.split('/')[-2]
       game[:main][:alias]                 = make_alias(data_source_url)
@@ -151,14 +151,14 @@ class Parser < Hamster::Parser
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
     alias_raw     = alias_raw.reverse.join('-')[0..120]
-    translate alias_raw
+    transliterate alias_raw
   end
 
-  def translate(str)
+  def transliterate(str)
     return str unless str.match?(/%/)
 
     url = URI.decode_www_form(str)[0][0]
-    Babosa::Transliterator.transliterate(url)
+    Babosa.transliterate(url)
   end
 
   def get_price(raw_price, currency=:ua)
