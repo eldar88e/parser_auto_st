@@ -158,7 +158,7 @@ class Parser < Hamster::Parser
     return str unless str.match?(/%/)
 
     url = URI.decode_www_form(str)[0][0]
-    Babosa.transliterate(url)
+    url.to_slug.transliterate(:russian).to_s
   end
 
   def get_price(raw_price, currency=:ua)
