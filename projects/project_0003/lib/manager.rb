@@ -12,24 +12,6 @@ class Manager < Hamster::Harvester
     @pages  = 0
   end
 
-  def export
-    keeper.status = 'exporting'
-    exporter      = Exporter.new(keeper)
-    domens        = %i[open_ps ps_try reloc ps_store]
-    domens.each do |domen|
-      csv       = exporter.make_csv(domen)
-      file_name = "#{keeper.run_id}_#{domen.to_s}_games.csv.gz"
-      peon.put(file: file_name, content: csv)
-      #csv_str = peon.give(file: file_name)
-
-      file_path    = "#{@_storehouse_}store/#{file_name}"
-      gz_file_data = IO.binread(file_path)
-      Hamster.send_file(gz_file_data, file_name)
-    end
-
-    notify "Exporting finish!" if @debug
-  end
-
   def download
     peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
@@ -40,9 +22,9 @@ class Manager < Hamster::Harvester
     scraper.scrape_games_ua
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
 
-    if commands[:ru]
+    if commands[:desc]
       scraper_ru = Scraper.new(keeper)
-      scraper_ru.scrape_games_ru
+      scraper_ru.scrape_games_desc
       notify "Scraping finish!\nScraped: #{scraper_ru.count} pages." if @debug
     end
   end
@@ -70,7 +52,6 @@ class Manager < Hamster::Harvester
       clear_cache
       cleared_cache = true
     end
-    export
     keeper.finish
     notify 'The parser completed its work successfully!'
   rescue => error

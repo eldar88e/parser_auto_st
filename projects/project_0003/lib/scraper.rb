@@ -1,6 +1,8 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
+  LAST_PAGE = 20
+
   def initialize(keeper)
     super
     @referers = YAML.load_file('referer.yml')['referer']
@@ -25,11 +27,10 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_ua
-    path_ua   = settings['path_tr'].sub('tr-store', 'ua-store')
-    last_page = 20
-    [*1..last_page].each do |page|
+    path_ua = settings['path_tr'].sub('tr-store', 'ua-store')
+    [*1..LAST_PAGE].each do |page|
       link = "#{settings['site']}#{path_ua}#{page}#{settings['params']}"
-      puts "Page #{page} of #{last_page}".green if @debug
+      puts "Page #{page} of #{LAST_PAGE}".green if @debug
       game_list = get_response(link).body
       sleep(rand(0.2..1.5))
       peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_ua")
@@ -37,11 +38,10 @@ class Scraper < Hamster::Scraper
     end
   end
 
-  def scrape_games_ru
-    first_page = "#{settings['site']}#{settings['path_ru']}1#{settings['params']}"
-    last_page  = make_last_page(first_page)
-    [*1..last_page].each do |page|
-      link        = "#{settings['site']}#{settings['path_ru']}#{page}"
+  def scrape_games_desc
+    path_ua = settings['path_tr'].sub('tr-store', 'ua-store')
+    [*1..LAST_PAGE].each do |page|
+      link        = "#{settings['site']}#{path_ua}#{page}"
       game_list   = get_response(link).body
       parser      = Parser.new(html: game_list)
       games_links = parser.parse_games_list
@@ -50,7 +50,7 @@ class Scraper < Hamster::Scraper
         url  = settings['site'] + path
         game = get_response(url).body
         name = MD5Hash.new(columns: %i[path]).generate({ path: path })
-        peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ru/game_list_#{page}")
+        peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ua/game_list_#{page}")
         sleep rand(1..3)
         @count += 1
       end
