@@ -141,6 +141,8 @@ class Keeper < Hamster::Keeper
     rescue => e
       puts e
       binding.pry
+    rescue ActiveRecord::RecordInvalid => e
+      Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
     end
   end
 
