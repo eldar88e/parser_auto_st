@@ -15,6 +15,7 @@ class Keeper < Hamster::Keeper
     @deleted         = 0
     @updated_lang    = 0
     @updated_desc    = 0
+    binding.pry
   end
 
   attr_reader :run_id, :count
