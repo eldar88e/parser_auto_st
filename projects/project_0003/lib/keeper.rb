@@ -143,6 +143,9 @@ class Keeper < Hamster::Keeper
         SonyGame.store(game)
         @count[:saved] += 1
       end
+    rescue => e
+      puts e
+      binding.pry
     end
   end
 
