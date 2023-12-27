@@ -111,6 +111,7 @@ class Manager < Hamster::Harvester
       othr_pl_count    += parser.other_platform
       not_prc_count    += parser.not_price
       other_type_count += parser.other_type
+      binding.pry
       keeper.save_games(list_games)
       @pages += 1
     end
@@ -165,7 +166,7 @@ class Manager < Hamster::Harvester
     message = ""
     message << "\nSaved: #{keeper.count[:saved]} games;" unless keeper.count[:saved].zero?
     message << "\nUpdated prices: #{keeper.count[:updated]} games;" unless keeper.count[:updated].zero?
-    message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
+    message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} games;" unless keeper.updated_menu_id.zero?
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?

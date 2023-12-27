@@ -141,7 +141,6 @@ class Parser < Hamster::Parser
       games << game
       @parsed += 1
     end
-    binding.pry
     games
   end
 
