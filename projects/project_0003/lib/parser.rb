@@ -1,7 +1,8 @@
 require_relative '../models/sony_game_additional'
 
 class Parser < Hamster::Parser
-  MIN_PRICE = 15
+  MIN_PRICE     = 15
+  EXCHANGE_RATE = 4
 
   def initialize(**page)
     super
@@ -77,7 +78,7 @@ class Parser < Hamster::Parser
     last_page_f > last_page_bad ? last_page_bad + 1 : last_page_bad
   end
 
-  def parse_list_games
+  def parse_list_games_ua
     games     = []
     games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
@@ -121,7 +122,7 @@ class Parser < Hamster::Parser
         next
       end
 
-      game[:main][:pagetitle]       = prepare_page_title(game_raw.at('.game-collection-item-details-title').text)
+      game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text
       game[:additional][:platform]  = platform.gsub(' / ', ', ')
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
       game[:additional][:type_game] = translate_type(type_game_raw)
@@ -140,65 +141,26 @@ class Parser < Hamster::Parser
       games << game
       @parsed += 1
     end
+    binding.pry
     games
   end
 
   private
 
-  def prepare_page_title(page_title_raw)
-    page_title_raw.gsub!(/[yY][öÖ][nN][eE][tT][mM][eE][nN][iİ][nN] [Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'режиссерская версия')
-    page_title_raw.gsub!(/[Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'edition')
-    page_title_raw.gsub!(/[Pp][aA][kK][eE][tT][iİI]?/, 'bundle')
-    page_title_raw.gsub!(/[Pp]lay[Ss]tation/, 'PS')
-    page_title_raw.gsub!(/[Dd]ijital/, 'digital')
-    page_title_raw = replace_turk_small_letters(page_title_raw)
-    page_title_raw.gsub('Ü','U').gsub('Ö', 'O').gsub('İ', 'I').gsub('Ç', 'C')
-                  .gsub('Ş', 'S').gsub('Ğ', 'G').gsub('™', '').gsub('®', '').gsub(' ve ', ' and ')
-  end
-
   def make_alias(url)
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
     alias_raw     = alias_raw.reverse.join('-')[0..120]
-    alias_raw     = URI.decode_www_form(alias_raw)[0][0] if alias_raw.match?(/%/)
-    alias_raw.gsub!(/s[uü]r[uü]m[uü]?/, 'edition')
-    alias_raw.gsub!(/paketi?/, 'bundle')
-    alias_raw.gsub!(/y[oö]netmeni?n?/, 'director')
-    alias_raw.gsub!(/-ve-/, '-and-')
-    replace_turk_small_letters(alias_raw)
+    alias_raw.match?(/%/) ? URI.decode_www_form(alias_raw)[0][0] : alias_raw
   end
 
-  def replace_turk_small_letters(str)
-    str.gsub('ü','u').gsub('ö','o').gsub('ı', 'i').gsub('ğ', 'g').gsub('ç', 'c').gsub('ş','s').gsub('â', 'a')
-  end
-
-  def get_price(raw_price, currency=:tr)
+  def get_price(raw_price, currency=:ua)
     return if raw_price.nil? || raw_price.strip.to_i.zero?
 
     price = raw_price.strip.gsub(',', '').to_f
-    return price if currency == :tr
+    return price if currency == :ua
 
-    exchange_rate = make_exchange_rate(price)
-    round_up_price(price * exchange_rate)
-  end
-
-  def make_exchange_rate(price)
-    #от 1 до 50 лир курс - 10
-    #От 51 до 300 лир курс - 5.5
-    # от 300 до 800 лир курс 5
-    # от 800 до 1600 курс 4.5
-    # от 1600 курс 4.3
-    if price >= 1 && price < 51
-      settings['exchange_rate'] + 4.5
-    elsif price >= 51 && price < 300
-      settings['exchange_rate']
-    elsif price >= 300 && price < 800
-      settings['exchange_rate'] - 0.5
-    elsif price >= 800 && price < 1600
-      settings['exchange_rate'] - 1
-    elsif price >= 1600
-      settings['exchange_rate'] - 1.2
-    end
+    round_up_price(price * EXCHANGE_RATE)
   end
 
   def round_up_price(price)
