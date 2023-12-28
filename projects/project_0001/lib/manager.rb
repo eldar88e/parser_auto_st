@@ -181,7 +181,7 @@ class Manager < Hamster::Harvester
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
-    message << "\nSaved: #{keeper.saved} games;" unless keeper.saved.zero?
+    message << "Saved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated prices: #{keeper.updated} games;" unless keeper.updated.zero?
     message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
     message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?

@@ -64,16 +64,6 @@ class Parser < Hamster::Parser
     info
   end
 
-  def parse_game_desc
-    desc_raw = @html.at('div#game-details-right div.col-xs-12 span[itemprop="description"]')
-    return unless desc_raw
-
-    url         = @html.at('link[rel="canonical"]')['href']
-    alias_uri   = url.split('/').last
-    description = desc_raw.children.to_html.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
-    { desc: description, alias: alias_uri }
-  end
-
   def get_last_page
     count_result   = @html.at('div.results').text.match(/\d+/).to_s.to_i
     games_per_page = @html.css('div.game-collection-item').size

@@ -14,12 +14,6 @@ class Scraper < Hamster::Scraper
 
   attr_reader :count
 
-  def scrape_lang(id)
-    url = settings['ps_game'] + id
-    sleep rand(0.2..2.1)
-    get_response(url).body
-  end
-
   def scrape_desc(id)
     url = settings['dd_game'] + id
     sleep rand(0.2..2.1)
@@ -41,12 +35,6 @@ class Scraper < Hamster::Scraper
   private
 
   attr_reader :run_id
-
-  def make_last_page(first_page)
-    game_list = get_response(first_page).body
-    parser    = Parser.new(html: game_list)
-    parser.get_last_page
-  end
 
   def get_response(link)
     headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'ua-UA' }
