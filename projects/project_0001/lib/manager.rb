@@ -161,7 +161,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "Parsed and updated description for #{keeper.updated_desc} game(s)."
+    notify "Parsed and added description for #{keeper.updated_desc} game(s)."
   end
 
   def parse_save_desc_ru

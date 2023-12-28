@@ -52,7 +52,7 @@ class Keeper < Hamster::Keeper
 
   def save_desc_lang_dd(data, id)
     lang = data.delete(:lang)
-    SonyGameAdditional.find(id).update(lang) && @count[:updated_lang] if lang
+    SonyGameAdditional.find(id).update(lang) && @count[:updated_lang] += 1 if lang
 
     if data[:content]
       data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
