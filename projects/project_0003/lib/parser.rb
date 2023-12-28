@@ -20,9 +20,15 @@ class Parser < Hamster::Parser
   end
 
   def parse_desc_dd
-    data = {}
-    @html
-    binding.pry
+    data     = {}
+    lang_row = @html.at('div.container-fluid table')&.text&.downcase
+    if lang_row&.match?(/полностью на русском/)
+      data[:lang] = { rus_voice: true, rus_screen: true }
+    elsif lang_row&.match?(/интерфейс на русском/)
+      data[:lang] = { rus_screen: true }
+    end
+
+
     script = @html.at('body script')
     return data unless script
 

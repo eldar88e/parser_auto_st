@@ -112,9 +112,7 @@ class Manager < Hamster::Harvester
       page   = scraper.scrape_desc(id[1])
       parser = Parser.new(html: page)
       desc   = parser.parse_desc_dd
-      next unless desc
-
-      keeper.save_desc_dd(desc, id[0])
+      keeper.save_desc_lang_dd(desc, id[0])
     end
     notify "Parsed and updated description for #{keeper.count[:updated_desc]} game(s)."
   end

@@ -50,10 +50,20 @@ class Keeper < Hamster::Keeper
     SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
-  def save_desc_dd(data, id)
-    data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
-    begin
+  def save_desc_lang_dd(data, id)
+    lang = data&.delete(:lang)
+
+    binding.pry
+
+    if data[:content]
+      data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
       SonyGame.find(id).update(data) && @count[:updated_desc] += 1
+    end
+
+    if lang
+      SonyGameAdditional.find(id).update(lang)
+    end
+
     rescue ActiveRecord::StatementInvalid => e
       Hamster.logger.error "ID: #{id} | #{e.message}"
     end
