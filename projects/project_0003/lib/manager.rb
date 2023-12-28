@@ -118,20 +118,20 @@ class Manager < Hamster::Harvester
       desc   = parser.parse_desc_dd
       keeper.save_desc_lang_dd(desc, id[0])
     end
-    notify "Parsed and added description for #{keeper.count[:updated_desc]} game(s)."
-    notify "Parsed and added language for #{keeper.count[:updated_lang]} game(s)."
+    notify "Parsed and added description for #{keeper.count[:updated_desc]} UA game(s)."
+    notify "Parsed and added language for #{keeper.count[:updated_lang]} UA game(s)."
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
-    message << "Saved: #{keeper.count[:saved]} games;" unless keeper.count[:saved].zero?
-    message << "\nUpdated prices: #{keeper.count[:updated]} games;" unless keeper.count[:updated].zero?
-    message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} games;" unless keeper.count[:updated_menu_id].zero?
-    message << "\nSkipped: #{keeper.count[:skipped]} games;" unless keeper.count[:skipped].zero?
-    message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
-    message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
-    message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
-    message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
+    message << "Saved: #{keeper.count[:saved]} UA games;" unless keeper.count[:saved].zero?
+    message << "\nUpdated prices: #{keeper.count[:updated]} UA games;" unless keeper.count[:updated].zero?
+    message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} UA games;" unless keeper.count[:updated_menu_id].zero?
+    message << "\nSkipped: #{keeper.count[:skipped]} UA games;" unless keeper.count[:skipped].zero?
+    message << "\nNot parsed other platform: #{othr_pl_count} UA games;" unless othr_pl_count.zero?
+    message << "\nNot parsed without or low price: #{not_prc_count} UA games;" unless not_prc_count.zero?
+    message << "\nNot parsed other type: #{other_type_count} UA games;" unless other_type_count.zero?
+    message << "\nParsed: #{@pages} pages, #{parser_count} UA games." unless parser_count.zero?
     message
   end
 
