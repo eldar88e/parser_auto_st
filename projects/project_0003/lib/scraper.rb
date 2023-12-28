@@ -38,25 +38,6 @@ class Scraper < Hamster::Scraper
     end
   end
 
-  def scrape_games_desc
-    path_ua = settings['path_tr'].sub('tr-store', 'ua-store')
-    [*1..LAST_PAGE].each do |page|
-      link        = "#{settings['site']}#{path_ua}#{page}"
-      game_list   = get_response(link).body
-      parser      = Parser.new(html: game_list)
-      games_links = parser.parse_games_list
-      games_links.each_with_index do |path, index|
-        puts "List page: #{page}, game page: #{index}".green if @debug
-        url  = settings['site'] + path
-        game = get_response(url).body
-        name = MD5Hash.new(columns: %i[path]).generate({ path: path })
-        peon.put(file: "#{name}.html", content: game, subfolder: "#{run_id}_games_ua/game_list_#{page}")
-        sleep rand(1..3)
-        @count += 1
-      end
-    end
-  end
-
   private
 
   attr_reader :run_id

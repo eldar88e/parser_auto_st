@@ -12,13 +12,6 @@ class Manager < Hamster::Harvester
   end
 
   def download
-    if commands[:desc]
-      scraper_ru = Scraper.new(keeper)
-      scraper_ru.scrape_games_desc
-      notify "Scraping finish!\nScraped: #{scraper_ru.count} pages." if @debug
-      return
-    end
-
     peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(10)
@@ -33,18 +26,13 @@ class Manager < Hamster::Harvester
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
 
-    if commands[:lang]
-      parse_save_lang
-      return
-    elsif commands[:desc]
-      #parse_save_desc_ru
+    if commands[:desc]
       parse_save_desc_dd
       return
     end
 
-    #parse_save_main
-    #parse_save_lang    if !keeper.count[:saved].zero? || settings['day_lang_all_scrap'] == Date.current.day
-    parse_save_desc_dd #unless keeper.count[:saved].zero?
+    parse_save_main
+    parse_save_desc_dd unless keeper.count[:saved].zero?
     keeper.delete_not_touched
     notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
     cleared_cache = false
@@ -115,20 +103,6 @@ class Manager < Hamster::Harvester
     end
     message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     notify message if message.present?
-  end
-
-  def parse_save_lang
-    ps_ids  = keeper.get_ps_ids
-    scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_lang(id[1])
-      parser = Parser.new(html: page)
-      lang   = parser.parse_lang
-      next if lang.nil?
-
-      keeper.save_lang_info(lang, id[0])
-    end
-    notify "Parsed and updated lang info for #{keeper.count[:updated_lang]} game(s)."
   end
 
   def parse_save_desc_dd
