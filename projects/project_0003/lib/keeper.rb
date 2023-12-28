@@ -51,19 +51,14 @@ class Keeper < Hamster::Keeper
   end
 
   def save_desc_lang_dd(data, id)
-    lang = data&.delete(:lang)
-
-    binding.pry
+    lang = data.delete(:lang)
+    SonyGameAdditional.find(id).update(lang) && @count[:updated_lang] if lang
 
     if data[:content]
       data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
+      data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
       SonyGame.find(id).update(data) && @count[:updated_desc] += 1
     end
-
-    if lang
-      SonyGameAdditional.find(id).update(lang)
-    end
-
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{id} | #{e.message}"
   end

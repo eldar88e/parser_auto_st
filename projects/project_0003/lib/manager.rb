@@ -119,6 +119,7 @@ class Manager < Hamster::Harvester
       keeper.save_desc_lang_dd(desc, id[0])
     end
     notify "Parsed and updated description for #{keeper.count[:updated_desc]} game(s)."
+    notify "Parsed and updated language for #{keeper.count[:updated_lang]} game(s)."
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
