@@ -33,7 +33,7 @@ class Keeper < Hamster::Keeper
   end
 
   def get_games_without_content
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''], rus_voice: false)
+    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
   end
 
   def delete_not_touched
