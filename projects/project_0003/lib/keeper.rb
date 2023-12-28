@@ -64,9 +64,8 @@ class Keeper < Hamster::Keeper
       SonyGameAdditional.find(id).update(lang)
     end
 
-    rescue ActiveRecord::StatementInvalid => e
-      Hamster.logger.error "ID: #{id} | #{e.message}"
-    end
+  rescue ActiveRecord::StatementInvalid => e
+    Hamster.logger.error "ID: #{id} | #{e.message}"
   end
 
   def get_ps_ids

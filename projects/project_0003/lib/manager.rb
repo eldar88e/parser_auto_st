@@ -27,19 +27,23 @@ class Manager < Hamster::Harvester
     keeper.status = 'parsing'
 
     if commands[:desc]
-      parse_save_desc_dd
+      parse_save_desc_lang_dd
       return
     end
 
     parse_save_main
-    parse_save_desc_dd unless keeper.count[:saved].zero?
+
+    parse_save_desc_lang_dd unless keeper.count[:saved].zero?
+
     keeper.delete_not_touched
     notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
+
     cleared_cache = false
     if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
       clear_cache
       cleared_cache = true
     end
+
     keeper.finish
     notify 'The parser UA completed its work successfully!'
   rescue => error
@@ -105,7 +109,7 @@ class Manager < Hamster::Harvester
     notify message if message.present?
   end
 
-  def parse_save_desc_dd
+  def parse_save_desc_lang_dd
     ps_ids  = keeper.get_ps_ids_without_desc_ua
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
