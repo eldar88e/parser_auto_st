@@ -42,9 +42,9 @@ class Manager < Hamster::Harvester
       return
     end
 
-    parse_save_main
+    #parse_save_main
     #parse_save_lang    if !keeper.count[:saved].zero? || settings['day_lang_all_scrap'] == Date.current.day
-    #parse_save_desc_dd unless keeper.count[:saved].zero?
+    parse_save_desc_dd #unless keeper.count[:saved].zero?
     keeper.delete_not_touched
     notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
     cleared_cache = false
@@ -132,7 +132,7 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_dd
-    ps_ids  = keeper.get_ps_ids_without_desc
+    ps_ids  = keeper.get_ps_ids_without_desc_ua
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
       page   = scraper.scrape_desc(id[1])
@@ -143,21 +143,6 @@ class Manager < Hamster::Harvester
       keeper.save_desc_dd(desc, id[0])
     end
     notify "Parsed and updated description for #{keeper.count[:updated_desc]} game(s)."
-  end
-
-  def parse_save_desc_ru
-    run_id     = keeper.run_id
-    list_pages = peon.list(subfolder: "#{run_id}_games_ru").sort_by { |name| name.scan(/\d+/).first.to_i }
-    list_pages.each do |name_list_page|
-      list_games = peon.list(subfolder: "#{run_id}_games_ru/#{name_list_page}")
-      list_games.each do |name|
-        puts name.green
-        file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
-        parser    = Parser.new(html: file)
-        list_info = parser.parse_game_desc
-        keeper.save_desc(list_info)
-      end
-    end
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)

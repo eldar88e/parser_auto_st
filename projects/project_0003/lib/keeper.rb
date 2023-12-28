@@ -33,7 +33,7 @@ class Keeper < Hamster::Keeper
   end
 
   def get_games_without_content
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
+    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''], rus_voice: false)
   end
 
   def delete_not_touched
@@ -43,20 +43,11 @@ class Keeper < Hamster::Keeper
     @count[:deleted] += sg.size
   end
 
-  def get_ps_ids_without_desc
+  def get_ps_ids_without_desc_ua
     games_ids       = get_games_without_content.pluck(:id)
     search          = { id: games_ids }
     search[:run_id] = run_id if settings['new_touched_update_desc']
     SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
-  end
-
-  def save_desc(data)
-    return unless data
-
-    game = get_games_without_content.find { |i| i[:alias].gsub(/-\d+\z/, '') == data[:alias] }
-    return unless game
-
-    game.update(content: data[:desc], editedon: Time.current.to_i, editedby: settings['user_id']) && @count[:updated_desc] += 1
   end
 
   def save_desc_dd(data, id)

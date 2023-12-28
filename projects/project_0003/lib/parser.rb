@@ -20,17 +20,21 @@ class Parser < Hamster::Parser
   end
 
   def parse_desc_dd
+    data = {}
+    @html
+    binding.pry
     script = @html.at('body script')
-    return unless script
+    return data unless script
 
     json_raw = script.text.match(/{.*}/)
-    return unless json_raw
+    return data unless json_raw
 
     json    = JSON.parse(json_raw.to_s)
     content = json.dig('product', 'product', 'description')
-    return unless content
+    return data unless content
 
-    { content: content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip }
+    data[:content] = content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
+    data
   end
 
   def parse_lang
