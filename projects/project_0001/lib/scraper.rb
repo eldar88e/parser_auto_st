@@ -68,12 +68,21 @@ class Scraper < Hamster::Scraper
     parser.get_last_page
   end
 
-  def get_response(link)
-    headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
-    connect_to(link, ssl_verify: false, headers: headers)
+  def get_response(link, try=1)
+    headers  = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
+    response = connect_to(link, ssl_verify: false, headers: headers)
+    raise 'Error receiving response from server' unless response.present?
+    response
   rescue => e
-    puts e
-    Hamster.report message: e.message + "\n #{link}"
-    binding.pry
+    try += 1
+
+    if try < 4
+      Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+      Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
+      sleep 5 * try
+      retry
+    end
+
+    Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
   end
 end
