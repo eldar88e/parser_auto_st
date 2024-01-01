@@ -90,7 +90,7 @@ class Keeper < Hamster::Keeper
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
-      game[:additional][:popular]  =  @count[:menu_id_count] < 151
+      game[:additional][:popular]  = @count[:menu_id_count] < 151
 
       if game_db
         sony_game = SonyGame.find(game_db.id)
@@ -135,9 +135,6 @@ class Keeper < Hamster::Keeper
       end
     rescue ActiveRecord::RecordInvalid => e
       Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
-    rescue => e
-      puts e
-      binding.pry
     end
   end
 
@@ -149,11 +146,8 @@ class Keeper < Hamster::Keeper
   end
 
   def make_parent_path(platform)
-    if platform == :ps5
-      get_parent_alias(PARENT_PS5)
-    else
-      get_parent_alias(PARENT_PS4)
-    end
+    parent = platform == :ps5 ? PARENT_PS5 : PARENT_PS4
+    get_parent_alias(parent)
   end
 
   def get_parent_alias(id)
@@ -175,16 +169,15 @@ class Keeper < Hamster::Keeper
   end
 
   def update_date(game, game_db, sony_game)
-    #check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = !game_db[:release].nil? && game_db[:release] > start_new_date
-    game_db.update(game[:additional]) && @count[:updated] += 1 #if check_md5_hash
+    game_db.update(game[:additional])
+    check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+    @count[:updated] += 1 if check_md5_hash
+    @count[:skipped] += 1 unless check_md5_hash
 
-    data          = { menuindex:  @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-    check_menu_id = @count[:menu_id_count] != sony_game[:menuindex]
-    sony_game.update(data) && @count[:updated_menu_id] += 1 if check_menu_id
-
-    #@skipped += 1 if !check_md5_hash # && !check_menu_id
+    data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
+    sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
   end
 
   def prepare_intro(game, content=nil)
