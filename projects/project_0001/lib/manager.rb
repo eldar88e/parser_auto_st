@@ -174,6 +174,8 @@ class Manager < Hamster::Harvester
         file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
         parser    = Parser.new(html: file)
         list_info = parser.parse_game_desc
+        next unless list_info
+
         keeper.save_desc(list_info)
       end
     end
@@ -184,7 +186,7 @@ class Manager < Hamster::Harvester
     message << "Saved: #{keeper.saved} games;" unless keeper.saved.zero?
     message << "\nUpdated prices: #{keeper.updated} games;" unless keeper.updated.zero?
     message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
-    message << "\nSkipped: #{keeper.skipped} games;" unless keeper.skipped.zero?
+    message << "\nSkipped prices: #{keeper.skipped} games;" unless keeper.skipped.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?

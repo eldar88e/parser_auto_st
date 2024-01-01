@@ -64,8 +64,6 @@ class Keeper < Hamster::Keeper
   end
 
   def save_desc(data)
-    return unless data
-
     game = get_games_without_content.find { |i| i[:alias].gsub(/-\d+\z/, '') == data[:alias] }
     return unless game
 
@@ -189,16 +187,17 @@ class Keeper < Hamster::Keeper
   end
 
   def update_date(game, game_db, sony_game)
-    #check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
+    check_md5_hash          = game_db[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = !game_db[:release].nil? && game_db[:release] > start_new_date
-    game_db.update(game[:additional]) && @updated += 1 #if check_md5_hash
+    game_db.update(game[:additional])
+    @updated += 1 if check_md5_hash
 
     data          = { menuindex: @menu_id_count, editedon: Time.current.to_i, editedby: settings['user_id'] }
     check_menu_id = @menu_id_count != sony_game[:menuindex]
     sony_game.update(data) && @updated_menu_id += 1 if check_menu_id
 
-    #@skipped += 1 if !check_md5_hash # && !check_menu_id
+    @skipped += 1 if !check_md5_hash && !check_menu_id
   end
 
   def prepare_intro(game, content=nil)
