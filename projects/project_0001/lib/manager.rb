@@ -183,10 +183,10 @@ class Manager < Hamster::Harvester
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
-    message << "Saved: #{keeper.saved} games;" unless keeper.saved.zero?
+    message << "Saved: #{keeper.saved} new games;" unless keeper.saved.zero?
     message << "\nUpdated prices: #{keeper.updated} games;" unless keeper.updated.zero?
-    message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
     message << "\nSkipped prices: #{keeper.skipped} games;" unless keeper.skipped.zero?
+    message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
     message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
     message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
     message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
