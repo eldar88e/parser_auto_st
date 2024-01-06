@@ -7,7 +7,7 @@ require_relative '../models/sony_game_additional'
 class ModelManager < Hamster::Keeper
 
   def run_last
-    SonyGameRun.last
+    [SonyGameRun.last, SonyGameUaRun.last]
   end
 
   def report_games

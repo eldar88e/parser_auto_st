@@ -15,13 +15,10 @@ class Message < Hamster::Keeper
   end
 
   def run_last
-    data = manager.run_last
-    <<~MESSAGE
-      Hомер запуска: #{data.id}
-      Статус: #{data.status}
-      Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
-      Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
-    MESSAGE
+    runs    = manager.run_last
+    tr_data = runs[0]
+    ua_data = runs[0]
+    "Информация о TR парсере:\n" + make_run_text(tr_data) + "Информация о UA парсере:\n" + make_run_text(ua_data)
   end
 
   def report_games
@@ -42,4 +39,12 @@ class Message < Hamster::Keeper
 
   attr_reader :manager
 
+  def make_run_text(data)
+    <<~MESSAGE
+      Hомер запуска: #{data.id}
+      Статус: #{data.status}
+      Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
+      Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
+    MESSAGE
+  end
 end
