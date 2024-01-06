@@ -64,7 +64,7 @@ class Manager < Hamster::Harvester
     parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.delete_not_touched
-    notify "Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
+    notify "‼️ Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
     cleared_cache = false
     if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.deleted.zero?
       clear_cache
@@ -72,7 +72,7 @@ class Manager < Hamster::Harvester
     end
     export
     keeper.finish
-    notify 'The parser completed its work successfully!'
+    notify '📌 The parser completed its work successfully!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
@@ -147,7 +147,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "Parsed and updated lang info for #{keeper.updated_lang} game(s)."
+    notify "📌 Parsed and updated lang info for #{keeper.updated_lang} game(s)."
   end
 
   def parse_save_desc_dd
@@ -161,7 +161,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "Parsed and added description for #{keeper.updated_desc} game(s)."
+    notify "📌 Parsed and added description for #{keeper.updated_desc} game(s)."
   end
 
   def parse_save_desc_ru
@@ -182,15 +182,15 @@ class Manager < Hamster::Harvester
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
-    message = ""
-    message << "Saved: #{keeper.saved} new games;" unless keeper.saved.zero?
-    message << "\nUpdated prices: #{keeper.updated} games;" unless keeper.updated.zero?
-    message << "\nSkipped prices: #{keeper.skipped} games;" unless keeper.skipped.zero?
-    message << "\nUpdated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
-    message << "\nNot parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
-    message << "\nNot parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
-    message << "\nNot parsed other type: #{other_type_count} games;" unless other_type_count.zero?
-    message << "\nParsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
+    message = "📌 Results:"
+    message << "\n✅ Saved: #{keeper.saved} new games;" unless keeper.saved.zero?
+    message << "\n✅ Updated prices: #{keeper.updated} games;" unless keeper.updated.zero?
+    message << "\n✅ Skipped prices: #{keeper.skipped} games;" unless keeper.skipped.zero?
+    message << "\n✅ Updated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
+    message << "\n✅ Not parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
+    message << "\n✅ Not parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
+    message << "\n✅ Not parsed other type: #{other_type_count} games;" unless other_type_count.zero?
+    message << "\n✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message
   end
 
