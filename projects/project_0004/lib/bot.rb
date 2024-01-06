@@ -36,16 +36,15 @@ class Bot < Hamster::Harvester
 
   def report_games
     games = manager.report_games
-    binding.pry
     <<~MESSAGE
       Турецкие игры:
-        - Активные: #{games.active_games(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Удаленные: #{games.deleted(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Снятые с публикации: #{games.unpublished(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        - Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        - Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
       Украинские игры:
-        - Активные: #{games.active_games(parent: [180, 181]).size}
-        - Удаленные: #{games.deleted(parent: [180, 181]).size}
-        - Снятые с публикации: #{games.unpublished(parent: [180, 181]).size}
+        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
+        - Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
+        - Снятые с публикации: #{games.where(published: 0).where(parent: [21, 22]).size}
     MESSAGE
   end
 end
