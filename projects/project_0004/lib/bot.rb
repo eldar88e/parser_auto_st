@@ -15,16 +15,6 @@ class Bot
         when Telegram::Bot::Types::Message
           handle_message(bot, message)
         end
-
-        if message.text == 'commands'
-          bot.api.send_message(chat_id: message.chat.id, text: commands)
-        elsif message.text == 'run_last'
-          bot.api.send_message(chat_id: message.chat.id, text: run_last)
-        elsif message.text == 'report'
-          bot.api.send_message(chat_id: message.chat.id, text: report_games)
-        else
-          bot.api.send_message(chat_id: message.chat.id, text: "Не верные данные!\n #{message.text}")
-        end
       end
     end
   end
@@ -33,9 +23,21 @@ class Bot
 
   attr_reader :messenger
 
+  def vv(message)
+    if message.text == 'commands'
+      bot.api.send_message(chat_id: message.chat.id, text: commands)
+    elsif message.text == 'run_last'
+      bot.api.send_message(chat_id: message.chat.id, text: run_last)
+    elsif message.text == 'report'
+      bot.api.send_message(chat_id: message.chat.id, text: report_games)
+    else
+      bot.api.send_message(chat_id: message.chat.id, text: "Не верные данные!\n #{message.text}")
+    end
+  end
+
   def handle_callback(bot, message)
     text = messenger.send(message.data.to_sym)
-    bot.api.send_message(chat_id: message.chat.id, text: )
+    bot.api.send_message(chat_id: message.chat.id, text: text)
   end
 
   def handle_message(bot, message)
