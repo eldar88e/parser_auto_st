@@ -9,4 +9,8 @@ class ModelManager < Hamster::Keeper
   def run_last
     SonyGameRun.last
   end
+
+  def report_games
+    SonyGame.where(parent: [settings['parent_ps5'], settings['parent_ps4'], 180, 181])
+  end
 end
