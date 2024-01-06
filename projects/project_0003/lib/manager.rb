@@ -36,7 +36,7 @@ class Manager < Hamster::Harvester
     parse_save_desc_lang_dd unless keeper.count[:saved].zero?
 
     keeper.delete_not_touched
-    notify "Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
+    notify "Deleted: #{keeper.count[:deleted]} old UA games" if keeper.count[:deleted] > 0
 
     cleared_cache = false
     if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
@@ -124,7 +124,7 @@ class Manager < Hamster::Harvester
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
-    message << "Saved: #{keeper.count[:saved]} UA new games;" unless keeper.count[:saved].zero?
+    message << "Saved: #{keeper.count[:saved]} new UA games;" unless keeper.count[:saved].zero?
     message << "\nUpdated prices: #{keeper.count[:updated]} UA games;" unless keeper.count[:updated].zero?
     message << "\nSkipped prices: #{keeper.count[:skipped]} UA games;" unless keeper.count[:skipped].zero?
     message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} UA games;" unless keeper.count[:updated_menu_id].zero?

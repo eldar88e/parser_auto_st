@@ -6,7 +6,6 @@ require_relative '../models/sony_game_intro'
 
 class Keeper < Hamster::Keeper
   SOURCE     = 3
-  FILE_TYPE  = 'image'
   PARENT_PS5 = 21
   PARENT_PS4 = 22
   MADE_IN    = 'Ukraine'
@@ -85,28 +84,28 @@ class Keeper < Hamster::Keeper
     @ps5_path ||= make_parent_path(:ps5)
     games.each do |game|
       @count[:menu_id_count] += 1
-      game_db = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @count[:menu_id_count] < 151
 
-      if game_db
-        sony_game = SonyGame.find(game_db.id)
+      if game_add
+        sony_game = SonyGame.find(game_add.id)
         if sony_game
           next if sony_game.deleted || !sony_game.published
         else
-          Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_db.id}` удалена!\n"\
+          Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
                                  "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
                                  "#{SonyGameCategories.table_name} или добавте в основную таблицу под этим ID запись."
           next
         end
-        update_date(game, game_db, sony_game)
+        update_date(game, game_add, sony_game)
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
-        game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
+        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
         game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
@@ -168,11 +167,11 @@ class Keeper < Hamster::Keeper
     platform.downcase.match?(/ps4/) && platform.downcase.match?(/ps5/)
   end
 
-  def update_date(game, game_db, sony_game)
+  def update_date(game, game_add, sony_game)
+    check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = !game_db[:release].nil? && game_db[:release] > start_new_date
-    game_db.update(game[:additional])
-    check_md5_hash = game_db[:md5_hash] != game[:additional][:md5_hash]
+    game[:additional][:new] = !game_add[:release].nil? && game_add[:release] > start_new_date
+    game_add.update(game[:additional])
     @count[:updated] += 1 if check_md5_hash
     @count[:skipped] += 1 unless check_md5_hash
 
