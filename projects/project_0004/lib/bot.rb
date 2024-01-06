@@ -51,6 +51,7 @@ class Bot
   end
 
   def send_keyboard(bot, chat_id)
+    binding.pry
     keyboard = [
       Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Последний запуск', callback_data: 'run_last'),
       Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Отчет', callback_data: 'report_games')
