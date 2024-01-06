@@ -1,7 +1,8 @@
 require_relative 'model_manager'
 
-class Message
+class Message < Hamster::Keeper
   def initialize
+    super
     @manager = ModelManager.new
   end
 
