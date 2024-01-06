@@ -17,7 +17,7 @@ class Message < Hamster::Keeper
   def run_last
     runs    = manager.run_last
     tr_data = runs[0]
-    ua_data = runs[0]
+    ua_data = runs[1]
     "📌 Информация о TR парсере:\n" + make_run_text(tr_data) + "\n" + "📌 Информация о UA парсере:\n" + make_run_text(ua_data)
   end
 
