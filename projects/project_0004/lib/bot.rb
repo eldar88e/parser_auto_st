@@ -15,6 +15,10 @@ class Bot < Hamster::Harvester
         else
           bot.api.send_message(chat_id: message.chat.id, text: "Не верные данные!\n #{message.text}")
         end
+      rescue => e
+        puts e.class
+        puts e.message
+        binding.pry
       end
     end
   end
