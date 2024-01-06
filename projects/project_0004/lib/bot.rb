@@ -9,6 +9,7 @@ class Bot
   def run
     Telegram::Bot::Client.run(@token) do |bot|
       bot.listen do |message|
+        binding.pry
         case message
         when Telegram::Bot::Types::CallbackQuery
           handle_callback(bot, message)
