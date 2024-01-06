@@ -29,6 +29,10 @@ class Bot < Hamster::Harvester
 
   def run_last
     data = manager.run_last
-    "Hомер запуска: #{data.id}\nСтатус: #{data.status}\nДата запуска: #{data.created_at}\nДата финиша: #{data.updated_at}"
+    <<~MESSAGE
+      Hомер запуска: #{data.id}\nСтатус: #{data.status}\n
+      Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %R:%M:%S")}\n
+      Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %R:%M:%S")}
+    MESSAGE
   end
 end
