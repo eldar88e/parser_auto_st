@@ -24,14 +24,14 @@ class Message < Hamster::Keeper
   def report_games
     games = manager.report_games
     <<~MESSAGE
-      Турецкие игры:
-        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-      Украинские игры:
-        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
-        - Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
-        - Снятые с публикации: #{games.where(published: 0).where(parent: [21, 22]).size}
+      📌 Турецкие игры:
+        ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        ✅ Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+      📌 Украинские игры:
+        ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
+        ✅ Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
+        ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [21, 22]).size}
     MESSAGE
   end
 
@@ -41,10 +41,10 @@ class Message < Hamster::Keeper
 
   def make_run_text(data)
     <<~MESSAGE
-      Hомер запуска: #{data.id}
-       ✅ Статус: #{data.status}
-       ✅ Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
-       ✅ Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
+      ✅ Hомер запуска: #{data.id}
+      ✅ Статус: #{data.status}
+      ✅ Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
+      ✅ Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
     MESSAGE
   end
 end
