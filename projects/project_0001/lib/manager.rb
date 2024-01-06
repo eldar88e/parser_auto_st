@@ -33,7 +33,7 @@ class Manager < Hamster::Harvester
   def download
     peon.move_all_to_trash
     puts 'The Store has been emptied.' if @debug
-    peon.throw_trash(5)
+    peon.throw_trash(3)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
     notify 'Scraping started' if @debug
     scraper = Scraper.new(keeper)
