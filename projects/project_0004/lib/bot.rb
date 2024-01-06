@@ -36,6 +36,8 @@ class Bot
   end
 
   def handle_callback(bot, message)
+    return unless messenger.respond_to?(message.data.to_sym)
+
     text = messenger.send(message.data.to_sym)
     bot.api.send_message(chat_id: message.chat.id, text: text)
   end
