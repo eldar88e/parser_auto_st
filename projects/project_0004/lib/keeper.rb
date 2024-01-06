@@ -6,4 +6,7 @@ require_relative '../models/sony_game_additional'
 
 class Keeper < Hamster::Keeper
 
+  def run_last
+    SonyGameRun.last
+  end
 end
