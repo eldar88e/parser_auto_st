@@ -13,7 +13,6 @@ class Bot
         when Telegram::Bot::Types::CallbackQuery
           handle_callback(bot, message)
         when Telegram::Bot::Types::Message
-          binding.pry
           handle_message(bot, message)
         end
       end
@@ -51,11 +50,10 @@ class Bot
   end
 
   def send_keyboard(bot, chat_id)
-    binding.pry
-    keyboard = [
+    keyboard = [[
       Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Последний запуск', callback_data: 'run_last'),
       Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Отчет', callback_data: 'report_games')
-    ]
+    ]]
     markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: keyboard)
     bot.api.send_message(chat_id: chat_id, text: 'Выберите кнопку:', reply_markup: markup)
   end
