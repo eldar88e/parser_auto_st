@@ -11,7 +11,7 @@ class Bot < Hamster::Harvester
       bot.listen do |message|
         if message.text == 'run_last'
           bot.api.send_message(chat_id: message.chat.id, text: run_last)
-        elsif message.text == 'report_games'
+        elsif message.text == 'report'
           bot.api.send_message(chat_id: message.chat.id, text: report_games)
         else
           bot.api.send_message(chat_id: message.chat.id, text: "Не верные данные!\n #{message.text}")
@@ -35,7 +35,16 @@ class Bot < Hamster::Harvester
   end
 
   def report_games
-    manager.report_games
-    binding.pry
+    games = manager.report_games
+    <<~MESSAGE
+      Турецкие игры:
+        - Активные: #{games.active_games(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        - Удаленные: #{games.deleted(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+        - Снятые с публикации: #{games.unpublished(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+      Украинские игры:
+        - Активные: #{games.active_games(parent: [180, 181]).size}
+        - Удаленные: #{games.deleted(parent: [180, 181]).size}
+        - Снятые с публикации: #{games.unpublished(parent: [180, 181]).size}
+    MESSAGE
   end
 end

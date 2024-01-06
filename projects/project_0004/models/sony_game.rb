@@ -8,7 +8,8 @@ class SonyGame < ApplicationRecord
   #has_many :sony_game_category, foreign_key: 'product_id', optional: true
 
   scope :active_games, ->(parent) { where(deleted: 0, published: 1, parent: parent) }
-
+  scope :deleted, ->(parent) { where(deleted: 1, parent: parent) }
+  scope :unpublished, ->(parent) { where(published: 0, parent: parent) }
   def self.store(data)
     self.transaction do
       sony_game_id    = self.create!(data[:main]).id
