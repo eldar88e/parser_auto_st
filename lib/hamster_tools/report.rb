@@ -23,7 +23,7 @@ module Hamster
 
       #type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
       #file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
-      message   = "Archived CSV file containing the #{settings['limit_export']} most popular PlayStation games."
+      message   = "⚽️ Top #{settings['limit_export']} PS games."
       #message   = 'Archived ' + message if type == :gz
       [@raw_users.to_s.split(',')].flatten.each do |user_id|
         Telegram::Bot::Client.run(@token_) do |bot|
