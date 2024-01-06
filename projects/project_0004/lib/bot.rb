@@ -15,7 +15,7 @@ class Bot < Hamster::Harvester
         else
           bot.api.send_message(chat_id: message.chat.id, text: "Не верные данные!\n #{message.text}")
         end
-      rescue => e
+      rescue Telegram::Bot::Exceptions::ResponseError => e
         puts e.class
         puts e.message
         binding.pry
@@ -28,6 +28,7 @@ class Bot < Hamster::Harvester
   attr_reader :manager
 
   def run_last
-    manager.run_last.attributes
+    data = manager.run_last
+    "Hомер запуска: #{data.id}\nСтатус: #{data.status}\nДата запуска: #{data.created_at}\nДата финиша: #{data.updated_at}"
   end
 end
