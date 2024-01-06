@@ -36,6 +36,7 @@ class Bot < Hamster::Harvester
 
   def report_games
     games = manager.report_games
+    binding.pry
     <<~MESSAGE
       Турецкие игры:
         - Активные: #{games.active_games(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
