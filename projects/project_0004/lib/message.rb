@@ -42,9 +42,9 @@ class Message < Hamster::Keeper
   def make_run_text(data)
     <<~MESSAGE
       Hомер запуска: #{data.id}
-      Статус: #{data.status}
-      Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
-      Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
+       - Статус: #{data.status}
+       - Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
+       - Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
     MESSAGE
   end
 end
