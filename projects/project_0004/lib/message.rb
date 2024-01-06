@@ -18,7 +18,7 @@ class Message < Hamster::Keeper
     runs    = manager.run_last
     tr_data = runs[0]
     ua_data = runs[0]
-    "Информация о TR парсере:\n" + make_run_text(tr_data) + "Информация о UA парсере:\n" + make_run_text(ua_data)
+    "📌 Информация о TR парсере:\n" + make_run_text(tr_data) + "\n" + "📌 Информация о UA парсере:\n" + make_run_text(ua_data)
   end
 
   def report_games
@@ -28,6 +28,7 @@ class Message < Hamster::Keeper
         ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
         ✅ Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
         ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
+      
       📌 Украинские игры:
         ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
         ✅ Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
