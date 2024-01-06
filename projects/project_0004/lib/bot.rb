@@ -39,7 +39,7 @@ class Bot
     return unless messenger.respond_to?(message.data.to_sym)
 
     text = messenger.send(message.data.to_sym)
-    bot.api.send_message(chat_id: message.chat.id, text: text)
+    bot.api.send_message(chat_id: message.from.id, text: text)
   end
 
   def handle_message(bot, message)
