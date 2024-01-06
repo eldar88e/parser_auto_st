@@ -1,3 +1,5 @@
+require_relative 'message'
+
 class Bot
   def initialize
     @token     = ENV['TELEGRAM_BOT_TOKEN']
