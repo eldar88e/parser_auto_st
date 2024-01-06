@@ -45,7 +45,7 @@ class Message < Hamster::Keeper
       ✅ Hомер запуска: #{data.id}
       ✅ Статус: #{data.status}
       ✅ Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
-      ✅ Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
+      ✅ Дата #{data.status}: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
     MESSAGE
   end
 end
