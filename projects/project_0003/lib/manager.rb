@@ -45,7 +45,7 @@ class Manager < Hamster::Harvester
     end
 
     keeper.finish
-    notify '📌 The parser UA completed its work successfully!'
+    notify '📌 The UA parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message

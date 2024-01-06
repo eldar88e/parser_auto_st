@@ -72,7 +72,7 @@ class Manager < Hamster::Harvester
     end
     export
     keeper.finish
-    notify '📌 The parser completed its work successfully!'
+    notify '📌 The parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
