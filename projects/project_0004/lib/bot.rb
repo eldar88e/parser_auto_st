@@ -1,15 +1,22 @@
-require_relative 'model_manager'
-
-class Bot < Hamster::Harvester
-  def initialize(*_)
-    super
-    @manager = ModelManager.new
+class Bot
+  def initialize
+    @token     = ENV['TELEGRAM_BOT_TOKEN']
+    @messenger = Message.new
   end
 
   def run
-    Telegram::Bot::Client.run(ENV['TELEGRAM_BOT_TOKEN']) do |bot|
+    Telegram::Bot::Client.run(@token) do |bot|
       bot.listen do |message|
-        if message.text == 'run_last'
+        case message
+        when Telegram::Bot::Types::CallbackQuery
+          handle_callback(bot, message)
+        when Telegram::Bot::Types::Message
+          handle_message(bot, message)
+        end
+
+        if message.text == 'commands'
+          bot.api.send_message(chat_id: message.chat.id, text: commands)
+        elsif message.text == 'run_last'
           bot.api.send_message(chat_id: message.chat.id, text: run_last)
         elsif message.text == 'report'
           bot.api.send_message(chat_id: message.chat.id, text: report_games)
@@ -22,29 +29,26 @@ class Bot < Hamster::Harvester
 
   private
 
-  attr_reader :manager
+  attr_reader :messenger
 
-  def run_last
-    data = manager.run_last
-    <<~MESSAGE
-      Hомер запуска: #{data.id}
-      Статус: #{data.status}
-      Дата запуска: #{(data.created_at + 3.hours).strftime("%e %B %Y %T")}
-      Дата финиша: #{(data.updated_at + 3.hours).strftime("%e %B %Y %T")}
-    MESSAGE
+  def handle_callback(bot, message)
+    text = messenger.send(message.data.to_sym)
+    bot.api.send_message(chat_id: message.chat.id, text: )
   end
 
-  def report_games
-    games = manager.report_games
-    <<~MESSAGE
-      Турецкие игры:
-        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-        - Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
-      Украинские игры:
-        - Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
-        - Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
-        - Снятые с публикации: #{games.where(published: 0).where(parent: [21, 22]).size}
-    MESSAGE
+  def handle_message(bot, message)
+    case message.text
+    when '/start'
+      send_keyboard(bot, message.chat.id)
+    end
+  end
+
+  def send_keyboard(bot, chat_id)
+    keyboard = [
+      Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Последний запуск', callback_data: 'run_last'),
+      Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Отчет', callback_data: 'report_games')
+    ]
+    markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: keyboard)
+    bot.api.send_message(chat_id: chat_id, text: 'Выберите кнопку:', reply_markup: markup)
   end
 end
