@@ -1,9 +1,9 @@
-require_relative 'keeper'
+require_relative 'model_manager'
 
 class Bot < Hamster::Harvester
   def initialize(*_)
     super
-    @keeper = Keeper.new
+    @manager = ModelManager.new
   end
 
   def run
@@ -21,9 +21,9 @@ class Bot < Hamster::Harvester
 
   private
 
-  attr_reader :keeper
+  attr_reader :manager
 
   def run_last
-    keeper.run_last.status
+    manager.run_last.attributes
   end
 end

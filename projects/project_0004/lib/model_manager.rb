@@ -4,7 +4,7 @@ require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_additional'
 
-class Keeper < Hamster::Keeper
+class ModelManager < Hamster::Keeper
 
   def run_last
     SonyGameRun.last
