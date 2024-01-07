@@ -147,7 +147,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "📌 Parsed and updated lang info for #{keeper.updated_lang} game(s)."
+    notify "📌 Updated lang for #{keeper.updated_lang} game(s)."
   end
 
   def parse_save_desc_dd
@@ -161,7 +161,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "📌 Parsed and added description for #{keeper.updated_desc} game(s)."
+    notify "📌 Added description for #{keeper.updated_desc} game(s)."
   end
 
   def parse_save_desc_ru
@@ -182,15 +182,15 @@ class Manager < Hamster::Harvester
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
-    message = "📌 Results:"
-    message << "\n✅ Saved: #{keeper.saved} new games;" unless keeper.saved.zero?
-    message << "\n✅ Updated prices: #{keeper.updated} games;" unless keeper.updated.zero?
-    message << "\n✅ Skipped prices: #{keeper.skipped} games;" unless keeper.skipped.zero?
-    message << "\n✅ Updated menuindex: #{keeper.updated_menu_id} games;" unless keeper.updated_menu_id.zero?
-    message << "\n✅ Not parsed other platform: #{othr_pl_count} games;" unless othr_pl_count.zero?
-    message << "\n✅ Not parsed without or low price: #{not_prc_count} games;" unless not_prc_count.zero?
-    message << "\n✅ Not parsed other type: #{other_type_count} games;" unless other_type_count.zero?
-    message << "\n✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
+    message = ""
+    message << "✅ Saved: #{keeper.saved} new games;\n" unless keeper.saved.zero?
+    message << "✅ Updated prices: #{keeper.updated} games;\n" unless keeper.updated.zero?
+    message << "✅ Skipped prices: #{keeper.skipped} games;\n" unless keeper.skipped.zero?
+    message << "✅ Updated menuindex: #{keeper.updated_menu_id} games;\n" unless keeper.updated_menu_id.zero?
+    message << "✅ Not parsed other platform: #{othr_pl_count} games;\n" unless othr_pl_count.zero?
+    message << "✅ Not parsed without or low price: #{not_prc_count} games;\n" unless not_prc_count.zero?
+    message << "✅ Not parsed other type: #{other_type_count} games;\n" unless other_type_count.zero?
+    message << "✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message
   end
 

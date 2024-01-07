@@ -173,7 +173,7 @@ class Keeper < Hamster::Keeper
     game[:additional][:new] = !game_add[:release].nil? && game_add[:release] > start_new_date
     game_add.update(game[:additional])
     @count[:updated] += 1 if check_md5_hash
-    @count[:skipped] += 1 unless check_md5_hash
+    #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
     sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]

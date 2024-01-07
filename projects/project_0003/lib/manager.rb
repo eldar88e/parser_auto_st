@@ -36,7 +36,7 @@ class Manager < Hamster::Harvester
     parse_save_desc_lang_dd unless keeper.count[:saved].zero?
 
     keeper.delete_not_touched
-    notify "Deleted: #{keeper.count[:deleted]} old UA games" if keeper.count[:deleted] > 0
+    notify "‼️ Deleted: #{keeper.count[:deleted]} old UA games" if keeper.count[:deleted] > 0
 
     cleared_cache = false
     if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
@@ -118,20 +118,20 @@ class Manager < Hamster::Harvester
       desc   = parser.parse_desc_dd
       keeper.save_desc_lang_dd(desc, id[0])
     end
-    notify "Parsed and added description for #{keeper.count[:updated_desc]} UA game(s)."
-    notify "Parsed and added language for #{keeper.count[:updated_lang]} UA game(s)."
+    notify "📌 Added description for #{keeper.count[:updated_desc]} UA game(s)."
+    notify "📌 Added language for #{keeper.count[:updated_lang]} UA game(s)."
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
-    message << "Saved: #{keeper.count[:saved]} new UA games;" unless keeper.count[:saved].zero?
-    message << "\nUpdated prices: #{keeper.count[:updated]} UA games;" unless keeper.count[:updated].zero?
-    message << "\nSkipped prices: #{keeper.count[:skipped]} UA games;" unless keeper.count[:skipped].zero?
-    message << "\nUpdated menuindex: #{keeper.count[:updated_menu_id]} UA games;" unless keeper.count[:updated_menu_id].zero?
-    message << "\nNot parsed other platform: #{othr_pl_count} UA games;" unless othr_pl_count.zero?
-    message << "\nNot parsed without or low price: #{not_prc_count} UA games;" unless not_prc_count.zero?
-    message << "\nNot parsed other type: #{other_type_count} UA games;" unless other_type_count.zero?
-    message << "\nParsed: #{@pages} pages, #{parser_count} UA games." unless parser_count.zero?
+    message << "✅ Saved: #{keeper.count[:saved]} new UA games;\n" unless keeper.count[:saved].zero?
+    message << "✅ Updated prices: #{keeper.count[:updated]} UA games;\n" unless keeper.count[:updated].zero?
+    message << "✅ Skipped prices: #{keeper.count[:skipped]} UA games;\n" unless keeper.count[:skipped].zero?
+    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} UA games;\n" unless keeper.count[:updated_menu_id].zero?
+    message << "✅ Not parsed other platform: #{othr_pl_count} UA games;\n" unless othr_pl_count.zero?
+    message << "✅ Not parsed without or low price: #{not_prc_count} UA games;\n" unless not_prc_count.zero?
+    message << "✅ Not parsed other type: #{other_type_count} UA games;\n" unless other_type_count.zero?
+    message << "✅ Parsed: #{@pages} pages, #{parser_count} UA games." unless parser_count.zero?
     message
   end
 
