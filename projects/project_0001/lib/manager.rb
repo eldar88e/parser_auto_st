@@ -70,7 +70,7 @@ class Manager < Hamster::Harvester
       clear_cache
       cleared_cache = true
     end
-    export
+    export if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.updated_menu_id.zero?
     keeper.finish
     notify '👌 The parser succeeded!'
   rescue => error
