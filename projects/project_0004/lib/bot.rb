@@ -17,6 +17,10 @@ class Bot
         end
       end
     end
+  rescue => e
+    Hamster.report(message: "Bot is not worked, it will restarted\n#{e.message}")
+    sleep 5
+    retry
   end
 
   private

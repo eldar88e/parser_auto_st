@@ -3,6 +3,7 @@ create table sony_game_additionals
     `id`                           BIGINT(20) AUTO_INCREMENT PRIMARY KEY,
 
     article                        varchar(50)       DEFAULT NULL,
+    made_in                        varchar(255)      DEFAULT NULL,
     price                          decimal(10,2)     DEFAULT 0.00,
     price_tl                       decimal(10,2)     DEFAULT NULL,
     old_price                      decimal(10,2)     DEFAULT 0.00,
