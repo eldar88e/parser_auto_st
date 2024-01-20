@@ -18,6 +18,8 @@ create table sony_games
     createdby                      int(10)            DEFAULT 0,
     editedon                       int(20)            DEFAULT NULL,
     editedby                       int(10)            DEFAULT 0,
+    deletedon                      int(20)            DEFAULT NULL,
+    deletedby                      int(10)            DEFAULT 0,
     uri                            VARCHAR(255)       DEFAULT NULL,
     show_in_tree                   TINYINT(1)         DEFAULT 0,
 
