@@ -10,8 +10,6 @@ def scrape(options)
   elsif options[:auto]
     manager.download
     manager.store
-  elsif options[:export]
-    manager.export
   end
 rescue => error
   puts error.backtrace

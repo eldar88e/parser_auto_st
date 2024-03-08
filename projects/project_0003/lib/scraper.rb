@@ -40,8 +40,6 @@ class Scraper < Hamster::Scraper
     headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'ua-UA' }
     connect_to(link, ssl_verify: false, headers: headers)
   rescue => e
-    puts e
     Hamster.report message: e.message + "\n #{link}"
-    binding.pry
   end
 end

@@ -1,9 +1,9 @@
 class ApplicationRecord < ActiveRecord::Base
   establish_connection(adapter: ENV.fetch('ADAPTER') { 'mysql2' },
                        host: ENV.fetch('HOST') { 'localhost' },
-                       database: ENV.fetch('DATABASE'),
-                       username: ENV.fetch('USERNAME'),
-                       password: ENV.fetch('PASSWORD'))
+                       database: ENV.fetch('DATABASE_UA'),
+                       username: ENV.fetch('USERNAME_UA'),
+                       password: ENV.fetch('PASSWORD_UA'))
 
   self.abstract_class     = true
   self.inheritance_column = :_type_disabled
