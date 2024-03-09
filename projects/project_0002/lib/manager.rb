@@ -110,14 +110,12 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang_dd
-    #skip = true
     additional  = keeper.get_ps_ids_without_desc_ua
-    #ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
     scraper = Scraper.new(keeper)
     additional.each_with_index do |model, idx|
-      #skip = idx > 414 #model.janr == 'EP9000-PPSA08338_00-MSM2DDE000000000'
       puts idx.to_s.green
-      next if idx < 414
+      next if idx < 2665
+      #######
 
       page = scraper.scrape_desc(model.janr)
       next unless page

@@ -147,16 +147,13 @@ class Parser < Hamster::Parser
   private
 
   def make_alias(url)
+    url           = transliterate(url) if url.match?(/%/)
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
-    alias_raw     = alias_raw.reverse.join('-')[0..120]
-    binding.pry
-    transliterate alias_raw
+    alias_raw.reverse.join('-')[0..120]
   end
 
   def transliterate(str)
-    return str unless str.match?(/%/)
-
     url = URI.decode_www_form(str)[0][0]
     url.to_slug.transliterate(:russian).to_s
   end
