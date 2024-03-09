@@ -150,6 +150,7 @@ class Parser < Hamster::Parser
     alias_raw     = url.split('/')[-2..-1]
     alias_raw[-1] = alias_raw[-1][0..120]
     alias_raw     = alias_raw.reverse.join('-')[0..120]
+    binding.pry
     transliterate alias_raw
   end
 

@@ -115,7 +115,7 @@ class Manager < Hamster::Harvester
     #ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
     scraper = Scraper.new(keeper)
     additional.each_with_index do |model, idx|
-      skip = false if model.janr == 'EP9000-PPSA08338_00-MSM2DDE000000000'
+      skip = idx > 390 #model.janr == 'EP9000-PPSA08338_00-MSM2DDE000000000'
       puts idx.to_s.green
       next if skip
 

@@ -56,7 +56,6 @@ class Keeper < Hamster::Keeper
     if data[:content]
       data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
       data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      binding.pry
       model.sony_game.update(data) && @count[:updated_desc] += 1
     end
   rescue ActiveRecord::StatementInvalid => e
@@ -91,6 +90,8 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @count[:menu_id_count] < 151
+      game[:main][:uri]            = make_uri(game[:main][:alias], game[:additional][:platform])
+      game[:main][:description]    = form_description(game[:main][:pagetitle])
 
       if game_add
         sony_game = SonyGame.find(game_add.id)
@@ -113,7 +114,6 @@ class Keeper < Hamster::Keeper
 
         crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]
-        game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:parent]       = make_parent(game[:additional][:platform])
         game[:main][:publishedon]  = crnt_time
         game[:main][:publishedby]  = settings['user_id']
@@ -123,7 +123,6 @@ class Keeper < Hamster::Keeper
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
         game[:main][:menuindex]    =  @count[:menu_id_count]
         game[:main][:published]    = 1
-        game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
         game[:main][:show_in_tree] = 0
 
         need_category   = check_need_category(game[:additional][:platform])
