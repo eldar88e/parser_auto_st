@@ -180,8 +180,7 @@ class Keeper < Hamster::Keeper
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
     ########
-    binding.pry
-    sony_game.update(data.merge(data[:main])) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    sony_game.update(data.merge(game[:main])) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
     ##################
   end
 
