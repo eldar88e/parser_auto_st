@@ -95,7 +95,8 @@ class Keeper < Hamster::Keeper
       game[:main][:description]    = form_description(game[:main][:pagetitle])
 
       if game_add
-        sony_game = SonyGame.find(game_add.id)
+        #sony_game = SonyGame.find(game_add.id)
+        sony_game = game_add.sony_game
         if sony_game
           next if sony_game.deleted || !sony_game.published
         else
