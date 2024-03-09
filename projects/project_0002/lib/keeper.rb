@@ -46,7 +46,7 @@ class Keeper < Hamster::Keeper
     games_ids       = get_games_without_content.pluck(:id)
     search          = { id: games_ids }
     search[:run_id] = run_id if settings['new_touched_update_desc']
-    SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
+    SonyGameAdditional.where(search) #.pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_desc_lang_dd(data, id)

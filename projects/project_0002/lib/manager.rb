@@ -111,7 +111,7 @@ class Manager < Hamster::Harvester
 
   def parse_save_desc_lang_dd
     #ps_ids  = keeper.get_ps_ids_without_desc_ua
-    ps_ids = ['EP1470-PPSA09580_00-8208260812492840']
+    ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
       page   = scraper.scrape_desc(id[1])

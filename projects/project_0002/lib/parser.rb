@@ -29,7 +29,6 @@ class Parser < Hamster::Parser
       data[:lang] = { rus_screen: true }
     end
 
-
     script = @html.at('body script')
     return data unless script
 
