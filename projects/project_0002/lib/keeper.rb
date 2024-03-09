@@ -110,7 +110,7 @@ class Keeper < Hamster::Keeper
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
-        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+        game[:additional][:site_link] = setztings['ps_game'] + game[:additional][:janr]
         game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
@@ -180,7 +180,7 @@ class Keeper < Hamster::Keeper
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
     ########
-    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    sony_game.update(data.merge(data[:main])) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
     ##################
   end
 
