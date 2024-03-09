@@ -112,6 +112,7 @@ class Manager < Hamster::Harvester
   def parse_save_desc_lang_dd
     #skip = true
     additional  = keeper.get_ps_ids_without_desc_ua
+    binding.pry
     #ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
     scraper = Scraper.new(keeper)
     additional.each_with_index do |model, idx|
