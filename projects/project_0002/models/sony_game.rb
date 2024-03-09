@@ -24,4 +24,7 @@ class SonyGame < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error
   end
+
+  ActiveRecord::Base.logger = Logger.new($stdout)
+  self.logger = Logger.new(STDOUT)
 end

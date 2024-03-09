@@ -82,9 +82,10 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
+    additional_all = SonyGameAdditional.all
     games.each do |game|
       @count[:menu_id_count] += 1
-      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = additional_all.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
@@ -176,7 +177,9 @@ class Keeper < Hamster::Keeper
     #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-    sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
+    ########
+    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    ##################
   end
 
   def prepare_intro(game, content=nil)
