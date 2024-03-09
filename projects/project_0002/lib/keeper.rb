@@ -59,8 +59,9 @@ class Keeper < Hamster::Keeper
       model.sony_game.update(data) && @count[:updated_desc] += 1
     end
   rescue ActiveRecord::StatementInvalid => e
-    binding.pry
     Hamster.logger.error "ID: #{id} | #{e.message}"
+  rescue
+    binding.pry
   end
 
   def get_ps_ids
