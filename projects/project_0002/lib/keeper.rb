@@ -86,7 +86,7 @@ class Keeper < Hamster::Keeper
     games.each do |game|
       @count[:menu_id_count] += 1
       #game_add = additional_all.find { |i| i.data_source_url == game[:additional][:data_source_url] } # (data_source_url: game[:additional][:data_source_url])
-      game_add = SonyGameAdditional.joins(:sony_game).find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = SonyGameAdditional.includes(:sony_game).find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
