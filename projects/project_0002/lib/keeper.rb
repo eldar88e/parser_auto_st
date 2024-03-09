@@ -191,7 +191,7 @@ class Keeper < Hamster::Keeper
   end
 
   def form_description(title)
-    <<~DESCR
+    <<~DESCR.squeeze(' ').chomp
       Вы искали игру #{title} PS Store Украина. Не знаете где купить? – Конечно же в PS-Ukraine.ru! 100% гарантия 
       от блокировок. Поддержка и консультация, акции и скидки.
     DESCR
