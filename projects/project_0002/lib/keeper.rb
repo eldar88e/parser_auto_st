@@ -82,7 +82,7 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
-    additional_all = SonyGameAdditional.all
+    additional_all = SonyGameAdditional.includes(:sony_game)
     games.each do |game|
       @count[:menu_id_count] += 1
       game_add = additional_all.find_by(data_source_url: game[:additional][:data_source_url])
@@ -95,7 +95,7 @@ class Keeper < Hamster::Keeper
       game[:main][:description]    = form_description(game[:main][:pagetitle])
 
       if game_add
-        sony_game = SonyGame.find(game_add.id)
+        sony_game = game_add.sony_game
         if sony_game
           next if sony_game.deleted || !sony_game.published
         else
@@ -133,6 +133,9 @@ class Keeper < Hamster::Keeper
         SonyGame.store(game)
         @count[:saved] += 1
       end
+      ###
+      sleep 10
+      ####
     rescue ActiveRecord::RecordInvalid => e
       Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
     end
