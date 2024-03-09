@@ -134,7 +134,7 @@ class Keeper < Hamster::Keeper
         @count[:saved] += 1
       end
       ###
-      sleep 10
+      sleep 1
       ####
     rescue ActiveRecord::RecordInvalid => e
       Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
