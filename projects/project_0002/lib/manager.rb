@@ -23,6 +23,7 @@ class Manager < Hamster::Harvester
   end
 
   def store
+    binding.pry
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
 
