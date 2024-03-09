@@ -2,7 +2,7 @@
 require_relative '../models/setting'
 
 module Hamster
-  def self.setting
+  def self.settings
     Setting.first.attributes
   end
 end

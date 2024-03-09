@@ -32,7 +32,7 @@ module Hamster
       @_peon_       = Hamster::Harvester::Peon.new(storehouse)
       @_commands_   = Hamster.commands
       @logger       = Hamster.logger
-      @settings     ||= Hamster.setting
+      @settings     ||= Hamster.settings
       Hamster.close_connection(Setting)
     end
   end
