@@ -21,6 +21,7 @@ class Parser < Hamster::Parser
 
   def parse_desc_dd
     data     = {}
+    binding.pry
     lang_row = @html.at('div.container-fluid table')&.text&.downcase
     if lang_row&.match?(/полностью на русском/)
       data[:lang] = { rus_voice: true, rus_screen: true }
