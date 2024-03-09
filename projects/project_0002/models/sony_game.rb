@@ -1,7 +1,5 @@
 require_relative './application_record'
 class SonyGame < ApplicationRecord
-  validates :alias, uniqueness: true
-  validates :uri, uniqueness: true
 
   self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
