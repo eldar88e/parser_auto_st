@@ -110,14 +110,14 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang_dd
-    #ps_ids  = keeper.get_ps_ids_without_desc_ua
-    ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
+    additional  = keeper.get_ps_ids_without_desc_ua
+    #ps_ids = [[29458, 'EP1470-PPSA09580_00-8208260812492840']]
     scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_desc(id[1])
+    additional.each do |model|
+      page   = scraper.scrape_desc(model.janr)
       parser = Parser.new(html: page)
       desc   = parser.parse_desc_dd
-      keeper.save_desc_lang_dd(desc, id[0])
+      keeper.save_desc_lang_dd(desc, model)
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)."
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)."

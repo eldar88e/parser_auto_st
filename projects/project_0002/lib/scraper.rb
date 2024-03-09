@@ -14,7 +14,7 @@ class Scraper < Hamster::Scraper
 
   def scrape_desc(id)
     url = settings['dd_game'] + id
-    sleep rand(0.2..2.1)
+    sleep rand(0.1..0.5)
     get_response(url).body
   end
 
