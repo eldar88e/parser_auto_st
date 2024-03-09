@@ -119,7 +119,9 @@ class Manager < Hamster::Harvester
       puts idx.to_s.green
       next if skip
 
-      page   = scraper.scrape_desc(model.janr)
+      page = scraper.scrape_desc(model.janr)
+      next unless page
+
       parser = Parser.new(html: page)
       desc   = parser.parse_desc_dd
       keeper.save_desc_lang_dd(desc, model)
