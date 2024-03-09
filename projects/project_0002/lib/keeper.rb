@@ -82,10 +82,10 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
-    additional_all = SonyGameAdditional.includes(:sony_game)
+    #additional_all = SonyGameAdditional.includes(:sony_game)
     games.each do |game|
       @count[:menu_id_count] += 1
-      game_add = additional_all.find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
@@ -95,7 +95,7 @@ class Keeper < Hamster::Keeper
       game[:main][:description]    = form_description(game[:main][:pagetitle])
 
       if game_add
-        sony_game = game_add.sony_game
+        sony_game = SonyGame.find(game_add.id)
         if sony_game
           next if sony_game.deleted || !sony_game.published
         else
