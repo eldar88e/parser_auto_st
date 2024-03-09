@@ -56,12 +56,11 @@ class Keeper < Hamster::Keeper
     if data[:content]
       data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
       data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
+      binding.pry
       model.sony_game.update(data) && @count[:updated_desc] += 1
     end
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{id} | #{e.message}"
-  rescue
-    binding.pry
   end
 
   def get_ps_ids
