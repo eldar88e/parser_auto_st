@@ -111,6 +111,7 @@ class Manager < Hamster::Harvester
 
   def parse_save_desc_lang_dd
     additional = keeper.get_ps_ids_without_desc_ua
+    binding.pry
     scraper    = Scraper.new(keeper)
     additional.each do |model|
       page = scraper.scrape_desc(model.janr)
