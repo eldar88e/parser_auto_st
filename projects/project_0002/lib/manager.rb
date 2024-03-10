@@ -110,11 +110,11 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang_dd
-    additional = keeper.get_ps_ids_without_desc_ua
+    additional = keeper.get_game_without_desc
     binding.pry
     scraper    = Scraper.new(keeper)
     additional.each do |model|
-      page = scraper.scrape_desc(model.janr)
+      page = scraper.scrape_desc(model.sony_game_additional.janr)
       binding.pry if model.janr == 'EP1464-PPSA02572_00-ALANWAKE20000000'
       next unless page
 

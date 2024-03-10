@@ -42,21 +42,24 @@ class Keeper < Hamster::Keeper
     @count[:deleted] += sg.size
   end
 
-  def get_ps_ids_without_desc_ua
-    games_ids       = get_games_without_content.order(:menuindex).limit(200).pluck(:id)
-    search          = { id: games_ids }
+  def get_game_without_desc
+    #games_ids       = get_games_without_content.order(:menuindex).limit(200).pluck(:id)
+    search          = {} # { id: games_ids }
     search[:run_id] = run_id if settings['new_touched_update_desc']
-    SonyGameAdditional.where(search) #.pluck(:id, :janr) # :janr contains Sony game ID
+    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).order(:menuindex).limit(200)
+            .includes(:sony_game_additional).where(sony_game_additional: search)
+
+    #SonyGameAdditional.where(search) #.pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_desc_lang_dd(data, model)
     lang = data.delete(:lang)
-    model.update(lang) && @count[:updated_lang] += 1 if lang
+    model.sony_game_additional.update(lang) && @count[:updated_lang] += 1 if lang
 
     if data[:content]
       data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
       data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      model.sony_game.update(data) && @count[:updated_desc] += 1
+      model.update(data) && @count[:updated_desc] += 1
     end
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{model.id} | #{e.message}"
