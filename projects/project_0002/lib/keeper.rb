@@ -43,7 +43,7 @@ class Keeper < Hamster::Keeper
   end
 
   def get_ps_ids_without_desc_ua
-    games_ids       = get_games_without_content.order(:menuindex).limit(100).pluck(:id)
+    games_ids       = get_games_without_content.order(:menuindex).limit(200).pluck(:id)
     search          = { id: games_ids }
     search[:run_id] = run_id if settings['new_touched_update_desc']
     SonyGameAdditional.where(search) #.pluck(:id, :janr) # :janr contains Sony game ID
