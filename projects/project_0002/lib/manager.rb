@@ -112,11 +112,7 @@ class Manager < Hamster::Harvester
   def parse_save_desc_lang_dd
     additional = keeper.get_ps_ids_without_desc_ua
     scraper    = Scraper.new(keeper)
-    additional.each_with_index do |model, idx|
-      #######
-      puts idx.to_s.green
-      next if idx < 1165
-      #######
+    additional.each do |model|
       page = scraper.scrape_desc(model.janr)
       next unless page
 

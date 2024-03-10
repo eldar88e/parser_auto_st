@@ -82,21 +82,16 @@ class Keeper < Hamster::Keeper
   def save_ua_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
-    #additional_all = SonyGameAdditional.includes(:sony_game)
     games.each do |game|
       @count[:menu_id_count] += 1
-      #game_add = additional_all.find { |i| i.data_source_url == game[:additional][:data_source_url] } # (data_source_url: game[:additional][:data_source_url])
-      game_add = SonyGameAdditional.includes(:sony_game).find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @count[:menu_id_count] < 151
-      game[:main][:uri]            = make_uri(game[:main][:alias], game[:additional][:platform])
-      game[:main][:description]    = form_description(game[:main][:pagetitle])
 
       if game_add
-        #sony_game = SonyGame.find(game_add.id)
         sony_game = game_add.sony_game
         if sony_game
           next if sony_game.deleted || !sony_game.published
@@ -118,6 +113,8 @@ class Keeper < Hamster::Keeper
         crnt_time                  = Time.current.to_i
         game[:main][:longtitle]    = game[:main][:pagetitle]
         game[:main][:parent]       = make_parent(game[:additional][:platform])
+        game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
+        game[:main][:description]  = form_description(game[:main][:pagetitle])
         game[:main][:publishedon]  = crnt_time
         game[:main][:publishedby]  = settings['user_id']
         game[:main][:createdon]    = crnt_time
@@ -137,8 +134,6 @@ class Keeper < Hamster::Keeper
       end
     rescue ActiveRecord::RecordInvalid => e
       Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
-    rescue
-      binding.pry
     end
   end
 
@@ -181,9 +176,7 @@ class Keeper < Hamster::Keeper
     #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-    ########
-    sony_game.update(data.merge(game[:main])) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
-    ##################
+    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
   end
 
   def prepare_intro(game, content=nil)
