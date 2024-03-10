@@ -15,7 +15,7 @@ class Scraper < Hamster::Scraper
   def scrape_desc(id)
     url = settings['dd_game'] + id
     response = get_response(url)
-    sleep rand(0.1..0.9) if response&.status != 404
+    sleep rand(0.5..1.9)
     return if response&.status == 404
 
     response.body
