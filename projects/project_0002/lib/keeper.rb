@@ -43,13 +43,9 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    #games_ids       = get_games_without_content.order(:menuindex).limit(200).pluck(:id)
-    search          = {} # { id: games_ids }
-    search[:run_id] = run_id if settings['new_touched_update_desc']
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).order(:menuindex).where(content: [nil, '']).limit(200)
+    search = { run_id: run_id } if settings['new_touched_update_desc']
+    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
             .includes(:sony_game_additional).where(sony_game_additional: search)
-
-    #SonyGameAdditional.where(search) #.pluck(:id, :janr) # :janr contains Sony game ID
   end
 
   def save_desc_lang_dd(data, model)
