@@ -105,6 +105,7 @@ class Keeper < Hamster::Keeper
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
+        binding.pry
         image_link_raw                = game[:additional].delete(:image_link_raw)
         binding.pry
         game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
