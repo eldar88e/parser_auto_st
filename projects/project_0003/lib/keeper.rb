@@ -105,9 +105,10 @@ class Keeper < Hamster::Keeper
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
-        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
-        game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
-        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
+        game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
+        image_link_raw                = game[:additional].delete(:image_link_raw)
+        game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
+        game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
 
         crnt_time                  = Time.current.to_i

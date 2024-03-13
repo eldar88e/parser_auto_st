@@ -18,7 +18,6 @@ create table sony_game_additionals
     discount_end_date              DATETIME          DEFAULT NULL,
     platform                       VARCHAR(30)       DEFAULT NULL,
     type_game                      VARCHAR(20)       DEFAULT NULL,
-    image_link_raw                 VARCHAR(255)      DEFAULT NULL,
     data_source_url                VARCHAR(255)      DEFAULT NULL,
     janr                           VARCHAR(255)      DEFAULT NULL,
     publisher                      VARCHAR(255)      DEFAULT NULL,
