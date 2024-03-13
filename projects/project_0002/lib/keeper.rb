@@ -89,6 +89,7 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @count[:menu_id_count] < 151
+      image_link_raw               = game[:additional].delete(:image_link_raw)
 
       if game_add
         sony_game = game_add.sony_game
@@ -105,9 +106,6 @@ class Keeper < Hamster::Keeper
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
-        binding.pry
-        image_link_raw                = game[:additional].delete(:image_link_raw)
-        binding.pry
         game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
