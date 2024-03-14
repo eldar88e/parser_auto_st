@@ -43,7 +43,7 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    search = { run_id: run_id } if settings['new_touched_update_desc']
+    search = settings['new_touched_update_desc'] ? { run_id: run_id } : {}
     SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
             .includes(:sony_game_additional).where(sony_game_additional: search)
   end
