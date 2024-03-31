@@ -121,7 +121,7 @@ class Manager < Hamster::Harvester
 
       parser = Parser.new(html: page)
       desc   = parser.parse_sony_desc_lang
-      keeper.save_desc_lang(desc, model)
+      keeper.save_desc_lang(desc, model) if desc
     rescue => e
       puts e.full_message
       binding.pry
