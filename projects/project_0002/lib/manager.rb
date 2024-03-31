@@ -18,14 +18,14 @@ class Manager < Hamster::Harvester
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(5)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
-    notify 'Scraping PS UA started' if @debug
+    notify 'Scraping PS_UA started' if @debug
     scraper = Scraper.new(keeper: keeper, settings: @settings)
     scraper.scrape_games_ua
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end
 
   def store
-    notify 'Parsing PS UA started' if @debug
+    notify 'Parsing PS_UA started' if @debug
     keeper.status = 'parsing'
 
     if commands[:desc]
@@ -35,7 +35,7 @@ class Manager < Hamster::Harvester
 
     parse_save_main
 
-    parse_save_desc_lang unless keeper.count[:saved].zero?
+    parse_save_desc_lang if !keeper.count[:saved].zero? || @settings[:day_all_lang_scrap].to_i == Date.current.day
 
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_UA games" if keeper.count[:deleted] > 0
@@ -114,12 +114,12 @@ class Manager < Hamster::Harvester
   def parse_save_desc_lang
     additional =
       if @settings[:day_all_lang_scrap].to_i == Date.current.day
-        notify "⚠️ Day of parsing All games without rus and with empty content!"
+        notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
         keeper.get_all_game_without_rus
       else
         keeper.get_game_without_desc
       end
-    scraper    = Scraper.new(keeper: keeper, settings: @settings)
+    scraper = Scraper.new(keeper: keeper, settings: @settings)
     additional.each_with_index do |model, idx|
       puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
       page = scraper.scrape_lang(model.sony_game_additional.janr)
@@ -129,8 +129,8 @@ class Manager < Hamster::Harvester
       desc   = parser.parse_sony_desc_lang
       keeper.save_desc_lang(desc, model) if desc
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)."
-    notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)."
+    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)." unless keeper.count[:updated_desc].zero?
+    notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)." unless keeper.count[:updated_lang].zero?
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
