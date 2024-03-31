@@ -84,28 +84,14 @@ class Manager < Hamster::Harvester
   def parse_save_main
     run_id          = keeper.run_id
     list_categories = peon.list(subfolder: "#{run_id}")
-    ########
-    dc = '.DS_Store'
-    ###########
     list_categories.each do |cat_name|
-      ################
-      next if cat_name == dc
-      ##################
-
-      list_sub_categories = peon.list(subfolder: "run_id_#{run_id}/#{cat_name}")
+      path = "#{run_id}/#{cat_name}"
+      list_sub_categories = peon.list(subfolder: path)
       list_sub_categories.each do |sub_name|
-        ################
-        next if sub_name == dc
-        ##################
-
-        list_name = peon.give_list(subfolder: "run_id_#{run_id}/#{cat_name}/#{sub_name}")
-        puts "run_id_#{run_id}/#{cat_name}/#{sub_name}".green
+        list_name = peon.give_list(subfolder: path + "/#{sub_name}")
+        puts "run_id_#{run_id}/#{cat_name}/#{sub_name}".green if @debug
         list_name.each do |name|
-          ################
-          next if name == dc
-          ##################
-
-          file       = peon.give(file: name, subfolder: "run_id_#{run_id}/#{cat_name}/#{sub_name}")
+          file       = peon.give(file: name, subfolder: path + "/#{sub_name}")
           parser     = Parser.new(html: file)
           supplement = parser.parse_supplement
 
