@@ -115,7 +115,7 @@ class Manager < Hamster::Harvester
     additional = keeper.get_game_without_desc
     scraper    = Scraper.new(keeper: keeper, settings: @settings)
     additional.each_with_index do |model, idx|
-      puts "#{idx} || #{model.sony_game_additional.janr}" if @debug
+      puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
       page = scraper.scrape_lang(model.sony_game_additional.janr)
       next unless page
 
