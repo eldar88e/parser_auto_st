@@ -36,7 +36,7 @@ class Manager < Hamster::Harvester
       cleared_cache = true
     end
 
-    #keeper.finish
+    keeper.finish
     notify make_message
     notify '👌 The Eczane parser succeeded!'
   rescue => error
