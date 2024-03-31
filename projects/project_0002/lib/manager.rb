@@ -122,11 +122,12 @@ class Manager < Hamster::Harvester
       parser = Parser.new(html: page)
       desc   = parser.parse_sony_desc_lang
       keeper.save_desc_lang(desc, model)
+    rescue => e
+      puts e.full_message
+      binding.pry
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)."
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)."
-  rescue => e
-    binding.pry
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
