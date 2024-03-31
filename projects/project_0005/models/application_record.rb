@@ -1,6 +1,6 @@
 class ApplicationRecord < ActiveRecord::Base
   establish_connection(adapter: 'mysql2',
-                       host: ENV.fetch('HOST'),
+                       host: ENV.fetch('HOST_UA'),
                        database: ENV.fetch('DB_ECZANE'),
                        username: ENV.fetch('USER_ECZANE'),
                        password: ENV.fetch('PASS_ECZANE'))

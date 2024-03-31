@@ -16,7 +16,7 @@ class Manager < Hamster::Harvester
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(5)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
-    notify 'Scraping started' if @debug
+    notify 'Scraping for Eczane has begun' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
@@ -31,10 +31,10 @@ class Manager < Hamster::Harvester
     #keeper.delete_not_touched
 
     cleared_cache = false
-    #if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
-    #  clear_cache
-    #  cleared_cache = true
-    #end
+    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? #|| !keeper.count[:deleted].zero?
+      clear_cache
+      cleared_cache = true
+    end
 
     #keeper.finish
     notify make_message
@@ -42,7 +42,7 @@ class Manager < Hamster::Harvester
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    #clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?)
+    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero?) #|| !keeper.count[:deleted].zero?)
   end
 
   private
@@ -51,8 +51,8 @@ class Manager < Hamster::Harvester
 
   def clear_cache
     ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN_UA')
-    ftp_pass = ENV.fetch('FTP_PASS_UA')
+    ftp_user = ENV.fetch('FTP_LOGIN_ECZANE')
+    ftp_pass = ENV.fetch('FTP_PASS_ECZANE')
 
     Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
       ftp.chdir('/core/cache/context_settings/web')
