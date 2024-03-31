@@ -1,14 +1,16 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
+require_relative '../models/parser_setting'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
   def initialize
     super
-    @keeper = Keeper.new
-    @debug  = commands[:debug]
-    @pages  = 0
+    @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
+    @keeper   = Keeper.new(@settings)
+    @debug    = commands[:debug]
+    @pages    = 0
   end
 
   def download
@@ -17,7 +19,7 @@ class Manager < Hamster::Harvester
     peon.throw_trash(5)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
     notify '⚙️ Scraping for Eczane has begun' if @debug
-    scraper = Scraper.new(keeper)
+    scraper = Scraper.new(keeper: keeper, settings: @settings)
     scraper.scrape
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end

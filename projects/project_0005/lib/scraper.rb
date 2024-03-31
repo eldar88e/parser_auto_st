@@ -1,11 +1,12 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
-  def initialize(keeper)
+  def initialize(**args)
     super
     @referers = YAML.load_file('referer.yml')['referer']
     @count    = 0
-    @keeper   = keeper
+    @keeper   = args[:keeper]
+    @settings = args[:settings]
     @debug    = commands[:debug]
     @run_id   = @keeper.run_id
   end
@@ -13,7 +14,7 @@ class Scraper < Hamster::Scraper
   attr_reader :count
 
   def scrape
-    main_path         = 'https://med.parasafi.com/vitaminy-bad-i-pischevye-dobavki/'
+    main_path         = @settings[:main_path]
     subcategories_one = get_response(main_path).body
     @html             = Nokogiri::HTML(subcategories_one)
     subcat_list_one   = @html.css('ul.ut2-subcategories li a').map { |i| i['href'] }
@@ -39,7 +40,7 @@ class Scraper < Hamster::Scraper
             content_product = get_response(product).body
             name      = product.split('/')[-1].gsub(/-/, '_') + '.html'
             subfolder = "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}".gsub(/-/, '_')
-            puts "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}/#{name}" if @debug
+            puts "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}/#{name}".green if @debug
             peon.put(file: name, content: content_product, subfolder: subfolder)
             @count += 1
             sleep rand(0.1..0.7)

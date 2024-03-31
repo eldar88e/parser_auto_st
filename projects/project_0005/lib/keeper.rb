@@ -4,13 +4,14 @@ require_relative '../models/content'
 require_relative '../models/intro'
 
 class Keeper < Hamster::Keeper
-  SOURCE = 2
+  SOURCE     = 2
+  PROPERTIES = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
 
-  def initialize
+  def initialize(parser_settings)
     super
     @run_id    = run.run_id
     @count     = { count: 0, saved: 0, updated: 0, skipped: 0, deleted: 0, content_updated: 0 }
-    @settings  = { user_id: 3, template_id: 6 }
+    @settings  = parser_settings
     @parents   = {}
     @no_parent = []
   end
@@ -56,7 +57,7 @@ class Keeper < Hamster::Keeper
       product[:main][:alias]        = product[:source_url].split('/')[-1]
       product[:main][:uri]          = product[:main][:alias]
       product[:main][:template]     = @settings[:template_id]
-      product[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
+      product[:main][:properties]   = PROPERTIES
       product[:main][:show_in_tree] = 0
       product[:main][:longtitle]    = product[:main][:pagetitle]
       product[:main][:parent]       = make_parent(product[:source_url])
@@ -67,11 +68,12 @@ class Keeper < Hamster::Keeper
       end
 
       product[:main][:description] = form_description(product[:main][:pagetitle])
-      crnt_time                    = Time.current.to_i
+      cur_time                     = Time.current.to_i
       product[:run_id]             = run_id
-      product[:main][:publishedon] = crnt_time
+      product[:new]                = true
+      product[:main][:publishedon] = cur_time
       product[:main][:publishedby] = @settings[:user_id]
-      product[:main][:createdon]   = crnt_time
+      product[:main][:createdon]   = cur_time
       product[:main][:createdby]   = @settings[:user_id]
       product[:main][:published]   = 1
       product[:intro]              = prepare_intro(product[:main])
@@ -92,12 +94,12 @@ class Keeper < Hamster::Keeper
       content_vendor = Content.find_by(pagetitle: vendor, parent: 77, template: 16)
       if content_vendor.nil?
         data               = {}
-        crnt_time          = Time.current.to_i
+        cur_time          = Time.current.to_i
         data[:template]    = 16
-        data[:properties]  = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
-        data[:publishedon] = crnt_time
+        data[:properties]  = PROPERTIES
+        data[:publishedon] = cur_time
         data[:publishedby] = 3
-        data[:createdon]   = crnt_time
+        data[:createdon]   = cur_time
         data[:createdby]   = data[:publishedby]
         data[:parent]      = 77
         data[:published]   = 1
@@ -128,7 +130,7 @@ class Keeper < Hamster::Keeper
         crnt_time = Time.current.to_i
         main_info = {}
         main_info[:template]    = 5
-        main_info[:properties]  = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
+        main_info[:properties]  = PROPERTIES
         main_info[:publishedon] = crnt_time
         main_info[:publishedby] = @settings[:user_id]
         main_info[:createdon]   = crnt_time
@@ -159,7 +161,9 @@ class Keeper < Hamster::Keeper
 
   def update_date(data, product_db, content_db)
     content_data = data.delete(:main)
-
+    cur_time     = Time.current
+    end_time     = Time.at(content_db.createdon) + 3.month
+    data[:new]   = cur_time < end_time if product_db.new
     product_db.update(data)
     @count[:updated] += 1 if product_db[:md5_hash] != data[:md5_hash]
     @count[:skipped] += 1 if product_db[:md5_hash] == data[:md5_hash]
@@ -175,10 +179,7 @@ class Keeper < Hamster::Keeper
   end
 
   def form_description(title)
-    <<~DESCR.squeeze(' ').chomp
-      Вы искали #{title} Eczane Store. Не знаете где купить? – Конечно же в Eczane Store! 100% гарантия доставки. \
-      Поддержка и консультация, акции и скидки.
-    DESCR
+    @settings[:description].gsub('[title]', title)
   end
 
   def run
