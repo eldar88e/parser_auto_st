@@ -83,7 +83,7 @@ class Manager < Hamster::Harvester
 
   def parse_save_main
     run_id          = keeper.run_id
-    list_categories = peon.list(subfolder: "run_id_#{run_id}")
+    list_categories = peon.list(subfolder: "#{run_id}")
     ########
     dc = '.DS_Store'
     ###########
