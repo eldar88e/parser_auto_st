@@ -16,14 +16,14 @@ class Manager < Hamster::Harvester
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(5)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
-    notify 'Scraping for Eczane has begun' if @debug
+    notify '⚙️ Scraping for Eczane has begun' if @debug
     scraper = Scraper.new(keeper)
     scraper.scrape
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end
 
   def store
-    notify 'Parsing started' if @debug
+    notify '⚙️ Parsing for Eczane has begun' if @debug
     keeper.status = 'parsing'
 
     parse_save_main

@@ -66,17 +66,15 @@ class Keeper < Hamster::Keeper
         return
       end
 
-      product[:main][:description]  = form_description(product[:main][:pagetitle])
-
-      crnt_time                     = Time.current.to_i
-      product[:run_id]              = run_id
-      product[:main][:publishedon]  = crnt_time
-      product[:main][:publishedby]  = @settings[:user_id]
-      product[:main][:createdon]    = crnt_time
-      product[:main][:createdby]    = @settings[:user_id]
-      product[:main][:published]    = 1
-
-      product[:intro]               = prepare_intro(product[:main])
+      product[:main][:description] = form_description(product[:main][:pagetitle])
+      crnt_time                    = Time.current.to_i
+      product[:run_id]             = run_id
+      product[:main][:publishedon] = crnt_time
+      product[:main][:publishedby] = @settings[:user_id]
+      product[:main][:createdon]   = crnt_time
+      product[:main][:createdby]   = @settings[:user_id]
+      product[:main][:published]   = 1
+      product[:intro]              = prepare_intro(product[:main])
 
       Content.store(product)
       @count[:saved] += 1

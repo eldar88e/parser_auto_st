@@ -22,9 +22,6 @@ class Parser < Hamster::Parser
     get_params(params_raw, supplement)
 
     supplement
-  rescue => e
-    puts e
-    binding.pry
   end
 
   private
@@ -57,10 +54,6 @@ class Parser < Hamster::Parser
         supplement[:compound] = value
       elsif label.match?(/Способ применения/)
         supplement[:mode_application] = value
-    ########
-      else
-        binding.pry
-    ############
       end
     end
   end
