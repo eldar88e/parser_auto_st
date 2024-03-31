@@ -39,16 +39,9 @@ class Scraper < Hamster::Scraper
             content_product = get_response(product).body
             name      = product.split('/')[-1].gsub(/-/, '_') + '.html'
             subfolder = "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}".gsub(/-/, '_')
-       ##########
-            begin
-              puts "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}/#{name}"
-              peon.put(file: name, content: content_product, subfolder: subfolder)
-              @count += 1
-            rescue => e
-              puts e
-              binding.pry
-            end
-       ###############
+            puts "#{run_id}/#{subcategori_folder}/#{sub_sub_folder}/#{name}" if @debug
+            peon.put(file: name, content: content_product, subfolder: subfolder)
+            @count += 1
             sleep rand(0.1..0.7)
           end
           page += 1

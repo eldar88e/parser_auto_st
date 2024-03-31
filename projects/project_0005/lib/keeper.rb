@@ -39,11 +39,6 @@ class Keeper < Hamster::Keeper
     product[:main][:content]   = product.delete(:content)
     product[:touched_run_id]   = run_id
 
-    if product[:main][:parent].nil?
-      @no_parent << product[:source_url]
-      return
-    end
-
     save_vendor(product)
 
     product_db = Product.find_by(source_url: product[:source_url])
@@ -65,6 +60,12 @@ class Keeper < Hamster::Keeper
       product[:main][:show_in_tree] = 0
       product[:main][:longtitle]    = product[:main][:pagetitle]
       product[:main][:parent]       = make_parent(product[:source_url])
+
+      if product[:main][:parent].nil?
+        @no_parent << product[:source_url]
+        return
+      end
+
       product[:main][:description]  = form_description(product[:main][:pagetitle])
 
       crnt_time                     = Time.current.to_i

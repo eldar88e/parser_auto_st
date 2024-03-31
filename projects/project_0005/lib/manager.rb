@@ -89,7 +89,7 @@ class Manager < Hamster::Harvester
       list_sub_categories = peon.list(subfolder: path)
       list_sub_categories.each do |sub_name|
         list_name = peon.give_list(subfolder: path + "/#{sub_name}")
-        puts "run_id_#{run_id}/#{cat_name}/#{sub_name}".green if @debug
+        puts "#{path}/#{sub_name}".green if @debug
         list_name.each do |name|
           file       = peon.give(file: name, subfolder: path + "/#{sub_name}")
           parser     = Parser.new(html: file)
@@ -100,7 +100,7 @@ class Manager < Hamster::Harvester
         end
       end
     end
-    notify "Для более 10 товаров не могут быть сохранены. \
+    notify "Более 10 товаров не могут быть сохранены. \
     Вот несколько из последних:\n#{keeper.no_parent.last(5).join(', ')}" if keeper.no_parent.size > 10
   end
 
