@@ -19,54 +19,27 @@ class Parser < Hamster::Parser
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
   end
 
-  def parse_desc_dd
-    data     = {}
-    lang_row = @html.at('div.container-fluid table')&.text&.downcase
-    if lang_row&.match?(/полностью на русском/)
-      data[:lang] = { rus_voice: true, rus_screen: true }
-    elsif lang_row&.match?(/интерфейс на русском/)
-      data[:lang] = { rus_screen: true }
-    end
-
-    script = @html.at('body script')
-    return data unless script
-
-    json_raw = script.text.match(/{.*}/)
-    return data unless json_raw
-
-    json    = JSON.parse(json_raw.to_s)
-    content = json.dig('product', 'product', 'description')
-    return data unless content
-
-    data[:content] = content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip
-    data
-  end
-
-  def parse_lang
+  def parse_sony_desc_lang
     dl = @html.at('dl.psw-l-grid')
     return if dl.nil?
 
     dt_count = dl.css('dt').size
     info     = {}
+
     dt_count.times do
       key   = dl.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
       value = dl.at('dd').remove.text
-      next if key == :platform
-
       info[key] = key == :release ? Date.parse(value) : value
-    rescue => e
-      notify e.message
     end
-    need_keys = %i[publisher genre release]
-    lang      = info.slice!(*need_keys)
-    new_lang  = { voice: '', screen_lang: '' }
-    lang.each do |k, v|
-      new_lang[:voice]       += v if k.to_s.match?(/voice/)
-      new_lang[:screen_lang] += v if k.to_s.match?(/screen/)
-    end
-    info[:rus_voice]  = new_lang[:voice].downcase.match?(/rus/)
-    info[:rus_screen] = new_lang[:screen_lang].downcase.match?(/rus/)
-    info
+
+    result              = {}
+    result[:release]    = info[:выпуск]
+    result[:publisher]  = info[:издатель]
+    result[:genre]      = info[:жанры]
+    result[:rus_voice]  = info[:голос].downcase.match?(/рус/)
+    result[:rus_screen] = info[:языки_отображения].downcase.match?(/рус/)
+    result[:content]    = @html.at('.psw-l-grid p').children.to_html
+    result
   end
 
   def get_last_page

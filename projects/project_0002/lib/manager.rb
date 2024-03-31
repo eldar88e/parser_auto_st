@@ -1,14 +1,16 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
+require_relative '../models/parser_setting'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
   def initialize
     super
-    @keeper = Keeper.new
-    @debug  = commands[:debug]
-    @pages  = 0
+    @keeper   = Keeper.new
+    @debug    = commands[:debug]
+    @pages    = 0
+    @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
   end
 
   def download
@@ -16,24 +18,24 @@ class Manager < Hamster::Harvester
     puts 'The Store has been emptied.' if @debug
     peon.throw_trash(5)
     puts 'The Trash has been emptied of files older than 10 days.' if @debug
-    notify 'Scraping started' if @debug
-    scraper = Scraper.new(keeper)
+    notify 'Scraping PS UA started' if @debug
+    scraper = Scraper.new(keeper: keeper, settings: @settings)
     scraper.scrape_games_ua
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end
 
   def store
-    notify 'Parsing started' if @debug
+    notify 'Parsing PS UA started' if @debug
     keeper.status = 'parsing'
 
     if commands[:desc]
-      parse_save_desc_lang_dd
+      parse_save_desc_lang
       return
     end
 
     parse_save_main
 
-    parse_save_desc_lang_dd unless keeper.count[:saved].zero?
+    parse_save_desc_lang unless keeper.count[:saved].zero?
 
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_UA games" if keeper.count[:deleted] > 0
@@ -109,19 +111,22 @@ class Manager < Hamster::Harvester
     notify message if message.present?
   end
 
-  def parse_save_desc_lang_dd
+  def parse_save_desc_lang
     additional = keeper.get_game_without_desc
-    scraper    = Scraper.new(keeper)
-    additional.each do |model|
-      page = scraper.scrape_desc(model.sony_game_additional.janr)
+    scraper    = Scraper.new(keeper: keeper, settings: @settings)
+    additional.each_with_index do |model, idx|
+      puts "#{idx} || #{model.sony_game_additional.janr}" if @debug
+      page = scraper.scrape_lang(model.sony_game_additional.janr)
       next unless page
 
       parser = Parser.new(html: page)
-      desc   = parser.parse_desc_dd
-      keeper.save_desc_lang_dd(desc, model)
+      desc   = parser.parse_sony_desc_lang
+      keeper.save_desc_lang(desc, model)
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)."
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)."
+  rescue => e
+    binding.pry
   end
 
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)

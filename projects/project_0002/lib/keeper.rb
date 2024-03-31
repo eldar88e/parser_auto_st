@@ -43,18 +43,21 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    search = settings['new_touched_update_desc'] ? { run_id: run_id } : {}
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
-            .includes(:sony_game_additional).where(sony_game_additional: search)
+    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
+                     .includes(:sony_game_additional)
+    ##############
+    # result = result.where(sony_game_additional: { run_id: run_id }) if settings['new_touched_update_desc']
+    ################
+    result
   end
 
-  def save_desc_lang_dd(data, model)
-    lang = data.delete(:lang)
-    model.sony_game_additional.update(lang) && @count[:updated_lang] += 1 if lang
+  def save_desc_lang(data, model)
+    content = data.delete(:content)
+    model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data
 
-    if data[:content]
-      data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
-      data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
+    if content
+      content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
+      data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
       model.update(data) && @count[:updated_desc] += 1
     end
   rescue ActiveRecord::StatementInvalid => e

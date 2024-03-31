@@ -1,24 +1,25 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
-  def initialize(keeper)
+  def initialize(**args)
     super
     @referers = YAML.load_file('referer.yml')['referer']
     @count    = 0
-    @keeper   = keeper
+    @keeper   = args[:keeper]
+    @settings = args[:settings]
     @debug    = commands[:debug]
     @run_id   = @keeper.run_id
   end
 
   attr_reader :count
 
-  def scrape_desc(id)
-    url = settings['dd_game'] + id
+  def scrape_lang(id)
+    url      = @settings[:sony_url] + id
     response = get_response(url)
-    sleep rand(0.5..1.9)
     return if response&.status == 404
 
-    response.body
+    sleep rand(0.1..0.9)
+    response&.body
   end
 
   def scrape_games_ua
