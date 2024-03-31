@@ -170,7 +170,7 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_add, sony_game)
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = !game_add[:release].nil? && game_add[:release] > start_new_date
+    game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
     game_add.update(game[:additional])
     @count[:updated] += 1 if check_md5_hash
     #@count[:skipped] += 1 unless check_md5_hash
