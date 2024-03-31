@@ -75,7 +75,7 @@ class Scraper < Hamster::Scraper
       retry
     end
 
-    Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
     Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+    Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
   end
 end

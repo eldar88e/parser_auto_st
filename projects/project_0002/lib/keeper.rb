@@ -10,11 +10,12 @@ class Keeper < Hamster::Keeper
   PARENT_PS4 = 22
   MADE_IN    = 'Ukraine'
 
-  def initialize
+  def initialize(settings)
     super
-    @run_id = run.run_id
-    @count  = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
-                skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
+    @settings = settings
+    @run_id   = run.run_id
+    @count    = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
+                  skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
   end
 
   attr_reader :run_id, :count
@@ -31,10 +32,6 @@ class Keeper < Hamster::Keeper
     run.finish
   end
 
-  def get_games_without_content
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
-  end
-
   def delete_not_touched
     sg = SonyGame.includes(:sony_game_additional).active_games([PARENT_PS5, PARENT_PS4])
                  .where.not(sony_game_additional: { touched_run_id: run_id })
@@ -45,9 +42,8 @@ class Keeper < Hamster::Keeper
   def get_game_without_desc
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
                      .includes(:sony_game_additional)
-    ##############
-    # result = result.where(sony_game_additional: { run_id: run_id }) if settings['new_touched_update_desc']
-    ################
+
+    result = result.where(sony_game_additional: { run_id: run_id }) if @settings[:touch_update_desc]
     result
   end
 
@@ -64,21 +60,9 @@ class Keeper < Hamster::Keeper
     Hamster.logger.error "ID: #{model.id} | #{e.message}"
   end
 
-  def get_ps_ids
-    params = { rus_voice: 0 }
-    if settings['day_lang_all_scrap'] == Date.current.day
-      params[:id] = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).order(:menuindex).pluck(:id)
-    else
-      params[:run_id] = run_id
-    end
-    SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
-  end
-
-  def save_lang_info(lang, id)
-    lang.merge!(touched_run_id: run_id)
-    lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
-    SonyGameAdditional.find(id).update(lang)
-    @count[:updated_lang] += 1
+  def get_all_game_without_rus
+    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).includes(:sony_game_additional)
+            .where(sony_game_additional: { rus_voice: 0 })
   end
 
   def save_ua_games(games)

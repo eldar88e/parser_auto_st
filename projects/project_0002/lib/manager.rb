@@ -7,10 +7,10 @@ require 'net/ftp'
 class Manager < Hamster::Harvester
   def initialize
     super
-    @keeper   = Keeper.new
     @debug    = commands[:debug]
     @pages    = 0
     @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
+    @keeper   = Keeper.new(@settings)
   end
 
   def download
@@ -112,7 +112,13 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang
-    additional = keeper.get_game_without_desc
+    additional =
+      if @settings[:day_all_lang_scrap].to_i == Date.current.day
+        notify "⚠️ Day of parsing All games without rus and with empty content!"
+        keeper.get_all_game_without_rus
+      else
+        keeper.get_game_without_desc
+      end
     scraper    = Scraper.new(keeper: keeper, settings: @settings)
     additional.each_with_index do |model, idx|
       puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
@@ -122,9 +128,6 @@ class Manager < Hamster::Harvester
       parser = Parser.new(html: page)
       desc   = parser.parse_sony_desc_lang
       keeper.save_desc_lang(desc, model) if desc
-    rescue => e
-      puts e.full_message
-      binding.pry
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)."
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)."

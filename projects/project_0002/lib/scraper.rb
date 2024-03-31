@@ -23,7 +23,7 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_ua
-    path_ua = settings['path_tr'].sub('tr-store', 'ua-store')
+    path_ua    = settings['path_tr'].sub('tr-store', 'ua-store')
     first_page = "#{settings['site']}#{path_ua}1#{settings['params']}"
     last_page  = make_last_page(first_page)
     [*1..last_page].each do |page|
@@ -56,11 +56,11 @@ class Scraper < Hamster::Scraper
 
     if try < 4
       Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
-      Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
       sleep 5 * try
       retry
     end
 
     Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+    Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
   end
 end
