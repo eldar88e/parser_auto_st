@@ -152,7 +152,6 @@ class Keeper < Hamster::Keeper
     @count[:updated] += 1 if check_md5_hash
     #@count[:skipped] += 1 unless check_md5_hash
 
-    binding.pry
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
     sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
   end
