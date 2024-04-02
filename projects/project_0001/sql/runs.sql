@@ -1,4 +1,4 @@
-CREATE TABLE `sony_game_runs`
+CREATE TABLE `runs`
 (
   `id`              BIGINT(20) AUTO_INCREMENT PRIMARY KEY,
   `status`          VARCHAR(255)       DEFAULT 'processing',

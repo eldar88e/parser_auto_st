@@ -1,4 +1,4 @@
-CREATE TABLE `sony_game_ps_ua_runs`
+CREATE TABLE `ua_runs`
 (
   `id`              BIGINT(20) AUTO_INCREMENT PRIMARY KEY,
   `status`          VARCHAR(255)       DEFAULT 'processing',

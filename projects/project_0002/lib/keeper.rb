@@ -1,4 +1,4 @@
-require_relative '../models/sony_game_ps_ua_run'
+require_relative '../models/run'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
@@ -180,6 +180,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(SonyGamePsUaRun)
+    RunId.new(Run)
   end
 end
