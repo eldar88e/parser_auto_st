@@ -41,7 +41,6 @@ class Keeper < Hamster::Keeper
     games_row    = get_top_games(product_keys)
     content_key  = %i[pagetitle alias content]
     product_keys -= content_key
-    binding.pry
     games_row.each do |game|
       save_ua_games({ main: content_key.zip(game[0..(content_key.size - 1)]).to_h,
                       additional: product_keys.zip(game[content_key.size..-1]).to_h })
@@ -74,9 +73,9 @@ class Keeper < Hamster::Keeper
     md5  = MD5Hash.new(columns: keys)
     game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
     game[:additional][:popular]  = @count[:menu_id_count] < 151
-
+    binding.pry
     if game_add
-      sony_game = SonyGame.find(game_add.id)
+      sony_game = game_add.sony_game
       if sony_game
         return if sony_game.deleted || !sony_game.published
       else
