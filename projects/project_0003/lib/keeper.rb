@@ -1,8 +1,10 @@
-require_relative '../models/sony_game_ua_run'
+require_relative '../models/ua_run'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_intro'
+require_relative '../models/content'
+require_relative '../models/product'
 
 class Keeper < Hamster::Keeper
   SOURCE     = 3
@@ -10,11 +12,12 @@ class Keeper < Hamster::Keeper
   PARENT_PS4 = 22
   MADE_IN    = 'Ukraine'
 
-  def initialize
+  def initialize(quantity)
     super
     @run_id = run.run_id
     @count  = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
                 skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
+    @quantity = quantity
   end
 
   attr_reader :run_id, :count
@@ -31,8 +34,19 @@ class Keeper < Hamster::Keeper
     run.finish
   end
 
-  def get_games_without_content
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
+  def import_top_games
+    product_keys = %i[pagetitle alias content article price old_price image thumb price_tl old_price_tl site_link
+                      janr data_source_url platform price_bonus price_bonus_tl type_game rus_voice rus_screen
+                      genre release publisher discount_end_date]
+    games_row    = get_top_games(product_keys)
+    content_key  = %i[pagetitle alias content]
+    product_keys -= content_key
+    games_row.each do |game|
+      save_ua_games({ main: content_key.zip(game[0..(content_key.size - 1)]).to_h,
+                      additional: product_keys.zip(game[content_key.size..-1]).to_h })
+    rescue ActiveRecord::RecordInvalid => e
+      Hamster.logger.error "#{game[12]} || #{e.message}"
+    end
   end
 
   def delete_not_touched
@@ -42,102 +56,64 @@ class Keeper < Hamster::Keeper
     @count[:deleted] += sg.size
   end
 
-  def get_ps_ids_without_desc_ua
-    games_ids       = get_games_without_content.pluck(:id)
-    search          = { id: games_ids }
-    search[:run_id] = run_id if settings['new_touched_update_desc']
-    SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
+  private
+
+  def get_top_games(game_key)
+    Content.order(:menuindex).active_contents([PARENT_PS5, PARENT_PS4])
+           .includes(:product).limit(@quantity).pluck(*game_key)
   end
 
-  def save_desc_lang_dd(data, id)
-    lang = data.delete(:lang)
-    SonyGameAdditional.find(id).update(lang) && @count[:updated_lang] += 1 if lang
-
-    if data[:content]
-      data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
-      data[:content].gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      SonyGame.find(id).update(data) && @count[:updated_desc] += 1
-    end
-  rescue ActiveRecord::StatementInvalid => e
-    Hamster.logger.error "ID: #{id} | #{e.message}"
-  end
-
-  def get_ps_ids
-    params = { rus_voice: 0 }
-    if settings['day_lang_all_scrap'] == Date.current.day
-      params[:id] = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).order(:menuindex).pluck(:id)
-    else
-      params[:run_id] = run_id
-    end
-    SonyGameAdditional.where(params).where.not(janr: [nil, '']).pluck(:id, :janr) # :janr contains Sony game ID
-  end
-
-  def save_lang_info(lang, id)
-    lang.merge!(touched_run_id: run_id)
-    lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
-    SonyGameAdditional.find(id).update(lang)
-    @count[:updated_lang] += 1
-  end
-
-  def save_ua_games(games)
+  def save_ua_games(game)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
-    games.each do |game|
-      @count[:menu_id_count] += 1
-      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
-      game[:additional][:touched_run_id] = run_id
-      keys = %i[data_source_url price old_price price_bonus discount_end_date]
-      md5  = MD5Hash.new(columns: keys)
-      game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
-      game[:additional][:popular]  = @count[:menu_id_count] < 151
+    @count[:menu_id_count] += 1
+    game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+    game[:additional][:touched_run_id] = run_id
+    keys = %i[data_source_url price old_price price_bonus discount_end_date]
+    md5  = MD5Hash.new(columns: keys)
+    game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
+    game[:additional][:popular]  = @count[:menu_id_count] < 151
 
-      if game_add
-        sony_game = SonyGame.find(game_add.id)
-        if sony_game
-          next if sony_game.deleted || !sony_game.published
-        else
-          Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
-                                 "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
-                                 "#{SonyGameCategories.table_name} или добавте в основную таблицу под этим ID запись."
-          next
-        end
-        update_date(game, game_add, sony_game)
+    if game_add
+      sony_game = game_add.sony_game
+      if sony_game
+        return if sony_game.deleted || !sony_game.published
       else
-        game[:additional][:run_id]    = run_id
-        game[:additional][:source]    = SOURCE
-        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
-        game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
-        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
-        game[:additional][:made_in]   = MADE_IN
-
-        crnt_time                  = Time.current.to_i
-        game[:main][:longtitle]    = game[:main][:pagetitle]
-        game[:main][:description]  = form_description(game[:main][:pagetitle])
-        game[:main][:parent]       = make_parent(game[:additional][:platform])
-        game[:main][:publishedon]  = crnt_time
-        game[:main][:publishedby]  = settings['user_id']
-        game[:main][:createdon]    = crnt_time
-        game[:main][:createdby]    = settings['user_id']
-        game[:main][:template]     = settings['template_id']
-        game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
-        game[:main][:menuindex]    =  @count[:menu_id_count]
-        game[:main][:published]    = 1
-        game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
-        game[:main][:show_in_tree] = 0
-
-        need_category   = check_need_category(game[:additional][:platform])
-        game[:category] = { category_id: PARENT_PS4 } if need_category
-        game[:intro]    = prepare_intro(game[:main])
-
-        SonyGame.store(game)
-        @count[:saved] += 1
+        Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
+                               "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
+                               "#{SonyGameCategories.table_name} или добавте в основную таблицу под этим ID запись."
+        return
       end
-    rescue ActiveRecord::RecordInvalid => e
-      Hamster.logger.error "#{game[:main][:uri]} || #{e.message}"
+      update_date(game, game_add, sony_game)
+    else
+      game[:additional][:run_id]    = run_id
+      game[:additional][:source]    = SOURCE
+      game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
+      game[:additional][:made_in]   = MADE_IN
+
+      crnt_time                  = Time.current.to_i
+      game[:main][:longtitle]    = game[:main][:pagetitle]
+      game[:main][:description]  = form_description(game[:main][:pagetitle])
+      game[:main][:parent]       = make_parent(game[:additional][:platform])
+      game[:main][:publishedon]  = crnt_time
+      game[:main][:publishedby]  = settings['user_id']
+      game[:main][:createdon]    = crnt_time
+      game[:main][:createdby]    = settings['user_id']
+      game[:main][:template]     = settings['template_id']
+      game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
+      game[:main][:menuindex]    =  @count[:menu_id_count]
+      game[:main][:published]    = 1
+      game[:main][:uri]          = make_uri(game[:main][:alias], game[:additional][:platform])
+      game[:main][:show_in_tree] = 0
+
+      need_category   = check_need_category(game[:additional][:platform])
+      game[:category] = { category_id: PARENT_PS4 } if need_category
+      game[:intro]    = prepare_intro(game[:main])
+
+      SonyGame.store(game)
+      @count[:saved] += 1
     end
   end
-
-  private
 
   def make_uri(alias_, platform)
     start = platform.downcase.match?(/ps5/) ? @ps5_path : @ps4_path
@@ -170,13 +146,15 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_add, sony_game)
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = !game_add[:release].nil? && game_add[:release] > start_new_date
+    game[:additional][:new] = game_add[:release] && game_add[:release] > start_new_date
     game_add.update(game[:additional])
     @count[:updated] += 1 if check_md5_hash
     #@count[:skipped] += 1 unless check_md5_hash
 
-    data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-    sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
+    ## убрать content из data
+    data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
+    ###
+    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
   end
 
   def prepare_intro(game, content=nil)
@@ -193,6 +171,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(SonyGameUaRun)
+    RunId.new(UaRun)
   end
 end

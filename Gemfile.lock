@@ -53,7 +53,7 @@ GEM
     method_source (1.0.0)
     minitest (5.20.0)
     multipart-post (2.3.0)
-    mysql2 (0.5.5)
+    mysql2 (0.5.6)
     net-ftp (0.2.0)
       net-protocol
       time
@@ -93,7 +93,7 @@ DEPENDENCIES
   dotenv
   faraday
   hashie
-  mysql2
+  mysql2 (~> 0.5.6)
   net-ftp
   nokogiri
   pry
@@ -103,4 +103,4 @@ RUBY VERSION
    ruby 3.2.2p53
 
 BUNDLED WITH
-   2.4.22
+   2.5.6

@@ -1,4 +1,4 @@
-require_relative '../models/sony_game_run'
+require_relative '../models/run'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_intro'
 require_relative '../models/sony_game_category'
@@ -108,6 +108,10 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
+      image_link_raw               = game[:additional].delete(:image_link_raw)
+      #
+      game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+      #
 
       if game_add
         sony_game = SonyGame.find(game_add.id)
@@ -124,9 +128,9 @@ class Keeper < Hamster::Keeper
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         #game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
-        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
-        game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
-        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
+        #game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+        game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
+        game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
 
         crnt_time                  = Time.current.to_i
@@ -190,7 +194,7 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_add, sony_game)
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = game_add[:release] && game_add[:release] > start_new_date
+    game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
     game_add.update(game[:additional])
     @updated += 1 if check_md5_hash
     #@skipped += 1 unless check_md5_hash
@@ -245,6 +249,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(SonyGameRun)
+    RunId.new(Run)
   end
 end

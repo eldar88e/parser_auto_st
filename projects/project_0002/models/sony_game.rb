@@ -1,6 +1,7 @@
 require_relative './application_record'
-
 class SonyGame < ApplicationRecord
+  validates :alias, uniqueness: true
+
   self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
   has_one :sony_game_additional, foreign_key: 'id'   #optional: true

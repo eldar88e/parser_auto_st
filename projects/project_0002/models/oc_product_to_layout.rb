@@ -1,7 +1,0 @@
-require_relative './application_record_price'
-
-class OcProductToLayout < ApplicationRecordPrice
-  self.table_name = 'oc_product_to_layout'
-
-  belongs_to :oc_product, foreign_key: 'product_id'
-end

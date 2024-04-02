@@ -11,7 +11,7 @@ module Hamster
     end
 
     def settings
-      @settings
+      @settings_
     end
     
     # @return [String] path Hamster storehouse directory
@@ -32,7 +32,7 @@ module Hamster
       @_peon_       = Hamster::Harvester::Peon.new(storehouse)
       @_commands_   = Hamster.commands
       @logger       = Hamster.logger
-      @settings     = Hamster.settings
+      @settings_    = Hamster.settings
       Hamster.close_connection(Setting)
     end
   end

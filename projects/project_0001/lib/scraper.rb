@@ -78,11 +78,11 @@ class Scraper < Hamster::Scraper
 
     if try < 4
       Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
-      Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
       sleep 5 * try
       retry
     end
 
     Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+    Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
   end
 end
