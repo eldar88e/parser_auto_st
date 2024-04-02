@@ -110,7 +110,6 @@ class Keeper < Hamster::Keeper
       game[:category] = { category_id: PARENT_PS4 } if need_category
       game[:intro]    = prepare_intro(game[:main])
 
-      binding.pry
       SonyGame.store(game)
       @count[:saved] += 1
     end
@@ -153,7 +152,11 @@ class Keeper < Hamster::Keeper
     #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
-    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    if sony_game.update(data)
+      @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    else
+      binding.pry
+    end
   end
 
   def prepare_intro(game, content=nil)
