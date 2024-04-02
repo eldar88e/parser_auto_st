@@ -5,7 +5,6 @@ class Setting < ActiveRecord::Base
                        username: ENV.fetch('USERNAME'),
                        password: ENV.fetch('PASSWORD'))
 
-  self.table_name = ENV['BD_TABLE_NAME_SETTING']
   self.inheritance_column = :_type_disabled
 
   #ActiveRecord::Base.logger = Logger.new($stdout)

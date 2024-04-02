@@ -108,6 +108,10 @@ class Keeper < Hamster::Keeper
       md5  = MD5Hash.new(columns: keys)
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
+      image_link_raw               = game[:additional].delete(:image_link_raw)
+      #
+      game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+      #
 
       if game_add
         sony_game = SonyGame.find(game_add.id)
@@ -124,9 +128,9 @@ class Keeper < Hamster::Keeper
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
         #game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
-        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
-        game[:additional][:image]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['medium_size'])
-        game[:additional][:thumb]     = game[:additional][:image_link_raw].sub(/720&h=720/, settings['small_size'])
+        #game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+        game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
+        game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
 
         crnt_time                  = Time.current.to_i
