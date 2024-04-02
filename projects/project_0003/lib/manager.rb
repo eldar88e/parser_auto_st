@@ -4,7 +4,8 @@ require 'net/ftp'
 class Manager < Hamster::Harvester
   def initialize
     super
-    @keeper = Keeper.new(800)
+    @parse_count = 800
+    @keeper = Keeper.new(@parse_count)
     @debug  = commands[:debug]
     @pages  = 0
   end
@@ -74,6 +75,7 @@ class Manager < Hamster::Harvester
     message << "✅ Updated prices: #{keeper.count[:updated]} UA games;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} UA games;\n" unless keeper.count[:skipped].zero?
     message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} UA games;\n" unless keeper.count[:updated_menu_id].zero?
+    message << "✅ Imported: #{@parse_count} UA games."
     message
   end
 
