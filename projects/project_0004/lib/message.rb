@@ -15,10 +15,13 @@ class Message < Hamster::Keeper
   end
 
   def run_last
-    runs    = manager.run_last
-    tr_data = runs[0]
-    ua_data = runs[1]
-    "📌 Информация о TR парсере:\n" + make_run_text(tr_data) + "\n" + "📌 Информация о UA парсере:\n" + make_run_text(ua_data)
+    runs       = manager.run_last
+    tr_data    = runs[0]
+    ua_data    = runs[1]
+    ps_ua_data = runs[2]
+    "📌 Информация о TR парсере:\n" + make_run_text(tr_data) +
+      "\n" + "📌 Информация о UA парсере:\n" + make_run_text(ua_data) +
+      "\n" + "📌 Информация о PS_UA парсере:\n" + make_run_text(ps_ua_data)
   end
 
   def report_games
