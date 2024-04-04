@@ -159,6 +159,7 @@ class Keeper < Hamster::Keeper
     ###
     return if sony_game[:menuindex] < 793
 
+    binding.pry
     if sony_game.update(data)
       @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
       puts "#{sony_game[:menuindex]} || #{@count[:updated_menu_id]}"
