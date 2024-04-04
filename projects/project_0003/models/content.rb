@@ -6,7 +6,7 @@ class Content < ApplicationRecord
                        username: ENV.fetch('DATABASE_UA'),
                        password: ENV.fetch('PASSWORD_UA'))
 
-  self.table_name = 'modx_site_content'
+  self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
   has_one :product, foreign_key: 'id'   #optional: true
 

@@ -154,7 +154,11 @@ class Keeper < Hamster::Keeper
     ## убрать content из data
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
     ###
-    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    if sony_game.update(data)
+      @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    else
+      binding.pry
+    end
   end
 
   def prepare_intro(game, content=nil)
