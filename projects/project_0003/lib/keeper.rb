@@ -157,6 +157,8 @@ class Keeper < Hamster::Keeper
     ## убрать content из data
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
     ###
+    return if sony_game[:menuindex] < 793
+
     if sony_game.update(data)
       @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
       puts "#{sony_game[:menuindex]} || #{@count[:updated_menu_id]}"
