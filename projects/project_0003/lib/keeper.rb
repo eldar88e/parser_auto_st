@@ -45,6 +45,7 @@ class Keeper < Hamster::Keeper
       save_ua_games({ main: content_key.zip(game[0..(content_key.size - 1)]).to_h,
                       additional: product_keys.zip(game[content_key.size..-1]).to_h })
     rescue ActiveRecord::RecordInvalid => e
+      binding.pry
       Hamster.logger.error "#{game[12]} || #{e.message}"
     end
   end
