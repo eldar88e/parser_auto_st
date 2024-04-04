@@ -160,7 +160,7 @@ class Keeper < Hamster::Keeper
     if sony_game.update(data)
       @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
       puts "#{sony_game[:menuindex]} || #{@count[:updated_menu_id]}"
-      sleep 0.5
+      sleep 0.1
     else
       binding.pry
     end
