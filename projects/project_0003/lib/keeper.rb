@@ -44,6 +44,8 @@ class Keeper < Hamster::Keeper
     games_row.each do |game|
       save_ua_games({ main: content_key.zip(game[0..(content_key.size - 1)]).to_h,
                       additional: product_keys.zip(game[content_key.size..-1]).to_h })
+    rescue => e
+      binding.pry
     rescue ActiveRecord::RecordInvalid => e
       binding.pry
       Hamster.logger.error "#{game[12]} || #{e.message}"
@@ -87,6 +89,7 @@ class Keeper < Hamster::Keeper
       end
       update_date(game, game_add, sony_game)
     else
+      binding.pry
       game[:additional][:run_id]    = run_id
       game[:additional][:source]    = SOURCE
       game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
