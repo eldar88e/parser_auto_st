@@ -89,7 +89,6 @@ class Keeper < Hamster::Keeper
       end
       update_date(game, game_add, sony_game)
     else
-      binding.pry
       game[:additional][:run_id]    = run_id
       game[:additional][:source]    = SOURCE
       game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-ua') + game[:additional][:janr]
@@ -114,7 +113,6 @@ class Keeper < Hamster::Keeper
       game[:category] = { category_id: PARENT_PS4 } if need_category
       game[:intro]    = prepare_intro(game[:main])
 
-      binding.pry
       SonyGame.store(game)
       @count[:saved] += 1
     end
@@ -164,6 +162,8 @@ class Keeper < Hamster::Keeper
     else
       binding.pry
     end
+  rescue => e
+    binding.pry
   end
 
   def prepare_intro(game, content=nil)
