@@ -71,7 +71,7 @@ class Keeper < Hamster::Keeper
     @ps5_path ||= make_parent_path(:ps5)
     @count[:menu_id_count] += 1
 
-    if @count[:menu_id_count] == 793
+    if @count[:menu_id_count] > 793
       binding.pry
     end
 
