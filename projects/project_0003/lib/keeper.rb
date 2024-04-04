@@ -70,6 +70,11 @@ class Keeper < Hamster::Keeper
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
     @count[:menu_id_count] += 1
+
+    if @count[:menu_id_count] == 793
+      binding.pry
+    end
+
     game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
     game[:additional][:touched_run_id] = run_id
     keys = %i[data_source_url price old_price price_bonus discount_end_date]
