@@ -54,6 +54,5 @@ module Hamster
     def log(text, color = nil, verbose = false)
       Hamster.log(text, color, verbose)
     end
-
   end
 end
