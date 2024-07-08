@@ -115,7 +115,7 @@ class Keeper < Hamster::Keeper
           if !sony_game.published
             next
           elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
-            sony_game.update(deleted: 0)
+            sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
             @restored += 1
           elsif sony_game.deleted
             next

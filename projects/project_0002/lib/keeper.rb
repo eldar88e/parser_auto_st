@@ -15,7 +15,7 @@ class Keeper < Hamster::Keeper
     @settings = settings
     @run_id   = run.run_id
     @count    = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
-                  skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
+                  skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0, restored: 0 }
   end
 
   attr_reader :run_id, :count
@@ -81,7 +81,15 @@ class Keeper < Hamster::Keeper
       if game_add
         sony_game = game_add.sony_game
         if sony_game
-          next if sony_game.deleted || !sony_game.published
+          #next if sony_game.deleted || !sony_game.published
+          if !sony_game.published
+            next
+          elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
+            sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
+            @count[:restored] += 1
+          elsif sony_game.deleted
+            next
+          end
         else
           Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
                                  "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
