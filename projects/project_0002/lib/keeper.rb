@@ -86,6 +86,7 @@ class Keeper < Hamster::Keeper
             next
           elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
             sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
+            sony_game.sony_game_additional.update(touched_run_id: run_id)
             @count[:restored] += 1
           elsif sony_game.deleted
             next
@@ -166,8 +167,7 @@ class Keeper < Hamster::Keeper
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
-    game_add.update(game[:additional])
-    @count[:updated] += 1 if check_md5_hash
+    game_add.update(game[:additional]) && @count[:updated] += 1 if check_md5_hash
     #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
