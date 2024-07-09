@@ -35,8 +35,7 @@ class Keeper < Hamster::Keeper
   def delete_not_touched
     sg = SonyGame.includes(:sony_game_additional).active_games([PARENT_PS5, PARENT_PS4])
                  .where.not(sony_game_additional: { touched_run_id: run_id })
-    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id'])
-    @count[:deleted] += sg.size
+    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id']) && @count[:deleted] += sg.size
   end
 
   def get_game_without_desc
