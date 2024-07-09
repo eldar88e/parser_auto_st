@@ -79,13 +79,13 @@ class Keeper < Hamster::Keeper
       if sony_game
         #return if sony_game.deleted || !sony_game.published
         if !sony_game.published
-          next
+          return
         elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
           sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
           sony_game.sony_game_additional.update(touched_run_id: run_id)
           @count[:restored] += 1
         elsif sony_game.deleted
-          next
+          return
         end
       else
         Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
