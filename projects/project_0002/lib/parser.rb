@@ -36,8 +36,8 @@ class Parser < Hamster::Parser
     result[:release]    = info[:выпуск]
     result[:publisher]  = info[:издатель]
     result[:genre]      = info[:жанры]
-    result[:rus_voice]  = info[:голос]&.downcase&.match?(/рус/)
-    result[:rus_screen] = info[:языки_отображения]&.downcase&.match?(/рус/)
+    result[:rus_voice]  = info[:голос]&.downcase&.match?(/рус/) || 0
+    result[:rus_screen] = info[:языки_отображения]&.downcase&.match?(/рус/) || 0
     result[:content]    = @html.at('.psw-l-grid p').children.to_html
     result
   end
