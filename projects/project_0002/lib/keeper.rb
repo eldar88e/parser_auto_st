@@ -47,7 +47,6 @@ class Keeper < Hamster::Keeper
   end
 
   def save_desc_lang(data, model)
-    binding.pry
     content = data.delete(:content)
     model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data
 
