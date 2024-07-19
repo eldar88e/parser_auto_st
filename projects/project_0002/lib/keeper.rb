@@ -41,8 +41,8 @@ class Keeper < Hamster::Keeper
   def get_game_without_desc
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
                      .includes(:sony_game_additional)
-
-    result = result.where(sony_game_additional: { run_id: run_id }) if @settings[:touch_update_desc]
+    ## TODO убрать комент
+    #result = result.where(sony_game_additional: { run_id: run_id }) if @settings[:touch_update_desc]
     result
   end
 
