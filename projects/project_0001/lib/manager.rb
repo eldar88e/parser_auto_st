@@ -51,13 +51,22 @@ class Manager < Hamster::Harvester
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
 
-    if commands[:desc]
-      parse_save_desc_lang
+    if commands[:lang]
+      parse_save_lang
+      return
+    elsif commands[:desc]
+      #parse_save_desc_ru
+      parse_save_desc_dd
       return
     end
 
     parse_save_main
-    parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
+
+    if !keeper.saved.zero? || settings['day_lang_all_scrap'].to_i == Date.current.day
+      notify "⚠️ Day of parsing All games without rus lang!"
+      parse_save_lang
+    end
+
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
@@ -132,28 +141,6 @@ class Manager < Hamster::Harvester
     notify message if message.present?
   end
 
-  def parse_save_desc_lang
-    additional =
-      if settings['day_all_lang_scrap'].to_i == Date.current.day
-        notify "⚠️ Day of parsing All games without rus and with empty content!"
-        keeper.get_all_game_without_rus
-      else
-        keeper.get_game_without_desc
-      end
-    scraper = Scraper.new(keeper)
-    additional.each_with_index do |model, idx|
-      puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
-      page = scraper.scrape_lang(model.sony_game_additional.janr)
-      next unless page
-
-      parser = Parser.new(html: page)
-      desc   = parser.parse_sony_desc_lang
-      keeper.save_desc_lang(desc, model) if desc
-    end
-    notify "📌 Added description for #{keeper.updated_desc} game(s)." unless keeper.updated_desc.zero?
-    notify "📌 Added language for #{keeper.updated_lang} game(s)." unless keeper.updated_lang.zero?
-  end
-
   def parse_save_lang
     ps_ids  = keeper.get_ps_ids
     scraper = Scraper.new(keeper)
@@ -165,7 +152,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "📌 Updated lang for #{keeper.updated_lang} game(s)."
+    notify "📌 Updated lang for #{keeper.updated_lang} game(s)." unless keeper.updated_lang.zero?
   end
 
   def parse_save_desc_dd
@@ -179,7 +166,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "📌 Added description for #{keeper.updated_desc} game(s)."
+    notify "📌 Added description for #{keeper.updated_desc} game(s)." unless keeper.updated_desc.zero?
   end
 
   def parse_save_desc_ru

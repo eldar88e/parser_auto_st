@@ -40,35 +40,6 @@ class Keeper < Hamster::Keeper
     run.finish
   end
 
-  def get_all_game_without_rus
-    SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).includes(:sony_game_additional)
-            .where(sony_game_additional: { rus_voice: 0 })
-  end
-
-  def get_game_without_desc
-    result = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).where(content: [nil, ''])
-                     .includes(:sony_game_additional)
-
-    ####### TODO убрать коментарий
-    # result = result.where(sony_game_additional: { run_id: run_id }) if settings['touch_update_desc']
-    ###########
-    result
-  end
-
-  def save_desc_lang(data, model)
-    binding.pry
-    content = data.delete(:content)
-    model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data
-
-    if content
-      content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
-      model.update(data) && @count[:updated_desc] += 1 if model.content != content
-    end
-  rescue ActiveRecord::StatementInvalid => e
-    Hamster.logger.error "ID: #{model.id} | #{e.message}"
-  end
-
   def list_last_popular_game(limit, parent)
     SonyGame.includes(:sony_game_additional, :sony_game_intro).active_games(parent).order(menuindex: :asc).limit(limit)
   end
