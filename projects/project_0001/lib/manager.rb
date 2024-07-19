@@ -63,7 +63,7 @@ class Manager < Hamster::Harvester
     parse_save_main
 
     if !keeper.saved.zero? || settings['day_lang_all_scrap'].to_i == Date.current.day
-      notify "⚠️ Day of parsing All games without rus lang!"
+      notify "⚠️ Day of parsing All games without rus lang!" if settings['day_lang_all_scrap'].to_i == Date.current.day
       parse_save_lang
     end
 
