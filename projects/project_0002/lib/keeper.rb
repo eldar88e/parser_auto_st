@@ -53,7 +53,7 @@ class Keeper < Hamster::Keeper
     if content
       content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
       data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
-      model.update(data) && @count[:updated_desc] += 1
+      model.update(data) && @count[:updated_desc] += 1 if model.content != content
     end
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{model.id} | #{e.message}"

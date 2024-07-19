@@ -13,9 +13,12 @@ class Scraper < Hamster::Scraper
   attr_reader :count
 
   def scrape_lang(id)
-    url = settings['ps_game'] + id
-    sleep rand(0.2..2.1)
-    get_response(url).body
+    url      = "https://store.playstation.com/ru-tr/product/#{id}"
+    response = get_response(url)
+    return if response&.status == 404
+
+    sleep rand(0.1..0.9)
+    response&.body
   end
 
   def scrape_desc(id)

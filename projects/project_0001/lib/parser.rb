@@ -32,6 +32,7 @@ class Parser < Hamster::Parser
     { content: content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip }
   end
 
+  #### OLD ##############
   def parse_lang
     dl = @html.at('dl.psw-l-grid')
     return if dl.nil?
@@ -57,6 +58,30 @@ class Parser < Hamster::Parser
     info[:rus_voice]  = new_lang[:voice].downcase.match?(/rus/)
     info[:rus_screen] = new_lang[:screen_lang].downcase.match?(/rus/)
     info
+  end
+  #############
+
+  def parse_sony_desc_lang
+    dl = @html.at('dl.psw-l-grid')
+    return if dl.nil?
+
+    dt_count = dl.css('dt').size
+    info     = {}
+
+    dt_count.times do
+      key   = dl.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
+      value = dl.at('dd').remove.text
+      info[key] = key == :release ? Date.parse(value) : value
+    end
+
+    result              = {}
+    result[:release]    = info[:выпуск]
+    result[:publisher]  = info[:издатель]
+    result[:genre]      = info[:жанры]
+    result[:rus_voice]  = info[:голос]&.downcase&.match?(/рус/) || 0
+    result[:rus_screen] = info[:языки_отображения]&.downcase&.match?(/рус/) || 0
+    result[:content]    = @html.at('.psw-l-grid p').children.to_html
+    result
   end
 
   def parse_game_desc
