@@ -49,8 +49,8 @@ class Keeper < Hamster::Keeper
     result = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).where(content: [nil, ''])
                      .includes(:sony_game_additional)
 
-    ####### TODO убрать коментарий с if
-    result = result.where(sony_game_additional: { run_id: run_id }) # if settings['touch_update_desc']
+    ####### TODO убрать коментарий
+    # result = result.where(sony_game_additional: { run_id: run_id }) if settings['touch_update_desc']
     ###########
     result
   end

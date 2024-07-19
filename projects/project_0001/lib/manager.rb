@@ -51,12 +51,8 @@ class Manager < Hamster::Harvester
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
 
-    if commands[:lang]
-      parse_save_lang
-      return
-    elsif commands[:desc]
-      #parse_save_desc_ru
-      parse_save_desc_dd
+    if commands[:desc]
+      parse_save_desc_lang
       return
     end
 
