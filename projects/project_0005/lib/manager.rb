@@ -104,6 +104,8 @@ class Manager < Hamster::Harvester
     end
     notify "Более 10 товаров не могут быть сохранены. \
     Вот несколько из последних:\n#{keeper.no_parent.last(5).join(', ')}" if keeper.no_parent.size > 10
+  rescue => e
+    binding.pry
   end
 
   def make_message
