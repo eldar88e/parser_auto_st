@@ -92,8 +92,7 @@ class Keeper < Hamster::Keeper
   def save_lang_info(lang, id)
     lang.merge!(touched_run_id: run_id)
     lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
-    SonyGameAdditional.find(id).update(lang)
-    @updated_lang += 1
+    SonyGameAdditional.find(id).update(lang) && @updated_lang += 1
   end
 
   def save_games(games)

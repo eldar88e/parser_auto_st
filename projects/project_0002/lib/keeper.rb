@@ -39,14 +39,13 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, ''])
-                     .includes(:sony_game_additional)
-    result = result.where(sony_game_additional: { run_id: run_id }) if @settings[:touch_update_desc]
-    result
+    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).includes(:sony_game_additional)
+    @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
   end
 
   def save_desc_lang(data, model)
     content = data.delete(:content)
+    binding.pry
     model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data
 
     if content
@@ -60,7 +59,7 @@ class Keeper < Hamster::Keeper
 
   def get_all_game_without_rus
     SonyGame.active_games([PARENT_PS5, PARENT_PS4]).includes(:sony_game_additional)
-            .where(sony_game_additional: { rus_voice: 0 })
+            .where(sony_game_additional: { rus_voice: 0 }).limit(settings['limit_upd_lang'])
   end
 
   def save_ua_games(games)
