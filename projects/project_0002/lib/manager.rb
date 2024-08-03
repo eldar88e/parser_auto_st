@@ -113,13 +113,12 @@ class Manager < Hamster::Harvester
 
   def parse_save_desc_lang
     additional =
-      if true # @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
+      if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
         notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
         keeper.get_all_game_without_rus
       else
         keeper.get_game_without_desc
       end
-    binding.pry
     scraper = Scraper.new(keeper: keeper, settings: @settings)
     additional.each_with_index do |model, idx|
       puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
