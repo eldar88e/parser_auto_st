@@ -97,14 +97,14 @@ class Manager < Hamster::Harvester
           parser     = Parser.new(html: file)
           supplement = parser.parse_supplement
 
-          keeper.save_supplement(supplement)
-          @pages += 1
+          keeper.save_supplement(supplement) && @pages += 1 if supplement
         end
       end
     end
     notify "Более 10 товаров не могут быть сохранены. \
     Вот несколько из последних:\n#{keeper.no_parent.last(5).join(', ')}" if keeper.no_parent.size > 10
   rescue => e
+    puts e.full_message
     binding.pry
   end
 
