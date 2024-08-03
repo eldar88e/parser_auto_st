@@ -29,6 +29,7 @@ class Manager < Hamster::Harvester
     keeper.status = 'parsing'
 
     if commands[:desc]
+      binding.pry
       parse_save_desc_lang
       return
     end
@@ -113,7 +114,7 @@ class Manager < Hamster::Harvester
 
   def parse_save_desc_lang
     additional =
-      if @settings[:day_all_lang_scrap].to_i == Date.current.day
+      if @settings[:day_all_lang_scrap].to_i == Date.current.day && Date.current.hour < 12
         notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
         keeper.get_all_game_without_rus
       else
