@@ -15,7 +15,7 @@ class Seo
   private
 
   def seo
-    @seo ||= send(@domain, @name)
+    @seo ||= send(@domain)
   end
 
   def open_ps
