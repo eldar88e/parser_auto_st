@@ -6,6 +6,8 @@ class Parser < Hamster::Parser
   end
 
   def parse_supplement
+    return if @html.to_s.match?(/504 Gateway Time-out/)
+
     supplement = {}
     supplement[:source_img]    = @html.at('div.cm-preview-wrapper a')['href'].gsub(/\A\/+/, 'https://')
     supplement[:source_url]    = @html.at('head link[rel="canonical"]')['href']

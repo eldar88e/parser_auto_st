@@ -61,7 +61,11 @@ class Manager < Hamster::Harvester
     end
 
     parse_save_main
-    parse_save_lang    if !keeper.saved.zero? || settings['day_lang_all_scrap'] == Date.current.day
+
+    if !keeper.saved.zero? || (settings['day_lang_all_scrap'].to_i == Date.current.day && Time.current.hour > 12)
+      parse_save_lang
+    end
+
     parse_save_desc_dd unless keeper.saved.zero?
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.deleted} old games" if keeper.deleted > 0
@@ -137,6 +141,9 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_lang
+    if settings['day_lang_all_scrap'].to_i == Date.current.day && Time.current.hour > 12
+      notify "⚠️ Day of parsing All games without rus lang!"
+    end
     ps_ids  = keeper.get_ps_ids
     scraper = Scraper.new(keeper)
     ps_ids.each do |id|
@@ -147,7 +154,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_lang_info(lang, id[0])
     end
-    notify "📌 Updated lang for #{keeper.updated_lang} game(s)."
+    notify "📌 Updated lang for #{keeper.updated_lang} game(s)." unless keeper.updated_lang.zero?
   end
 
   def parse_save_desc_dd
@@ -161,7 +168,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, id[0])
     end
-    notify "📌 Added description for #{keeper.updated_desc} game(s)."
+    notify "📌 Added description for #{keeper.updated_desc} game(s)." unless keeper.updated_desc.zero?
   end
 
   def parse_save_desc_ru
@@ -184,6 +191,7 @@ class Manager < Hamster::Harvester
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
     message << "✅ Saved: #{keeper.saved} new games;\n" unless keeper.saved.zero?
+    message << "✅ Restored: #{keeper.restored} games;\n" unless keeper.restored.zero?
     message << "✅ Updated prices: #{keeper.updated} games;\n" unless keeper.updated.zero?
     message << "✅ Skipped prices: #{keeper.skipped} games;\n" unless keeper.skipped.zero?
     message << "✅ Updated menuindex: #{keeper.updated_menu_id} games;\n" unless keeper.updated_menu_id.zero?

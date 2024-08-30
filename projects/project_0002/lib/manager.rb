@@ -113,7 +113,7 @@ class Manager < Hamster::Harvester
 
   def parse_save_desc_lang
     additional =
-      if @settings[:day_all_lang_scrap].to_i == Date.current.day
+      if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
         notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
         keeper.get_all_game_without_rus
       else
@@ -136,6 +136,7 @@ class Manager < Hamster::Harvester
   def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
     message = ""
     message << "✅ Saved: #{keeper.count[:saved]} new PS_UA games;\n" unless keeper.count[:saved].zero?
+    message << "✅ Restored: #{keeper.count[:restored]} PS_UA games;\n" unless keeper.count[:restored].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} PS_UA games;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} PS_UA games;\n" unless keeper.count[:skipped].zero?
     message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} PS_UA games;\n" unless keeper.count[:updated_menu_id].zero?

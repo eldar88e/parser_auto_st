@@ -15,7 +15,7 @@ class Scraper < Hamster::Scraper
   def scrape_lang(id)
     url = settings['ps_game'] + id
     sleep rand(0.2..2.1)
-    get_response(url).body
+    get_response(url)&.body
   end
 
   def scrape_desc(id)

@@ -72,8 +72,8 @@ class Manager < Hamster::Harvester
   def make_message
     message = ""
     message << "✅ Saved: #{keeper.count[:saved]} new UA games;\n" unless keeper.count[:saved].zero?
+    message << "✅ Restored: #{keeper.count[:restored]} UA games;\n" unless keeper.count[:restored].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} UA games;\n" unless keeper.count[:updated].zero?
-    message << "✅ Skipped prices: #{keeper.count[:skipped]} UA games;\n" unless keeper.count[:skipped].zero?
     message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} UA games;\n" unless keeper.count[:updated_menu_id].zero?
     message << "✅ Imported: #{@parse_count} UA games."
     message

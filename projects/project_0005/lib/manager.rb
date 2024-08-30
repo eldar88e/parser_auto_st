@@ -97,7 +97,7 @@ class Manager < Hamster::Harvester
           parser     = Parser.new(html: file)
           supplement = parser.parse_supplement
 
-          keeper.save_supplement(supplement)
+          keeper.save_supplement(supplement) if supplement
           @pages += 1
         end
       end

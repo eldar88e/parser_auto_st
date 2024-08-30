@@ -16,7 +16,7 @@ class Keeper < Hamster::Keeper
     super
     @run_id = run.run_id
     @count  = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
-                skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0 }
+                deleted: 0, updated_lang: 0, updated_desc: 0, restored: 0 }
     @quantity = quantity
   end
 
@@ -77,7 +77,16 @@ class Keeper < Hamster::Keeper
     if game_add
       sony_game = game_add.sony_game
       if sony_game
-        return if sony_game.deleted || !sony_game.published
+        #return if sony_game.deleted || !sony_game.published
+        if !sony_game.published
+          return
+        elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
+          sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
+          sony_game.sony_game_additional.update(touched_run_id: run_id)
+          @count[:restored] += 1
+        elsif sony_game.deleted
+          return
+        end
       else
         Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
                                "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
@@ -147,14 +156,11 @@ class Keeper < Hamster::Keeper
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = game_add[:release] && game_add[:release] > start_new_date
-    game_add.update(game[:additional])
+    game_add.update(game[:additional]) # For update touched_run_id
     @count[:updated] += 1 if check_md5_hash
-    #@count[:skipped] += 1 unless check_md5_hash
 
-    ## убрать content из data
-    data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'], content: game[:main][:content] }
-    ###
-    sony_game.update(data) && @count[:updated_menu_id] += 1 #if @count[:menu_id_count] != sony_game[:menuindex]
+    data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
+    sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
   end
 
   def prepare_intro(game, content=nil)

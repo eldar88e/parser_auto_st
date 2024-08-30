@@ -22,9 +22,10 @@ class Keeper < Hamster::Keeper
     @deleted         = 0
     @updated_lang    = 0
     @updated_desc    = 0
+    @restored        = 0
   end
 
-  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc, :deleted
+  attr_reader :run_id, :saved, :updated, :skipped, :updated_lang, :updated_menu_id, :updated_desc, :deleted, :restored
   attr_accessor :count
 
   def status=(new_status)
@@ -48,8 +49,6 @@ class Keeper < Hamster::Keeper
   end
 
   def delete_not_touched
-    #sg = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).pluck(:id)
-    #sga = SonyGameAdditional.where(id: sg).where.not(touched_run_id: run_id)
     sg = SonyGame.includes(:sony_game_additional).active_games([settings['parent_ps5'], settings['parent_ps4']])
                  .where.not(sony_game_additional: { touched_run_id: run_id })
     sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id'])
@@ -93,8 +92,7 @@ class Keeper < Hamster::Keeper
   def save_lang_info(lang, id)
     lang.merge!(touched_run_id: run_id)
     lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
-    SonyGameAdditional.find(id).update(lang)
-    @updated_lang += 1
+    SonyGameAdditional.find(id).update(lang) && @updated_lang += 1
   end
 
   def save_games(games)
@@ -109,14 +107,19 @@ class Keeper < Hamster::Keeper
       game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
       game[:additional][:popular]  = @menu_id_count < 151
       image_link_raw               = game[:additional].delete(:image_link_raw)
-      #
-      game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
-      #
 
       if game_add
         sony_game = SonyGame.find(game_add.id)
         if sony_game
-          next if sony_game.deleted || !sony_game.published
+          if !sony_game.published
+            next
+          elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
+            sony_game.update(deleted: 0, editedon: Time.current.to_i, editedby: settings['user_id'])
+            sony_game.sony_game_additional.update(touched_run_id: run_id)
+            @restored += 1
+          elsif sony_game.deleted
+            next
+          end
         else
           Hamster.logger.error "Основная запись в таблице #{SonyGame.table_name} под ID: `#{game_add.id}` удалена!\n"\
                                  "Удалите остатки в таблицах: #{SonyGameAdditional.table_name}, "\
@@ -127,8 +130,7 @@ class Keeper < Hamster::Keeper
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
-        #game[:additional][:site_link] = "https://psprices.com/game/buy/#{game[:additional][:article]}"
-        #game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
+        game[:additional][:site_link] = settings['ps_game'] + game[:additional][:janr]
         game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
@@ -195,7 +197,7 @@ class Keeper < Hamster::Keeper
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
     game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
-    game_add.update(game[:additional])
+    game_add.update(game[:additional])  # For update touched_run_id
     @updated += 1 if check_md5_hash
     #@skipped += 1 unless check_md5_hash
 
