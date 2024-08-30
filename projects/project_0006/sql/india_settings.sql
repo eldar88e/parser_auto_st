@@ -1,0 +1,10 @@
+CREATE TABLE india_settings (
+    id BIGINT(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    variable VARCHAR(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+    value VARCHAR(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+    description VARCHAR(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)DEFAULT CHARSET = `utf8mb4`
+    COLLATE = utf8mb4_unicode_520_ci
+    COMMENT 'Parser settings table for India';
