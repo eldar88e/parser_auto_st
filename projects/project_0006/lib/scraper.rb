@@ -29,7 +29,6 @@ class Scraper < Hamster::Scraper
     params     = settings['params'].sub('&minPrice=15', '')
     first_page = "#{settings['site']}#{path_in}1#{params}"
     last_page  = make_last_page(first_page)
-    binding.pry
     [*1..last_page].each do |page|
       link = "#{settings['site']}#{path_in}#{page}#{params}"
       puts "Page #{page} of #{last_page}".green if @debug
