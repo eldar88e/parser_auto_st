@@ -113,7 +113,7 @@ class Keeper < Hamster::Keeper
         game[:main][:createdby]    = settings['user_id']
         game[:main][:template]     = settings['template_id']
         game[:main][:properties]   = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
-        game[:main][:menuindex]    =  @count[:menu_id_count]
+        game[:main][:menuindex]    = @count[:menu_id_count]
         game[:main][:published]    = 1
         game[:main][:show_in_tree] = 0
 

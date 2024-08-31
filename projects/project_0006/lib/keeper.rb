@@ -1,4 +1,4 @@
-require_relative '../models/run'
+require_relative '../models/in_run'
 require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
@@ -34,27 +34,25 @@ class Keeper < Hamster::Keeper
   end
 
   def delete_not_touched
-    sg = SonyGame.includes(:sony_game_additional).active_games([PARENT_PS5, PARENT_PS4])
+    sg = SonyGame.joins(:sony_game_additional)
+                 .active_games([PARENT_PS5, PARENT_PS4])
                  .where.not(sony_game_additional: { touched_run_id: run_id })
-    sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id']) && @count[:deleted] += sg.size
+
+    deleted_count = sg.update_all(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id'])
+    @count[:deleted] += deleted_count
   end
 
-  def get_game_without_desc
-    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).includes(:sony_game_additional)
+  def get_game_without_genre
+    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
+                     .includes(:sony_game_additional)
+    # .where(sony_game_additional: { genre: [nil, ''] }) TODO убрать коментарий
     @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
   end
 
-  def save_desc_lang(data, model)
-    content = data.delete(:content)
-    model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data[:rus_voice] && data[:rus_voice] != 0
-
-    if content
-      content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
-      model.update(data) && @count[:updated_desc] += 1 if model.content != content
-    end
+  def save_desc_lang(data, game)
+    game.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data[:rus_voice] || data[:rus_voice]
   rescue ActiveRecord::StatementInvalid => e
-    Hamster.logger.error "ID: #{model.id} | #{e.message}"
+    Hamster.logger.error "ID: #{game.id} | #{e.message}"
   end
 
   def get_all_game_without_rus
@@ -65,9 +63,11 @@ class Keeper < Hamster::Keeper
   def save_in_games(games)
     @ps4_path ||= make_parent_path(:ps4)
     @ps5_path ||= make_parent_path(:ps5)
+    urls           = games.map { |i| i[:additional][:data_source_url] }
+    game_additions = SonyGameAdditional.includes(:sony_game).where(data_source_url: urls)
     games.each do |game|
       @count[:menu_id_count] += 1
-      game_add = SonyGameAdditional.find_by(data_source_url: game[:additional][:data_source_url])
+      game_add = game_additions.find { |i| i[:data_source_url] == game[:additional][:data_source_url] }
       game[:additional][:touched_run_id] = run_id
       keys = %i[data_source_url price old_price price_bonus discount_end_date]
       md5  = MD5Hash.new(columns: keys)
@@ -75,10 +75,9 @@ class Keeper < Hamster::Keeper
       game[:additional][:popular]  = @count[:menu_id_count] < 151
       image_link_raw               = game[:additional].delete(:image_link_raw)
 
-      if game_add
+      if game_add.present?
         sony_game = game_add.sony_game
         if sony_game
-          #next if sony_game.deleted || !sony_game.published
           if !sony_game.published
             next
           elsif sony_game.deleted && sony_game.deletedby == settings['user_id']
@@ -98,7 +97,7 @@ class Keeper < Hamster::Keeper
       else
         game[:additional][:run_id]    = run_id
         game[:additional][:source]    = SOURCE
-        game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','ru-in') + game[:additional][:janr]
+        game[:additional][:site_link] = settings['ps_game'].gsub('en-tr','en-in') + game[:additional][:janr]
         game[:additional][:image]     = image_link_raw.sub(/720&h=720/, settings['medium_size'])
         game[:additional][:thumb]     = image_link_raw.sub(/720&h=720/, settings['small_size'])
         game[:additional][:made_in]   = MADE_IN
@@ -114,13 +113,14 @@ class Keeper < Hamster::Keeper
         game[:main][:createdby]    = settings['user_id']
         game[:main][:template]     = settings['template_id']
         game[:main][:properties]   = PROPERTIES
-        game[:main][:menuindex]    =  @count[:menu_id_count]
+        game[:main][:menuindex]    = @count[:menu_id_count]
         game[:main][:published]    = 1
         game[:main][:show_in_tree] = 0
 
         need_category   = check_need_category(game[:additional][:platform])
         game[:category] = { category_id: PARENT_PS4 } if need_category
         game[:intro]    = prepare_intro(game[:main])
+        game[:content]  = form_content(game[:additional][:janr])
 
         SonyGame.store(game)
         @count[:saved] += 1
@@ -131,6 +131,12 @@ class Keeper < Hamster::Keeper
   end
 
   private
+
+  def form_content(sony_id)
+    SonyGameAdditional.includes(:sony_game)
+                      .where(janr: sony_id, made_in: [nil, '', 'Turkish', 'Ukraine'])
+                      .where.not(sony_game: { content: ['', nil]}).first&.sony_game&.content
+  end
 
   def make_uri(alias_, platform)
     start = platform.downcase.match?(/ps5/) ? @ps5_path : @ps4_path
@@ -166,7 +172,6 @@ class Keeper < Hamster::Keeper
     game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
     game_add.update(game[:additional]) # For update touched_run_id
     @count[:updated] += 1 if check_md5_hash
-    #@count[:skipped] += 1 unless check_md5_hash
 
     data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
     sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
@@ -180,12 +185,12 @@ class Keeper < Hamster::Keeper
 
   def form_description(title)
     <<~DESCR.squeeze(' ').chomp
-      Вы искали игру #{title} PS Store Украина. Не знаете где купить? – Конечно же в PS-Ukraine.ru! 100% гарантия 
+      Вы искали игру #{title} PS Store Индия. Не знаете где купить? – Конечно же в Open-PS! 100% гарантия 
       от блокировок. Поддержка и консультация, акции и скидки.
     DESCR
   end
 
   def run
-    RunId.new(Run)
+    RunId.new(InRun)
   end
 end

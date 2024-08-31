@@ -22,16 +22,16 @@ class Scraper < Hamster::Scraper
     response&.body
   end
 
-  def scrape_games_ua
-    path_ua    = settings['path_tr'].sub('tr-store', 'ua-store')
-    first_page = "#{settings['site']}#{path_ua}1#{settings['params']}"
+  def scrape_games_in
+    path_in    = settings['path_tr'].sub('tr-store', 'in-store')
+    first_page = "#{settings['site']}#{path_in}1#{settings['params']}"
     last_page  = make_last_page(first_page)
     [*1..last_page].each do |page|
-      link = "#{settings['site']}#{path_ua}#{page}#{settings['params']}"
+      link = "#{settings['site']}#{path_in}#{page}#{settings['params']}"
       puts "Page #{page} of #{last_page}".green if @debug
       game_list = get_response(link).body
       sleep(rand(0.2..1.5))
-      peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_ua")
+      peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_in")
       @count += 1
     end
   end
@@ -47,7 +47,7 @@ class Scraper < Hamster::Scraper
   end
 
   def get_response(link, try=1)
-    headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'ua-UA' }
+    headers  = { 'Referer' => @referers.sample, 'Accept-Language' => 'en-US' }
     response = connect_to(link, ssl_verify: false, headers: headers)
     raise 'Error receiving response from server' unless response.present?
     response
