@@ -15,7 +15,7 @@ class Scraper < Hamster::Scraper
 
   attr_reader :count
 
-  def scrape_lang(id)
+  def scrape_genre_lang(id)
     url      = @settings[:sony_url] + id
     response = get_response(url)
     return if response&.status == 404

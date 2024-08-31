@@ -105,19 +105,19 @@ class Manager < Hamster::Harvester
     sony_games =
       if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
         notify "⚠️ Day of parsing All PS_IN games without rus and with empty content!"
-        keeper.get_all_game_without_rus
+        keeper.get_game_without_rus
       else
         keeper.get_game_without_genre
       end
     scraper = Scraper.new(keeper: keeper, settings: @settings)
     sony_games.each_with_index do |game, idx|
       puts "#{idx} || #{game.sony_game_additional.janr}".green if @debug
-      page = scraper.scrape_lang(game.sony_game_additional.janr)
+      page = scraper.scrape_genre_lang(game.sony_game_additional.janr)
       next unless page
 
-      parser = Parser.new(html: page)
-      desc   = parser.parse_genre_lang
-      keeper.save_desc_lang(desc, game) if desc
+      parser     = Parser.new(html: page)
+      genre_lang = parser.parse_genre_lang
+      keeper.save_genre_lang(desc, game) if genre_lang
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_IN game(s)." unless keeper.count[:updated_desc].zero?
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_IN game(s)." unless keeper.count[:updated_lang].zero?
