@@ -45,7 +45,7 @@ class Keeper < Hamster::Keeper
 
   def save_desc_lang(data, model)
     content = data.delete(:content)
-    model.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data[:rus_voice] && data[:rus_voice] != 0
+    model.sony_game_additional.update(data) && @count[:updated_lang] += 1
 
     if content
       content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
