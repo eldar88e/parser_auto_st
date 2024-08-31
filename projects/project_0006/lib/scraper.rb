@@ -26,7 +26,7 @@ class Scraper < Hamster::Scraper
 
   def scrape_games_in
     path_in    = settings['path_tr'].sub('tr-store', 'in-store')
-    params     = settings['params'].sub('minPrice=15', "minPrice=#{MIN_PRICE}")
+    params     = settings['params'].sub('&minPrice=15', '')
     first_page = "#{settings['site']}#{path_in}1#{params}"
     last_page  = make_last_page(first_page)
     binding.pry
