@@ -1,6 +1,8 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
+  MIN_PRICE = 200
+
   def initialize(**args)
     super
     @referers = YAML.load_file('referer.yml')['referer']
@@ -23,7 +25,7 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_in
-    path_in    = settings['path_tr'].sub('tr-store', 'in-store')
+    path_in    = settings['path_tr'].sub('tr-store', 'in-store').sub('minPrice=15', "minPrice#{MIN_PRICE}")
     first_page = "#{settings['site']}#{path_in}1#{settings['params']}"
     last_page  = make_last_page(first_page)
     [*1..last_page].each do |page|

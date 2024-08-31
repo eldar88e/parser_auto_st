@@ -20,12 +20,10 @@ module Hamster
 
     def translate_genre(text)
       result = genres[text.downcase]
-      if result
-        result
-      else
-        notify "Unknown genre - #{result}"
-        'Другое'
-      end
+      return result if result
+
+      notify "Unknown genre - #{result}"
+      'Другое'
     end
 
     private
