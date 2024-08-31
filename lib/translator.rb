@@ -23,7 +23,7 @@ module Hamster
       return result if result
 
       notify "Unknown genre - #{text}"
-      'Другое'
+      nil
     end
 
     private
