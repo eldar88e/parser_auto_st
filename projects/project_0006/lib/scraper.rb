@@ -25,11 +25,13 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape_games_in
-    path_in    = settings['path_tr'].sub('tr-store', 'in-store').sub('minPrice=15', "minPrice#{MIN_PRICE}")
-    first_page = "#{settings['site']}#{path_in}1#{settings['params']}"
+    path_in    = settings['path_tr'].sub('tr-store', 'in-store')
+    params     = settings['params'].sub('minPrice=15', "minPrice=#{MIN_PRICE}")
+    first_page = "#{settings['site']}#{path_in}1#{params}"
     last_page  = make_last_page(first_page)
+    binding.pry
     [*1..last_page].each do |page|
-      link = "#{settings['site']}#{path_in}#{page}#{settings['params']}"
+      link = "#{settings['site']}#{path_in}#{page}#{params}"
       puts "Page #{page} of #{last_page}".green if @debug
       game_list = get_response(link).body
       sleep(rand(0.2..1.5))
