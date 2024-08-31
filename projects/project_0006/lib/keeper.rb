@@ -169,8 +169,7 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_add, sony_game)
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    binding.pry
-    game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
+    game[:additional][:new] = (game_add[:release] > start_new_date) if game_add[:release]
     game_add.update(game[:additional]) # For update touched_run_id
     @count[:updated] += 1 if check_md5_hash
 
