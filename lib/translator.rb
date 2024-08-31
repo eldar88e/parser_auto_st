@@ -45,7 +45,7 @@ module Hamster
         "quiz" => "Викторина",
         "role playing games" => "Ролевая игра",
         "shooter" => "Шутер",
-        "simulation" => "Симулятор",
+        "simulator" => "Симулятор",
         "sport" => "Спортивная",
         "strategy" => "Стратегия",
         'unique' => 'Уникальные'
