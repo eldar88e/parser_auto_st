@@ -27,12 +27,12 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing PS_IN started' if @debug
     keeper.status = 'parsing'
-    if commands[:desc]
-      parse_save_desc_lang
+    if commands[:genre]
+      parse_save_genre_lang
       return
     end
     parse_save_main
-    parse_save_desc_lang if keeper.count[:saved] > 0 || @settings[:day_all_lang_scrap].to_i == Date.current.day
+    parse_save_genre_lang if keeper.count[:saved] > 0 || @settings[:day_all_lang_scrap].to_i == Date.current.day
     keeper.delete_not_touched
     cleared_cache = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_IN games" if keeper.count[:deleted] > 0
@@ -101,7 +101,7 @@ class Manager < Hamster::Harvester
     notify message if message.present?
   end
 
-  def parse_save_desc_lang
+  def parse_save_genre_lang
     sony_games =
       if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
         notify "⚠️ Day of parsing All PS_IN games without rus and with empty content!"
@@ -117,7 +117,7 @@ class Manager < Hamster::Harvester
 
       parser     = Parser.new(html: page)
       genre_lang = parser.parse_genre_lang
-      keeper.save_genre_lang(desc, game) if genre_lang
+      keeper.save_genre_lang(genre_lang, game) if genre_lang
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_IN game(s)." unless keeper.count[:updated_desc].zero?
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_IN game(s)." unless keeper.count[:updated_lang].zero?

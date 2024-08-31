@@ -1,6 +1,6 @@
 require_relative '../models/sony_game_additional'
 class Parser < Hamster::Parser
-  EXCHANGE_RATE_MIN = 1.5 # От 1000 RS - 1.5р за 1 RS
+  EXCHANGE_RATE_MIN = 1.5 # До 8000 RS - 1.5р за 1 RS
   EXCHANGE_RATE_MAX = 1.4 # От 8000 RS - 1.4р за 1 RS
 
   def initialize(**page)
