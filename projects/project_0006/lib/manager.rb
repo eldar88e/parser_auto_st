@@ -27,7 +27,10 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing PS_IN started' if @debug
     keeper.status = 'parsing'
-    parse_save_desc_lang && return if commands[:desc]
+    if commands[:desc]
+      parse_save_desc_lang
+      return
+    end
     parse_save_main
     parse_save_desc_lang if keeper.count[:saved] > 0 || @settings[:day_all_lang_scrap].to_i == Date.current.day
     keeper.delete_not_touched
@@ -113,7 +116,7 @@ class Manager < Hamster::Harvester
       next unless page
 
       parser = Parser.new(html: page)
-      desc   = parser.parse_sony_desc_lang
+      desc   = parser.parse_genre_lang
       keeper.save_desc_lang(desc, game) if desc
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_IN game(s)." unless keeper.count[:updated_desc].zero?

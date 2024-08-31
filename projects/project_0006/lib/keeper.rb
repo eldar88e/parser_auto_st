@@ -45,12 +45,12 @@ class Keeper < Hamster::Keeper
   def get_game_without_genre
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
                      .includes(:sony_game_additional)
-    # .where(sony_game_additional: { genre: [nil, ''] }) TODO убрать коментарий
+                     .where(sony_game_additional: { genre: [nil, ''] })
     @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
   end
 
   def save_desc_lang(data, game)
-    game.sony_game_additional.update(data) && @count[:updated_lang] += 1 if data[:rus_voice] || data[:rus_voice]
+    game.sony_game_additional.update(data) && @count[:updated_lang] += 1 #if data[:rus_voice] || data[:rus_voice]
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{game.id} | #{e.message}"
   end
@@ -191,6 +191,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(InRun)
+    @run ||= RunId.new(InRun)
   end
 end

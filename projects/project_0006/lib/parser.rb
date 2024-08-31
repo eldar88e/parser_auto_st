@@ -15,7 +15,7 @@ class Parser < Hamster::Parser
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
   end
 
-  def parse_sony_desc_lang
+  def parse_genre_lang
     dl = @html.at('dl.psw-l-grid')
     return if dl.nil?
 
@@ -90,11 +90,9 @@ class Parser < Hamster::Parser
     result              = {}
     result[:release]    = info[:release]
     result[:publisher]  = info[:publisher]
-    genre               = parse_genres(info[:genres])
-    result[:genre]      = translate_genre genre
+    result[:genre]      = form_genres(info)
     result[:rus_voice]  = exist_rus?(info)
     result[:rus_screen] = exist_rus?(info, 'screen')
-    # result[:content]    = @html.at('.psw-l-grid p').children.to_html
     result
   end
 
@@ -102,9 +100,14 @@ class Parser < Hamster::Parser
     info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/russia/) }
   end
 
-  def parse_genres(genres_row)
-    return 'Другое' unless genres_row.present?
+  def form_genres(info)
+    return 'Другое' unless info[:genres].present?
 
+    genre = parse_genres(info[:genres])
+    translate_genre(genre)
+  end
+
+  def parse_genres(genres_row)
     genres_row.split(', ').map(&:strip).uniq.join(', ')
   end
 

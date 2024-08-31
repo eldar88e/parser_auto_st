@@ -22,7 +22,7 @@ module Hamster
       result = genres[text.downcase]
       return result if result
 
-      notify "Unknown genre - #{result}"
+      notify "Unknown genre - #{text}"
       'Другое'
     end
 
@@ -46,7 +46,7 @@ module Hamster
         "role playing games" => "Ролевая игра",
         "shooter" => "Шутер",
         "simulation" => "Симулятор",
-        "sports" => "Спортивная",
+        "sport" => "Спортивная",
         "strategy" => "Стратегия",
         'unique' => 'Уникальные'
       }
