@@ -91,6 +91,7 @@ class Parser < Hamster::Parser
     result[:release]    = info[:release]
     result[:publisher]  = info[:publisher]
     result[:genre]      = form_genres(info[:genres])
+    binding.pry if result[:genre] && result[:genre][0] == ','
     result[:rus_voice]  = exist_rus?(info)
     result[:rus_screen] = exist_rus?(info, 'screen')
     result
