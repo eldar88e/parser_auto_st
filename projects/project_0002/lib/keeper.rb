@@ -42,8 +42,7 @@ class Keeper < Hamster::Keeper
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
                      .includes(:sony_game_additional)
                      .where(sony_game_additional: { genre: [nil, ''] })
-    # @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result TODO раскоментировать
-    result
+    @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
   end
 
   def save_desc_lang(data, model)
