@@ -141,15 +141,15 @@ class Manager < Hamster::Harvester
     if settings['day_lang_all_scrap'].to_i == Date.current.day && Time.current.hour > 12
       notify "⚠️ Day of parsing All games without rus lang!"
     end
-    ps_ids  = keeper.get_ps_ids
-    scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_lang(id[1])
+    ps_additions = keeper.get_without_rus
+    scraper      = Scraper.new(keeper)
+    ps_additions.each do |addition|
+      page   = scraper.scrape_lang(addition.janr)
       parser = Parser.new(html: page)
       lang   = parser.parse_lang
       next if lang.nil?
 
-      keeper.save_lang_info(lang, id[0])
+      keeper.save_lang_info(lang, addition)
     end
     notify "📌 Updated lang for #{keeper.updated_lang} game(s)." unless keeper.updated_lang.zero?
   end

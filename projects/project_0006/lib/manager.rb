@@ -2,6 +2,7 @@ require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
 require_relative '../models/india_setting'
+require_relative '../lib/exporter'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
@@ -11,6 +12,21 @@ class Manager < Hamster::Harvester
     @pages    = 0
     @settings = IndiaSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
     @keeper   = Keeper.new(@settings)
+  end
+
+  def export
+    keeper.status = 'exporting'
+    exporter      = Exporter.new(keeper)
+    domen         = :indiaps
+    csv           = exporter.make_csv(domen)
+    file_name     = "#{keeper.run_id}_#{domen.to_s}_games.csv.gz"
+    peon.put(file: file_name, content: csv)
+
+    file_path    = "#{@_storehouse_}store/#{file_name}"
+    gz_file_data = IO.binread(file_path)
+    Hamster.send_file(gz_file_data, file_name)
+
+    notify "Exporting finish!" if @debug
   end
 
   def download
@@ -37,6 +53,7 @@ class Manager < Hamster::Harvester
     cleared_cache = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_IN games" if keeper.count[:deleted] > 0
     clear_cache if cleared_cache
+    export if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.updated_menu_id.zero?
     #keeper.finish TODO убрать
     notify '👌 The PS_IN parser succeeded!'
   rescue => error

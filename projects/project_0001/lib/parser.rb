@@ -32,28 +32,10 @@ class Parser < Hamster::Parser
 
   def parse_lang
     dl = @html.at('dl.psw-l-grid')
-    return if dl.nil?
+    return unless dl.present?
 
-    dt_count = dl.css('dt').size
-    info     = {}
-    dt_count.times do
-      key   = dl.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
-      value = dl.at('dd').remove.text
-      next if key == :platform
-
-      info[key] = key == :release ? Date.parse(value) : value
-    end
-
-    need_keys = %i[publisher genre release]
-    lang      = info.slice!(*need_keys)
-    new_lang  = { voice: '', screen_lang: '' }
-    lang.each do |k, v|
-      new_lang[:voice]       += v if k.to_s.match?(/voice/)
-      new_lang[:screen_lang] += v if k.to_s.match?(/screen/)
-    end
-    info[:rus_voice]  = new_lang[:voice].downcase.match?(/rus/)
-    info[:rus_screen] = new_lang[:screen_lang].downcase.match?(/rus/)
-    info
+    row_data = formit_row_lang(dl)
+    formit_genre_lang(row_data)
   end
 
   def parse_game_desc
@@ -120,6 +102,42 @@ class Parser < Hamster::Parser
   end
 
   private
+
+  def formit_row_lang(chunk)
+    dt_count = chunk.css('dt').size
+    info     = {}
+    dt_count.times do
+      key       = chunk.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
+      value     = chunk.at('dd').remove.text
+      info[key] = key == :release ? Date.parse(value) : value
+    end
+    info
+  end
+
+  def formit_genre_lang(info)
+    result              = {}
+    result[:release]    = info[:release]
+    result[:publisher]  = info[:publisher]
+    result[:genre]      = form_genres(info[:genres])
+    result[:rus_voice]  = exist_rus?(info)
+    result[:rus_screen] = exist_rus?(info, 'screen')
+    result
+  end
+
+  def form_genres(genre_raw)
+    return 'Другое' unless genre_raw.present?
+
+    genre = genre_raw.split(', ').map(&:strip).uniq.sort.join(', ')
+    translate_genre(genre)
+  end
+
+  def translate_genre(text)
+    text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
+  end
+
+  def exist_rus?(info, params='voice')
+    info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/russia/) }
+  end
 
   def prepare_page_title(page_title_raw)
     page_title_raw.gsub!(/[yY][öÖ][nN][eE][tT][mM][eE][nN][iİ][nN] [Ss][üÜ][rR][üÜ][mM][üÜ]?/, 'режиссерская версия')

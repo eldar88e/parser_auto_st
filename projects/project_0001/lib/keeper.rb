@@ -78,21 +78,20 @@ class Keeper < Hamster::Keeper
     end
   end
 
-  def get_ps_ids
-    params = { rus_voice: 0 }
-    if settings['day_lang_all_scrap'] == Date.current.day
-      params[:id] = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']])
-                            .order(:menuindex).pluck(:id)
+  def get_without_rus
+    ids    = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).pluck(:id)
+    result = SonyGameAdditional.joins(:sony_game).where(sony_game: { id: ids }).limit(settings['limit_upd_lang'])
+    # result.where("genre LIKE ?", "%action%") TODO для перевода
+    if settings['day_lang_all_scrap'] == Date.current.day && Time.current.hour > 12
+      result.where(rus_voice: false) # result.where(genre: [nil, ''])
     else
-      params[:run_id] = run_id
+      result.where(run_id: run_id)
     end
-    SonyGameAdditional.where(params).where.not(janr: [nil, '']).limit(settings['limit_upd_lang']).pluck(:id, :janr) # :janr contains Sony game ID
   end
 
-  def save_lang_info(lang, id)
-    lang.merge!(touched_run_id: run_id)
-    lang[:new] = lang[:release] && lang[:release] > Date.current.prev_month(settings['month_since_release'])
-    SonyGameAdditional.find(id).update(lang) && @updated_lang += 1
+  def save_lang_info(lang, model)
+    model.update(lang)
+    @updated_lang += 1 if model.saved_changes?
   end
 
   def save_games(games)
@@ -196,7 +195,7 @@ class Keeper < Hamster::Keeper
   def update_date(game, game_add, sony_game)
     check_md5_hash          = game_add[:md5_hash] != game[:additional][:md5_hash]
     start_new_date          = Date.current.prev_month(settings['month_since_release'])
-    game[:additional][:new] = game_add[:release] && (game_add[:release] > start_new_date)
+    game[:additional][:new] = game_add[:release] > start_new_date if game_add[:release]
     game_add.update(game[:additional])  # For update touched_run_id
     @updated += 1 if check_md5_hash
     #@skipped += 1 unless check_md5_hash

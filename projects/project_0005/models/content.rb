@@ -1,14 +1,12 @@
 require_relative './application_record'
 require_relative './vendor'
 class Content < ApplicationRecord
-  validates :alias, uniqueness: true
-
-  ########
   self.table_name = 'modx_site_content'
-  #########
 
   has_one :product, foreign_key: 'id'   #optional: true
   has_one :intro, foreign_key: 'resource'
+
+  validates :alias, uniqueness: true
 
   #has_many :sony_game_category, foreign_key: 'product_id', optional: true
 

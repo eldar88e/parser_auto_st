@@ -18,7 +18,7 @@ class Parser < Hamster::Parser
 
   def parse_genre_lang
     dl = @html.at('dl.psw-l-grid')
-    return if dl.nil?
+    return unless dl.present?
 
     row_data = formit_row_lang(dl)
     formit_genre_lang(row_data)

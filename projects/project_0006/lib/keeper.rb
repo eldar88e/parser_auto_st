@@ -33,6 +33,11 @@ class Keeper < Hamster::Keeper
     run.finish
   end
 
+  def list_last_popular_game(limit)
+    SonyGame.includes(:sony_game_additional, :sony_game_intro)
+            .active_games([PARENT_PS4, PARENT_PS5]).order(menuindex: :asc).limit(limit)
+  end
+
   def delete_not_touched
     sg = SonyGame.joins(:sony_game_additional)
                  .active_games([PARENT_PS5, PARENT_PS4])
