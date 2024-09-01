@@ -24,8 +24,6 @@ class Content < ApplicationRecord
     end
   rescue ActiveRecord::RecordNotUnique
     # To prevent not unique error
-  rescue => e
-    binding.pry
   end
 
   private
