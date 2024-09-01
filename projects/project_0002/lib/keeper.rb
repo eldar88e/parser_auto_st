@@ -39,20 +39,11 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    binding.pry
-    sad = SonyGameAdditional.where(made_in: 'Ukraine').where.not(genre: [nil, ''])
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
                      .includes(:sony_game_additional)
                      .where(sony_game_additional: { genre: [nil, ''] })
     # @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result TODO раскоментировать
     result
-  end
-
-  def upd_game(sad)
-    sad.each do |model|
-      new_genre = model.genre.split(', ').uniq.sort.join(', ')
-      model.update(genre: new_genre)
-    end
   end
 
   def save_desc_lang(data, model)
