@@ -103,7 +103,7 @@ class Parser < Hamster::Parser
   def form_genres(genre_raw)
     return 'Другое' unless genre_raw.present?
 
-    genre = genre_raw.split(', ').map(&:strip).uniq.join(', ')
+    genre = genre_raw.split(', ').map(&:strip).uniq.sort.join(', ')
     translate_genre(genre)
   end
 

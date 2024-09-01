@@ -104,7 +104,7 @@ class Parser < Hamster::Parser
   def form_genres(genres_raw)
     return 'Другое' unless genres_raw.present?
 
-    genres_raw.split(', ').map(&:strip).uniq.join(', ')
+    genres_raw.split(', ').map(&:strip).uniq.sort.join(', ')
   end
 
   def exist_rus?(info, params='голос')
