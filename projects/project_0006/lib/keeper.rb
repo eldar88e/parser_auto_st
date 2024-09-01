@@ -43,7 +43,6 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_genre
-    binding.pry
     result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
                      .includes(:sony_game_additional)
                      .where(sony_game_additional: { genre: [nil, ''] })
