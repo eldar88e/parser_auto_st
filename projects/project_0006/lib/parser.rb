@@ -108,7 +108,7 @@ class Parser < Hamster::Parser
   end
 
   def translate_genre(text)
-    text.split(', ').map { |i| Hamster::Translator.new.translate_genre(i) }.join(', ').sort
+    text.split(', ').map { |i| Hamster::Translator.new.translate_genre(i) }.sort.join(', ')
   end
 
   def transliterate(str)
