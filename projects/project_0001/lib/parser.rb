@@ -5,14 +5,12 @@ class Parser < Hamster::Parser
 
   def initialize(**page)
     super
-    @html           = Nokogiri::HTML(page[:html])
-    @other_platform = 0
-    @other_type     = 0
-    @not_price      = 0
-    @parsed         = 0
+    @parsed     = 0
+    @translator = Hamster::Translator.new
+    @html       = Nokogiri::HTML(page[:html])
   end
 
-  attr_reader :parsed, :other_platform, :not_price, :other_type
+  attr_reader :parsed
 
   def parse_games_list
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
@@ -44,9 +42,8 @@ class Parser < Hamster::Parser
       next if key == :platform
 
       info[key] = key == :release ? Date.parse(value) : value
-    rescue => e
-      notify e.message
     end
+
     need_keys = %i[publisher genre release]
     lang      = info.slice!(*need_keys)
     new_lang  = { voice: '', screen_lang: '' }
@@ -81,21 +78,12 @@ class Parser < Hamster::Parser
     games     = []
     games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
-      game         = { main: {}, additional: {} }
-      price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
-      if price_tl_raw.nil? || price_tl_raw.to_i.zero?
-        @not_price += 1
-        next
-      end
-
-      platform = game_raw.at('.game-collection-item-top-platform').text
-      unless platform.downcase.match?(/ps5|ps4/)
-        @other_platform += 1
-        next
-      end
-
+      game           = { main: {}, additional: {} }
+      price_tl_raw   = game_raw.at('span.game-collection-item-price')&.text
+      platform       = game_raw.at('.game-collection-item-top-platform').text
       match_date     = %r[\d день|\d+ дня|\d+ дней|\d+ месяца?|\d+ месяцев|\d+ days?|\d+ months?]
       date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date)
+      binding.pry if date_raw
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -116,21 +104,10 @@ class Parser < Hamster::Parser
       game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
       game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
 
-      if game[:additional][:price_tl] < MIN_PRICE
-        @not_price += 1
-        next
-      end
-
-      game[:main][:pagetitle]       = prepare_page_title(game_raw.at('.game-collection-item-details-title').text)
-      game[:additional][:platform]  = platform.gsub(' / ', ', ')
-      type_game_raw                 = game_raw.at('.game-collection-item-type').text
-      game[:additional][:type_game] = translate_type(type_game_raw)
-
-      unless ['Игра', 'Комплект', 'VR игра', 'PSN игра', 'Контент'].include?(game[:additional][:type_game])
-        @other_type += 1
-        next
-      end
-
+      game[:main][:pagetitle]             = prepare_page_title(game_raw.at('.game-collection-item-details-title').text)
+      game[:additional][:platform]        = platform.gsub(' / ', ', ').gsub(/, PS Vita|, PS3/, '')
+      type_game_raw                       = game_raw.at('.game-collection-item-type').text
+      game[:additional][:type_game]       = @translator.translate_type(type_game_raw)
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       game[:additional][:data_source_url] = settings['site'] + game_raw.at('a')['href']
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
@@ -213,28 +190,5 @@ class Parser < Hamster::Parser
     num_day_month = date_raw.to_i
     today         = Date.today
     today + num_day_month.send(day_month)
-  end
-
-  def translate_type(type_raw)
-    case type_raw
-    when 'Full Game'
-      'Игра'
-    when 'Bundle'
-      'Комплект'
-    when 'VR Game'
-      'VR игра'
-    when 'PSN Game'
-      'PSN игра'
-    when 'Game Content'
-      'Контент'
-    else
-      type_raw
-    end
-  end
-
-  def notify(message, color=:green, method_=:info)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts color.nil? ? message : message.send(color) if @debug
   end
 end

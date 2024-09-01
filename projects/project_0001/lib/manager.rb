@@ -121,22 +121,19 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_main
-    run_id     = keeper.run_id
-    list_pages = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
-    parser_count, othr_pl_count, not_prc_count, other_type_count = [0, 0, 0, 0]
+    run_id       = keeper.run_id
+    list_pages   = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
+    parser_count = 0
     list_pages.each do |name|
       puts name.green if @debug
       file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
       parser     = Parser.new(html: file)
       list_games = parser.parse_list_games
-      parser_count     += parser.parsed
-      othr_pl_count    += parser.other_platform
-      not_prc_count    += parser.not_price
-      other_type_count += parser.other_type
+      parser_count += parser.parsed
       keeper.save_games(list_games)
       @pages += 1
     end
-    message = make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
+    message = make_message(parser_count)
     notify message if message.present?
   end
 
@@ -188,16 +185,13 @@ class Manager < Hamster::Harvester
     end
   end
 
-  def make_message(othr_pl_count, not_prc_count, parser_count, other_type_count)
+  def make_message(parser_count)
     message = ""
     message << "✅ Saved: #{keeper.saved} new games;\n" unless keeper.saved.zero?
     message << "✅ Restored: #{keeper.restored} games;\n" unless keeper.restored.zero?
     message << "✅ Updated prices: #{keeper.updated} games;\n" unless keeper.updated.zero?
     message << "✅ Skipped prices: #{keeper.skipped} games;\n" unless keeper.skipped.zero?
     message << "✅ Updated menuindex: #{keeper.updated_menu_id} games;\n" unless keeper.updated_menu_id.zero?
-    message << "✅ Not parsed other platform: #{othr_pl_count} games;\n" unless othr_pl_count.zero?
-    message << "✅ Not parsed without or low price: #{not_prc_count} games;\n" unless not_prc_count.zero?
-    message << "✅ Not parsed other type: #{other_type_count} games;\n" unless other_type_count.zero?
     message << "✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message
   end

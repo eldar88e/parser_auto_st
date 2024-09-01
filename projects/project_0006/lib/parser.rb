@@ -5,8 +5,9 @@ class Parser < Hamster::Parser
 
   def initialize(**page)
     super
-    @html   = Nokogiri::HTML(page[:html])
-    @parsed = 0
+    @parsed     = 0
+    @translator = Hamster::Translator.new
+    @html       = Nokogiri::HTML(page[:html])
   end
 
   attr_reader :parsed
@@ -32,9 +33,8 @@ class Parser < Hamster::Parser
   end
 
   def parse_list_games_in
-    games      = []
-    translator = Hamster::Translator.new
-    games_raw  = @html.css('div.game-collection-item')
+    games     = []
+    games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
       game           = { main: {}, additional: {} }
       price_rs_raw   = game_raw.at('span.game-collection-item-price')&.text
@@ -60,7 +60,7 @@ class Parser < Hamster::Parser
       game[:main][:pagetitle]               = game_raw.at('.game-collection-item-details-title').text
       game[:additional][:platform]          = platform.gsub(' / ', ', ').gsub(/, PS Vita|, PS3/, '')
       type_game_raw                         = game_raw.at('.game-collection-item-type').text
-      game[:additional][:type_game]         = translator.translate_type(type_game_raw)
+      game[:additional][:type_game]         = @translator.translate_type(type_game_raw)
       game[:additional][:image_link_raw]    = game_raw.at('img.game-collection-item-image')['content']
       data_source_url                       = settings['site'] + game_raw.at('a')['href']
       game[:additional][:data_source_url]   = transliterate data_source_url
@@ -108,7 +108,7 @@ class Parser < Hamster::Parser
   end
 
   def translate_genre(text)
-    text.split(', ').map { |i| Hamster::Translator.new.translate_genre(i) }.sort.join(', ')
+    text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
   end
 
   def transliterate(str)

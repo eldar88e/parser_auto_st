@@ -251,6 +251,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(Run)
+    @run ||= RunId.new(Run)
   end
 end
