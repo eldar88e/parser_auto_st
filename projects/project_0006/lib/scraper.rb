@@ -18,10 +18,10 @@ class Scraper < Hamster::Scraper
   def scrape_genre_lang(id)
     url      = @settings[:sony_url] + id
     response = get_response(url)
-    return if response&.status == 404
+    return if !response.present? || response.status != 200
 
     sleep rand(0.1..0.9)
-    response&.body
+    response.body
   end
 
   def scrape_games_in
