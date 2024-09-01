@@ -39,8 +39,11 @@ class Keeper < Hamster::Keeper
   end
 
   def get_game_without_desc
-    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).includes(:sony_game_additional)
-    @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
+    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
+                     .includes(:sony_game_additional)
+                     .where(sony_game_additional: { genre: [nil, ''] })
+    # @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result TODO раскоментировать
+    result
   end
 
   def save_desc_lang(data, model)
@@ -185,6 +188,6 @@ class Keeper < Hamster::Keeper
   end
 
   def run
-    RunId.new(Run)
+    @run ||= RunId.new(Run)
   end
 end

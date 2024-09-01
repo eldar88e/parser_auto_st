@@ -19,8 +19,8 @@ class Parser < Hamster::Parser
     dl = @html.at('dl.psw-l-grid')
     return if dl.nil?
 
-    row_desc = formit_row_desc(dl)
-    formit_desc(row_desc)
+    row_data = formit_row_lang(dl)
+    formit_genre_lang(row_data)
   end
 
   def get_last_page
@@ -75,7 +75,7 @@ class Parser < Hamster::Parser
 
   private
 
-  def formit_row_desc(chunk)
+  def formit_row_lang(chunk)
     dt_count = chunk.css('dt').size
     info     = {}
     dt_count.times do
@@ -86,11 +86,11 @@ class Parser < Hamster::Parser
     info
   end
 
-  def formit_desc(info)
+  def formit_genre_lang(info)
     result              = {}
     result[:release]    = info[:release]
     result[:publisher]  = info[:publisher]
-    result[:genre]      = form_genres(info)
+    result[:genre]      = form_genres(info[:genres])
     result[:rus_voice]  = exist_rus?(info)
     result[:rus_screen] = exist_rus?(info, 'screen')
     result
@@ -100,15 +100,11 @@ class Parser < Hamster::Parser
     info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/russia/) }
   end
 
-  def form_genres(info)
-    return 'Другое' unless info[:genres].present?
+  def form_genres(genre_raw)
+    return 'Другое' unless genre_raw.present?
 
-    genre = parse_genres(info[:genres])
+    genre = genre_raw.split(', ').map(&:strip).uniq.join(', ')
     translate_genre(genre)
-  end
-
-  def parse_genres(genres_row)
-    genres_row.split(', ').map(&:strip).uniq.join(', ')
   end
 
   def translate_genre(text)
