@@ -45,11 +45,13 @@ module Hamster
         "quiz" => "Викторина",
         "role playing games" => "Ролевая игра",
         "shooter" => "Шутер",
-        "simulation" => "Симулятор",
+        "simulation" => "Имитация",
         "simulator" => "Симулятор",
         "sport" => "Спортивная",
         "strategy" => "Стратегия",
-        'unique' => 'Уникальные'
+        'unique' => 'Уникальные',
+        'adult' => 'Для взрослых',
+        'brain training' => 'Тренировка мозга'
       }
     end
 
