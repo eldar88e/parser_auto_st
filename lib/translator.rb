@@ -13,8 +13,7 @@ module Hamster
       when 'Game Content'
         'Контент'
       else
-        notify "Неизвестный тип игры для Индии - #{type_raw}"
-        nil
+        type_raw
       end
     end
 
