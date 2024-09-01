@@ -22,8 +22,8 @@ module Hamster
       result = genres[text.downcase]
       return result if result
 
-      notify "Unknown genre - #{text}"
-      'Unknown'
+      notify "Genre without translation – #{text}"
+      text
     end
 
     private
