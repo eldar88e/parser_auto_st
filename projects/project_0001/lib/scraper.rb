@@ -69,7 +69,7 @@ class Scraper < Hamster::Scraper
   end
 
   def get_response(link, try=1)
-    headers  = { 'Referer' => @referers.sample, 'Accept-Language' => 'tr-TR' }
+    headers  = { 'Referer' => @referers.sample, 'Accept-Language' => 'en-US' }
     response = connect_to(link, ssl_verify: false, headers: headers)
     raise 'Error receiving response from server' unless response.present?
     response
