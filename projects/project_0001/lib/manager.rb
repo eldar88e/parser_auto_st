@@ -110,7 +110,7 @@ class Manager < Hamster::Harvester
       notify "⚠️ Day of parsing All games without rus lang!"
     end
     run_parse_save_lang
-    notify "📌 Updated lang for #{keeper.count[:updated_lang]} game(s)." unless keeper.count[:updated_lang] > 0
+    notify "📌 Updated lang for #{keeper.count[:updated_lang]} game(s)." if keeper.count[:updated_lang] > 0
   end
 
   def parse_save_desc_dd
@@ -124,7 +124,7 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc_dd(desc, games)
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} game(s)." unless keeper.count[:updated_desc] > 0
+    notify "📌 Added description for #{keeper.count[:updated_desc]} game(s)." if keeper.count[:updated_desc] > 0
   end
 
   def make_message(parser_count)
@@ -133,7 +133,7 @@ class Manager < Hamster::Harvester
     message << "✅ Restored: #{keeper.count[:restored]} games;\n" unless keeper.count[:restored].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} games;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} games;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} games;\n" unless keeper.count[:updated_menu_id] > 0
+    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} games;\n" if keeper.count[:updated_menu_id] > 0
     message << "✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
     message
   end
