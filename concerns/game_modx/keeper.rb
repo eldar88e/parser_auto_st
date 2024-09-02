@@ -10,6 +10,8 @@ module GameModx
       @count    = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
                     skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0, restored: 0 }
       @quantity = settings[:parse_count]
+      @ps4_path = get_parent_alias self.class::PARENT_PS5
+      @ps5_path = get_parent_alias self.class::PARENT_PS4
     end
 
     attr_reader :run_id, :count
@@ -54,6 +56,19 @@ module GameModx
     end
 
     private
+
+    def form_block_game_additions(games)
+      urls = games.map { |i| i[:additional][:data_source_url] }
+      SonyGameAdditional.includes(:sony_game).where(data_source_url: urls)
+    end
+
+    def form_start_game_data(game)
+      game[:additional][:touched_run_id] = run_id
+      keys = %i[data_source_url price old_price price_bonus discount_end_date]
+      md5  = MD5Hash.new(columns: keys)
+      game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
+      game[:additional][:popular]  = @count[:menu_id_count] < 151
+    end
 
     def check_game(sony_game)
       unless sony_game
@@ -125,11 +140,6 @@ module GameModx
     def make_uri(alias_, platform)
       start = platform.downcase.match?(/ps5/) ? @ps5_path : @ps4_path
       "#{start}/#{alias_}"
-    end
-
-    def make_parent_path(platform)
-      parent = platform == :ps5 ? self.class::PARENT_PS5 : self.class::PARENT_PS4
-      get_parent_alias(parent)
     end
 
     def get_parent_alias(id)

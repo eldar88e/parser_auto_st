@@ -29,19 +29,12 @@ class Keeper < Hamster::Keeper
   end
 
   def save_games(games)
-    @ps4_path ||= make_parent_path(:ps4)
-    @ps5_path ||= make_parent_path(:ps5)
-    urls           = games.map { |i| i[:additional][:data_source_url] }
-    game_additions = SonyGameAdditional.includes(:sony_game).where(data_source_url: urls)
+    game_additions = form_block_game_additions(games)
     games.each do |game|
       @count[:menu_id_count] += 1
-      game_add = game_additions.find { |i| i[:data_source_url] == game[:additional][:data_source_url] }
-      game[:additional][:touched_run_id] = run_id
-      keys = %i[data_source_url price old_price price_bonus discount_end_date]
-      md5  = MD5Hash.new(columns: keys)
-      game[:additional][:md5_hash] = md5.generate(game[:additional].slice(*keys))
-      game[:additional][:popular]  = @count[:menu_id_count] < 151
-      image_link_raw               = game[:additional].delete(:image_link_raw)
+      game_add       = game_additions.find { |i| i[:data_source_url] == game[:additional][:data_source_url] }
+      image_link_raw = game[:additional].delete(:image_link_raw)
+      form_start_game_data(game)
 
       if game_add.present?
         sony_game = game_add.sony_game
