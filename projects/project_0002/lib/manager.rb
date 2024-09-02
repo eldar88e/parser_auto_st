@@ -103,6 +103,8 @@ class Manager < Hamster::Harvester
       parser_count += parser.parsed
       keeper.save_ua_games(list_games)
       @pages += 1
+    rescue => e
+      binding.pry
     end
     message = make_message(parser_count)
     notify message if message.present?

@@ -52,7 +52,7 @@ module GameModx
       day_month = date_raw.match?(/день|дня|дней|day|days/) ? :days : :months
       num       = date_raw.to_i
       today     = Date.today
-      today + num_day_month.send(day_month)
+      today + num.send(day_month)
     end
   end
 end
