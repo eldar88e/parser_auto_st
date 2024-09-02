@@ -109,21 +109,19 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang
-    additional =
-      if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-        notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
-        keeper.get_all_game_without_rus
-      else
-        keeper.get_game_without_desc
-      end
-    scraper = Scraper.new(keeper: keeper, settings: @settings)
+    if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
+      notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
+    end
+
+    additional = keeper.get_game_without_rus
+    scraper    = Scraper.new(keeper: keeper, settings: @settings)
     additional.each_with_index do |model, idx|
-      puts "#{idx} || #{model.sony_game_additional.janr}".green if @debug
-      page = scraper.scrape_lang(model.sony_game_additional.janr)
+      puts "#{idx} || #{model.janr}".green if @debug
+      page = scraper.scrape_lang(model.janr)
       next unless page
 
       parser = Parser.new(html: page)
-      desc   = parser.parse_sony_desc_lang
+      desc   = parser.parse_genre_lang
       keeper.save_desc_lang(desc, model) if desc
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)." unless keeper.count[:updated_desc].zero?

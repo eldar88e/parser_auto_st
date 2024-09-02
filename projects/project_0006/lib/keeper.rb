@@ -3,8 +3,11 @@ require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_intro'
+require_relative '../../../concerns/game_modx/keeper'
 
 class Keeper < Hamster::Keeper
+  include GameModx::Keeper
+
   SOURCE     = 3
   PARENT_PS4 = 24
   PARENT_PS5 = 25
@@ -45,21 +48,6 @@ class Keeper < Hamster::Keeper
 
     deleted_count = sg.update_all(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id'])
     @count[:deleted] += deleted_count
-  end
-
-  def get_game_without_rus
-    ids    = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).pluck(:id)
-    result = SonyGameAdditional.where(id: ids, rus_voice: 0).limit(settings['limit_upd_lang'])
-    check  = @settings[:touch_update_desc].nil? ||
-      @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-    check ? result : result.where(run_id: run_id)
-  end
-
-  def save_genre_lang(data, game)
-    game.update(data)
-    @count[:updated_lang] += 1 if game.saved_changes?
-  rescue ActiveRecord::StatementInvalid => e
-    Hamster.logger.error "ID: #{game.id} | #{e.message}"
   end
 
   def save_in_games(games)

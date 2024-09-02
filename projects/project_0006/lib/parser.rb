@@ -1,5 +1,9 @@
 require_relative '../models/sony_game_additional'
+require_relative '../../../concerns/game_modx/parser'
+
 class Parser < Hamster::Parser
+  include GameModx::Parser
+
   EXCHANGE_RATE_MIN = 1.5 # До 8000 RS - 1.5р за 1 RS
   EXCHANGE_RATE_MAX = 1.4 # От 8000 RS - 1.4р за 1 RS
 
@@ -14,22 +18,6 @@ class Parser < Hamster::Parser
 
   def parse_games_list
     @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
-  end
-
-  def parse_genre_lang
-    dl = @html.at('dl.psw-l-grid')
-    return unless dl.present?
-
-    row_data = formit_row_lang(dl)
-    formit_genre_lang(row_data)
-  end
-
-  def get_last_page
-    count_result   = @html.at('div.results').text.match(/\d+/).to_s.to_i
-    games_per_page = @html.css('div.game-collection-item').size
-    last_page_bad  = count_result / games_per_page
-    last_page_f    = count_result / games_per_page.to_f
-    last_page_f > last_page_bad ? last_page_bad + 1 : last_page_bad
   end
 
   def parse_list_games_in
@@ -75,18 +63,7 @@ class Parser < Hamster::Parser
 
   private
 
-  def formit_row_lang(chunk)
-    dt_count = chunk.css('dt').size
-    info     = {}
-    dt_count.times do
-      key       = chunk.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
-      value     = chunk.at('dd').remove.text
-      info[key] = key == :release ? Date.parse(value) : value
-    end
-    info
-  end
-
-  def formit_genre_lang(info)
+  def formit_lang(info)
     result              = {}
     result[:release]    = info[:release]
     result[:publisher]  = info[:publisher]
@@ -111,18 +88,6 @@ class Parser < Hamster::Parser
     text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
   end
 
-  def transliterate(str)
-    url = URI.decode_www_form(str)[0][0]
-    url.to_slug.transliterate(:russian).to_s
-  end
-
-  def make_alias(url)
-    url           = transliterate(url) if url.match?(/%/)
-    alias_raw     = url.split('/')[-2..-1]
-    alias_raw[-1] = alias_raw[-1][0..120]
-    alias_raw.reverse.join('-')[0..120]
-  end
-
   def get_price(raw_price, currency=:rs)
     return unless raw_price.present?
 
@@ -135,19 +100,5 @@ class Parser < Hamster::Parser
 
   def make_exchange_rate(price)
     price * (price < 8000 ? EXCHANGE_RATE_MIN : EXCHANGE_RATE_MAX)
-  end
-
-  def round_up_price(price)
-    (price / settings['round_price'].to_f).round * settings['round_price']
-  end
-
-  def get_discount_end_date(date_raw)
-    return unless date_raw
-
-    date_raw  = date_raw.to_s
-    day_month = date_raw.match(/days?|months?/)&.to_s.to_sym
-    num       = date_raw.to_i
-    today     = Date.today
-    today + num.send(day_month)
   end
 end

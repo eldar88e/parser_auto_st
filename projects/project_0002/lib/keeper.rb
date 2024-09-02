@@ -3,8 +3,11 @@ require_relative '../models/sony_game_additional'
 require_relative '../models/sony_game'
 require_relative '../models/sony_game_category'
 require_relative '../models/sony_game_intro'
+require_relative '../../../concerns/game_modx/keeper'
 
 class Keeper < Hamster::Keeper
+  include GameModx::Keeper
+
   SOURCE     = 3
   PARENT_PS5 = 21
   PARENT_PS4 = 22
@@ -38,29 +41,10 @@ class Keeper < Hamster::Keeper
     sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id']) && @count[:deleted] += sg.size # TODO проверить update_all
   end
 
-  def get_game_without_desc
-    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
-                     .includes(:sony_game_additional)
-                     .where(sony_game_additional: { genre: [nil, ''] })
-    @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
-  end
-
   def save_desc_lang(data, model)
     content = data.delete(:content)
-    model.sony_game_additional.update(data) && @count[:updated_lang] += 1
-
-    if content
-      content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-      data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
-      model.update(data) && @count[:updated_desc] += 1 if model.content != content
-    end
-  rescue ActiveRecord::StatementInvalid => e
-    Hamster.logger.error "ID: #{model.id} | #{e.message}"
-  end
-
-  def get_all_game_without_rus
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).includes(:sony_game_additional)
-            .where(sony_game_additional: { rus_voice: 0 }).limit(settings['limit_upd_lang'])
+    save_lang(data, model)
+    save_content(content, model) if content && model.sony_game.content != content
   end
 
   def save_ua_games(games)
@@ -131,6 +115,12 @@ class Keeper < Hamster::Keeper
   end
 
   private
+
+  def save_content(content, model)
+    content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
+    data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
+    model.sony_game.update(data) && @count[:updated_desc] += 1
+  end
 
   def make_uri(alias_, platform)
     start = platform.downcase.match?(/ps5/) ? @ps5_path : @ps4_path

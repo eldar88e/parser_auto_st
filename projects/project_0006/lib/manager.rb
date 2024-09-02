@@ -131,7 +131,7 @@ class Manager < Hamster::Harvester
 
       parser     = Parser.new(html: page)
       genre_lang = parser.parse_genre_lang
-      keeper.save_genre_lang(genre_lang, game) if genre_lang
+      keeper.save_lang(genre_lang, game) if genre_lang
     end
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_IN game(s)." unless keeper.count[:updated_lang].zero?
   end
