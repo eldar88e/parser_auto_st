@@ -56,7 +56,7 @@ class Manager < Hamster::Harvester
     cleared_cache = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_IN games" if keeper.count[:deleted] > 0
     clear_cache if cleared_cache
-    export if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.updated_menu_id.zero?
+    export if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:updated_menu_id].zero?
     keeper.finish
     notify '👌 The PS_IN parser succeeded!'
   rescue => error
