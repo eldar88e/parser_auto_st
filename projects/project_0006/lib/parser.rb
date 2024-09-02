@@ -1,4 +1,3 @@
-require_relative '../models/sony_game_additional'
 require_relative '../../../concerns/game_modx/parser'
 
 class Parser < Hamster::Parser
@@ -16,10 +15,6 @@ class Parser < Hamster::Parser
 
   attr_reader :parsed
 
-  def parse_games_list
-    @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
-  end
-
   def parse_list_games_in
     games     = []
     games_raw = @html.css('div.game-collection-item')
@@ -27,7 +22,7 @@ class Parser < Hamster::Parser
       game           = { main: {}, additional: {} }
       price_rs_raw   = game_raw.at('span.game-collection-item-price')&.text
       platform       = game_raw.at('.game-collection-item-top-platform').text
-      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d{1,2}\s+days?|\d{1,2}\s+months?/)
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(/\d+ days?|\d+ months?/).to_s
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -62,41 +57,6 @@ class Parser < Hamster::Parser
   end
 
   private
-
-  def formit_lang(info)
-    result              = {}
-    result[:release]    = info[:release]
-    result[:publisher]  = info[:publisher]
-    result[:genre]      = form_genres(info[:genres])
-    result[:rus_voice]  = exist_rus?(info)
-    result[:rus_screen] = exist_rus?(info, 'screen')
-    result
-  end
-
-  def exist_rus?(info, params='voice')
-    info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/russia/) }
-  end
-
-  def form_genres(genre_raw)
-    return 'Другое' unless genre_raw.present?
-
-    genre = genre_raw.split(', ').map(&:strip).uniq.sort.join(', ')
-    translate_genre(genre)
-  end
-
-  def translate_genre(text)
-    text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
-  end
-
-  def get_price(raw_price, currency=:rs)
-    return unless raw_price.present?
-
-    price = raw_price.downcase.gsub('rs', '').gsub(',', '').to_f
-    return price if currency == :rs
-
-    exchanged_price = make_exchange_rate(price)
-    round_up_price exchanged_price
-  end
 
   def make_exchange_rate(price)
     price * (price < 8000 ? EXCHANGE_RATE_MIN : EXCHANGE_RATE_MAX)

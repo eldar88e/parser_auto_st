@@ -4,8 +4,11 @@ require_relative '../lib/keeper'
 require_relative '../models/india_setting'
 require_relative '../lib/exporter'
 require 'net/ftp'
+require_relative '../../../concerns/game_modx/manager'
 
 class Manager < Hamster::Harvester
+  include GameModx::Manager
+
   def initialize
     super
     @debug    = commands[:debug]
@@ -67,40 +70,6 @@ class Manager < Hamster::Harvester
 
   private
 
-  attr_reader :keeper
-
-  def clear_cache
-    ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN')
-    ftp_pass = ENV.fetch('FTP_PASS')
-
-    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-      ftp.chdir('/core/cache/context_settings/web')
-      delete_files(ftp)
-      ftp.chdir('/core/cache/resource/web/resources')
-      delete_files(ftp)
-    end
-    notify "The cache has been emptied." if @debug
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
-  end
-
-  def delete_files(ftp)
-    list = ftp.nlst
-    list.each do |i|
-      try = 0
-      begin
-        try += 1
-        ftp.delete(i)
-      rescue Net::FTPPermError => e
-        Hamster.logger.error e.message
-        sleep 5 * try
-        retry if try > 3
-      end
-    end
-  end
-
   def parse_save_main
     run_id       = keeper.run_id
     list_pages   = peon.give_list(subfolder: "#{run_id}_games_in").sort_by { |name| name.scan(/\d+/).first.to_i }
@@ -122,17 +91,7 @@ class Manager < Hamster::Harvester
     if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
       notify "⚠️ Day of parsing All PS_IN games without rus and with empty content!"
     end
-    sony_games = keeper.get_game_without_rus
-    scraper    = Scraper.new(keeper: keeper, settings: @settings)
-    sony_games.each_with_index do |game, idx|
-      puts "#{idx} || #{game.janr}".green if @debug
-      page = scraper.scrape_genre_lang(game.janr)
-      next unless page
-
-      parser     = Parser.new(html: page)
-      genre_lang = parser.parse_genre_lang
-      keeper.save_lang(genre_lang, game) if genre_lang
-    end
+    run_parse_save_lang
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_IN game(s)." unless keeper.count[:updated_lang].zero?
   end
 
@@ -145,11 +104,5 @@ class Manager < Hamster::Harvester
     message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} PS_IN games;\n" unless keeper.count[:updated_menu_id].zero?
     message << "✅ Parsed: #{@pages} pages, #{parser_count} PS_IN games." unless parser_count.zero?
     message
-  end
-
-  def notify(message, color=:green, method_=:info)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts color.nil? ? message : message.send(color) if @debug
   end
 end

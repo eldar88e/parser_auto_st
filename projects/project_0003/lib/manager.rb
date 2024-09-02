@@ -1,13 +1,16 @@
 require_relative '../lib/keeper'
 require 'net/ftp'
+require_relative '../../../concerns/game_modx/manager'
 
 class Manager < Hamster::Harvester
+  include GameModx::Manager
+
   def initialize
     super
     @parse_count = 800
-    @keeper = Keeper.new(@parse_count)
-    @debug  = commands[:debug]
-    @pages  = 0
+    @keeper      = Keeper.new({ parse_count: @parse_count })
+    @debug       = commands[:debug]
+    @pages       = 0
   end
 
   def import
@@ -18,10 +21,10 @@ class Manager < Hamster::Harvester
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old UA games" if keeper.count[:deleted] > 0
 
-    cleared_cache = false
+    clr_cache = false
     if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
       clear_cache
-      cleared_cache = true
+      clr_cache = true
     end
 
     keeper.finish
@@ -30,44 +33,10 @@ class Manager < Hamster::Harvester
     Hamster.logger.error error.message
     Hamster.report message: error.message
     @debug = true
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?)
+    clear_cache if !clr_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0)
   end
 
   private
-
-  attr_reader :keeper
-
-  def clear_cache
-    ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN')
-    ftp_pass = ENV.fetch('FTP_PASS')
-
-    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-      ftp.chdir('/core/cache/context_settings/web')
-      delete_files(ftp)
-      ftp.chdir('/core/cache/resource/web/resources')
-      delete_files(ftp)
-    end
-    notify "The cache has been emptied." if @debug
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
-  end
-
-  def delete_files(ftp)
-    list = ftp.nlst
-    list.each do |i|
-      try = 0
-      begin
-        try += 1
-        ftp.delete(i)
-      rescue Net::FTPPermError => e
-        Hamster.logger.error e.message
-        sleep 5 * try
-        retry if try > 3
-      end
-    end
-  end
 
   def make_message
     message = ""
@@ -77,11 +46,5 @@ class Manager < Hamster::Harvester
     message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} UA games;\n" unless keeper.count[:updated_menu_id].zero?
     message << "✅ Imported: #{@parse_count} UA games."
     message
-  end
-
-  def notify(message, color=:green, method_=:info)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts color.nil? ? message : message.send(color) if @debug
   end
 end

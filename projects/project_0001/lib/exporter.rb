@@ -21,7 +21,7 @@ class Exporter < Hamster::Harvester
   end
 
   def make_csv(domen)
-    games_raw  = @keeper.list_last_popular_game(settings['limit_export'], [settings['parent_ps5'], settings['parent_ps4']])
+    games_raw  = @keeper.list_last_popular_game(settings['limit_export'])
     games_list = convert_objects_list(games_raw, domen)
     CSV.generate { |csv| games_list.each { |row| csv << row } }
   end

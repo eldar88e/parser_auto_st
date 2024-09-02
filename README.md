@@ -48,9 +48,9 @@ this data and saving it into MySQL tables for the MODX Revolution website.
 - limit_export            (default: 0, preferably: 700)
 - small_size              (example: '40&h=40')
 - medium_size             (example: '312&h=312')
-- new_touched_update_desc (true or false(default: false))
+- touch_update_desc       (true or false(default: false))
 - month_since_release     (1 - 12 months(default: 6 moths))
-- day_lang_all_scrap      (1 - 31 day)
+- day_all_lang_scrap      (1 - 31 day)
 - telegram_chat_id        (fill out this column to send you a report in Telegram)
 
 **To run the script, fill in the following columns in the .env file:**

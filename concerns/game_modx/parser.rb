@@ -18,6 +18,27 @@ module GameModx
 
     private
 
+    def formit_lang(info)
+      result              = {}
+      result[:release]    = info[:release]
+      result[:publisher]  = info[:publisher]
+      result[:genre]      = form_genres(info[:genres])
+      result[:rus_voice]  = exist_rus?(info)
+      result[:rus_screen] = exist_rus?(info, 'screen')
+      result
+    end
+
+    def form_genres(genre_raw)
+      return 'Другое' unless genre_raw.present?
+
+      genre = genre_raw.split(', ').map(&:strip).uniq.sort.join(', ')
+      translate_genre(genre)
+    end
+
+    def exist_rus?(info, params='voice')
+      info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/russia/) }
+    end
+
     def round_up_price(price)
       (price / settings['round_price'].to_f).round * settings['round_price']
     end
@@ -46,13 +67,26 @@ module GameModx
     end
 
     def get_discount_end_date(date_raw)
-      return unless date_raw
+      return unless date_raw.present?
 
-      date_raw  = date_raw.to_s
       day_month = date_raw.match?(/день|дня|дней|day|days/) ? :days : :months
       num       = date_raw.to_i
       today     = Date.today
       today + num.send(day_month)
+    end
+
+    def translate_genre(text)
+      text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
+    end
+
+    def get_price(raw_price, currency=:rs)
+      return unless raw_price.present?
+
+      price = raw_price.downcase.gsub('rs', '').gsub(',', '').to_f
+      return price if currency == :rs
+
+      exchanged_price = make_exchange_rate(price)
+      round_up_price exchanged_price
     end
   end
 end

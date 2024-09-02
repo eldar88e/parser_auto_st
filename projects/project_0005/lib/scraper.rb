@@ -55,12 +55,6 @@ class Scraper < Hamster::Scraper
 
   attr_reader :run_id
 
-  def make_last_page(first_page)
-    game_list = get_response(first_page).body
-    parser    = Parser.new(html: game_list)
-    parser.get_last_page
-  end
-
   def get_response(link, try=1)
     headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7' }
     response = connect_to(link, ssl_verify: false, headers: headers)

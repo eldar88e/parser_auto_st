@@ -1,4 +1,3 @@
-require_relative '../models/sony_game_additional'
 require_relative '../../../concerns/game_modx/parser'
 
 class Parser < Hamster::Parser
@@ -23,7 +22,7 @@ class Parser < Hamster::Parser
       price_tl_raw   = game_raw.at('span.game-collection-item-price')&.text
       platform       = game_raw.at('.game-collection-item-top-platform').text
       match_date     = %r[\d день|\d+ дня|\d+ дней|\d+ месяца?|\d+ месяцев|\d+ days?|\d+ months?]
-      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date)
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date).to_s
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -83,12 +82,7 @@ class Parser < Hamster::Parser
     info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/рус/) }
   end
 
-  def get_price(raw_price, currency=:ua)
-    return if raw_price.nil? || raw_price.strip.to_i.zero?
-
-    price = raw_price.strip.gsub(',', '').to_f
-    return price if currency == :ua
-
-    round_up_price(price * EXCHANGE_RATE)
+  def make_exchange_rate(price)
+    price * EXCHANGE_RATE
   end
 end
