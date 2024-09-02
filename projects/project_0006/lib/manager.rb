@@ -43,7 +43,7 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing PS_IN started' if @debug
     keeper.status = 'parsing'
-    if commands[:genre]
+    if commands[:lang]
       parse_save_genre_lang
       return
     end
@@ -54,7 +54,7 @@ class Manager < Hamster::Harvester
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_IN games" if keeper.count[:deleted] > 0
     clear_cache if cleared_cache
     export if !keeper.saved.zero? || !keeper.updated.zero? || !keeper.updated_menu_id.zero?
-    #keeper.finish TODO убрать
+    keeper.finish
     notify '👌 The PS_IN parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
@@ -119,24 +119,20 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_genre_lang
-    sony_games =
-      if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-        notify "⚠️ Day of parsing All PS_IN games without rus and with empty content!"
-        keeper.get_game_without_rus
-      else
-        keeper.get_game_without_genre
-      end
-    scraper = Scraper.new(keeper: keeper, settings: @settings)
+    if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
+      notify "⚠️ Day of parsing All PS_IN games without rus and with empty content!"
+    end
+    sony_games = keeper.get_game_without_rus
+    scraper    = Scraper.new(keeper: keeper, settings: @settings)
     sony_games.each_with_index do |game, idx|
-      puts "#{idx} || #{game.sony_game_additional.janr}".green if @debug
-      page = scraper.scrape_genre_lang(game.sony_game_additional.janr)
+      puts "#{idx} || #{game.janr}".green if @debug
+      page = scraper.scrape_genre_lang(game.janr)
       next unless page
 
       parser     = Parser.new(html: page)
       genre_lang = parser.parse_genre_lang
       keeper.save_genre_lang(genre_lang, game) if genre_lang
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_IN game(s)." unless keeper.count[:updated_desc].zero?
     notify "📌 Added language for #{keeper.count[:updated_lang]} PS_IN game(s)." unless keeper.count[:updated_lang].zero?
   end
 

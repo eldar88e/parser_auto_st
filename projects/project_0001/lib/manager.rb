@@ -143,7 +143,8 @@ class Manager < Hamster::Harvester
     end
     ps_additions = keeper.get_without_rus
     scraper      = Scraper.new(keeper)
-    ps_additions.each do |addition|
+    ps_additions.each_with_index do |addition, idx|
+      puts "#{idx} || #{addition.janr}".green if @debug
       page   = scraper.scrape_lang(addition.janr)
       parser = Parser.new(html: page)
       lang   = parser.parse_lang
@@ -155,15 +156,15 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_dd
-    ps_ids  = keeper.get_ps_ids_without_desc
+    games   = keeper.get_ps_ids_without_desc
     scraper = Scraper.new(keeper)
-    ps_ids.each do |id|
-      page   = scraper.scrape_desc(id[1])
+    games.each do |game|
+      page   = scraper.scrape_desc(game.janr)
       parser = Parser.new(html: page)
       desc   = parser.parse_desc_dd
       next unless desc
 
-      keeper.save_desc_dd(desc, id[0])
+      keeper.save_desc_dd(desc, games)
     end
     notify "📌 Added description for #{keeper.updated_desc} game(s)." unless keeper.updated_desc.zero?
   end
@@ -174,7 +175,7 @@ class Manager < Hamster::Harvester
     list_pages.each do |name_list_page|
       list_games = peon.list(subfolder: "#{run_id}_games_ru/#{name_list_page}")
       list_games.each do |name|
-        puts name.green
+        puts name.green if @debug
         file      = peon.give(file: name, subfolder: "#{run_id}_games_ru/#{name_list_page}")
         parser    = Parser.new(html: file)
         list_info = parser.parse_game_desc

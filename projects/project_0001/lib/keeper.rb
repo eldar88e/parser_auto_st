@@ -59,7 +59,7 @@ class Keeper < Hamster::Keeper
     games_ids       = get_games_without_content.pluck(:id)
     search          = { id: games_ids }
     search[:run_id] = run_id if settings['new_touched_update_desc']
-    SonyGameAdditional.where(search).pluck(:id, :janr) # :janr contains Sony game ID
+    SonyGameAdditional.where(search)
   end
 
   def save_desc(data)
@@ -69,24 +69,20 @@ class Keeper < Hamster::Keeper
     game.update(content: data[:desc], editedon: Time.current.to_i, editedby: settings['user_id']) && @updated_desc += 1
   end
 
-  def save_desc_dd(data, id)
+  def save_desc_dd(data, game)
     data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
-    begin
-      SonyGame.find(id).update(data) && @updated_desc += 1
-    rescue ActiveRecord::StatementInvalid => e
-      Hamster.logger.error "ID: #{id} | #{e.message}"
-    end
+    game.update(data)
+    @updated_desc += 1 if game.saved_changes?
+  rescue ActiveRecord::StatementInvalid => e
+    Hamster.logger.error "ID: #{id} | #{e.message}"
   end
 
   def get_without_rus
     ids    = SonyGame.active_games([settings['parent_ps5'], settings['parent_ps4']]).pluck(:id)
-    result = SonyGameAdditional.joins(:sony_game).where(sony_game: { id: ids }).limit(settings['limit_upd_lang'])
-    # result.where("genre LIKE ?", "%action%") TODO для перевода
-    if settings['day_lang_all_scrap'] == Date.current.day && Time.current.hour > 12
-      result.where(rus_voice: false) # result.where(genre: [nil, ''])
-    else
-      result.where(run_id: run_id)
-    end
+    result = SonyGameAdditional.where(id: ids, rus_voice: 0).limit(settings['limit_upd_lang'])
+    check  = settings[:new_touched_update_desc] == 0 ||
+      settings['day_lang_all_scrap'] == Date.current.day && Time.current.hour > 12
+    check ? result : result.where(run_id: run_id)
   end
 
   def save_lang_info(lang, model)

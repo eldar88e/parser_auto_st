@@ -16,7 +16,7 @@ class Keeper < Hamster::Keeper
     @settings = settings
     @run_id   = run.run_id
     @count    = { count: 0, menu_id_count: 0, saved: 0, updated: 0, updated_menu_id: 0,
-                  skipped: 0, deleted: 0, updated_lang: 0, updated_desc: 0, restored: 0 }
+                  skipped: 0, deleted: 0, updated_lang: 0, restored: 0 }
   end
 
   attr_reader :run_id, :count
@@ -47,22 +47,19 @@ class Keeper < Hamster::Keeper
     @count[:deleted] += deleted_count
   end
 
-  def get_game_without_genre
-    result = SonyGame.active_games([PARENT_PS5, PARENT_PS4])
-                     .includes(:sony_game_additional)
-                     .where(sony_game_additional: { genre: [nil, ''] })
-    @settings[:touch_update_desc] ? result.where(sony_game_additional: { run_id: run_id }) : result
+  def get_game_without_rus
+    ids    = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).pluck(:id)
+    result = SonyGameAdditional.where(id: ids, rus_voice: 0).limit(settings['limit_upd_lang'])
+    check  = @settings[:touch_update_desc].nil? ||
+      @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
+    check ? result : result.where(run_id: run_id)
   end
 
   def save_genre_lang(data, game)
-    game.sony_game_additional.update(data) && @count[:updated_lang] += 1
+    game.update(data)
+    @count[:updated_lang] += 1 if game.saved_changes?
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{game.id} | #{e.message}"
-  end
-
-  def get_game_without_rus
-    SonyGame.active_games([PARENT_PS5, PARENT_PS4]).includes(:sony_game_additional)
-            .where(sony_game_additional: { rus_voice: 0 }).limit(settings['limit_upd_lang'])
   end
 
   def save_in_games(games)
