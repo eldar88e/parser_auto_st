@@ -7,13 +7,13 @@ module GameModx
 
     def run_parse_save_lang
       sony_games = keeper.fetch_game_without_rus
-      scraper    = Scraper.new(keeper: keeper, settings: @settings)
+      scraper    = ::Scraper.new(keeper: keeper, settings: @settings)
       sony_games.each_with_index do |game, idx|
         puts "#{idx} || #{game.janr}".green if @debug
         page = scraper.scrape_genre_lang(game.janr)
         next unless page
 
-        parser     = Parser.new(html: page)
+        parser     = ::Parser.new(html: page)
         genre_lang = parser.parse_genre_lang
         keeper.save_lang(genre_lang, game) if genre_lang
       end
