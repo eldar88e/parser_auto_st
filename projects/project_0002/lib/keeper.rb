@@ -48,8 +48,10 @@ class Keeper < Hamster::Keeper
 
   def save_content(content, model)
     content.gsub!(/[Бб][Оо][Гг][Ии]?/, 'Human')
-    data = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
-    model.sony_game.update(data) && @count[:updated_desc] += 1
+    data      = { content: content, editedon: Time.current.to_i, editedby: settings['user_id'] }
+    sony_game = model.sony_game
+    sony_game.update(data)
+    @count[:updated_desc] += 1 if sony_game.saved_changes?
   end
 
   def form_description(title)
