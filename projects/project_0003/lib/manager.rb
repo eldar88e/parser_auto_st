@@ -22,10 +22,7 @@ class Manager < Hamster::Harvester
     notify "‼️ Deleted: #{keeper.count[:deleted]} old UA games" if keeper.count[:deleted] > 0
 
     clr_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
-      clear_cache
-      clr_cache = true
-    end
+    clr_cache = clear_cache if keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
 
     keeper.finish
     notify '👌 The UA import succeeded!'

@@ -30,13 +30,21 @@ module GameModx
 
     def fetch_game_without_rus
       ids    = SonyGame.active_games([self.class::PARENT_PS5, self.class::PARENT_PS4]).pluck(:id)
-      result = SonyGameAdditional.where(id: ids, rus_voice: 0).limit(settings['limit_upd_lang'])
+      search = { id: ids, rus_voice: 0 }
+      if commands[:genre]
+        search[:genre] = [nil, '']
+        puts 'Searching without genre games'.green
+        sleep 1
+      end
+      result = SonyGameAdditional.where(search).limit(settings['limit_upd_lang'])
       check  = @settings[:touch_update_desc].nil? ||
         @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-      check ? result : result.where(run_id: run_id)
+      check || commands[:genre] ? result : result.where(run_id: run_id)
     end
 
     def save_lang(data, model)
+      content = data.delete(:content)
+      save_content(content, model) if content && model.sony_game.content != content
       model.update(data)
       @count[:updated_lang] += 1 if model.saved_changes?
     rescue ActiveRecord::StatementInvalid => e

@@ -14,6 +14,7 @@ class Manager < Hamster::Harvester
     @pages    = 0
     @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
     @keeper   = Keeper.new(@settings)
+    @day_all_lang_parsing = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour > 12
   end
 
   def download
@@ -30,32 +31,25 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing PS_UA started' if @debug
     keeper.status = 'parsing'
-
-    if commands[:desc]
-      parse_save_desc_lang
-      return
-    end
+    return parse_save_desc_lang if commands[:desc] || commands[:lang]
 
     parse_save_main
-
-    parse_save_desc_lang if !keeper.count[:saved].zero? || @settings[:day_all_lang_scrap].to_i == Date.current.day
-
+    parse_save_desc_lang if @day_all_lang_parsing
     keeper.delete_not_touched
-    notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_UA games" if keeper.count[:deleted] > 0
+    notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_UA game(s)" if keeper.count[:deleted] > 0
 
+    has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     cleared_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
-      clear_cache
-      cleared_cache = true
-    end
+    cleared_cache = clear_cache if has_update
 
     keeper.finish
     notify '👌 The PS_UA parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    @debug = true
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?)
+    @debug     = true
+    has_update = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
+    clear_cache if !cleared_cache && has_update
   end
 
   private
@@ -72,6 +66,7 @@ class Manager < Hamster::Harvester
       delete_files(ftp)
     end
     notify "The cache has been emptied." if @debug
+    true
   rescue => e
     message = "Please delete the ModX cache file manually!\nError: #{e.message}"
     notify(message, :red, :error)
@@ -95,12 +90,10 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_lang
-    if @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-      notify "⚠️ Day of parsing All PS_UA games without rus and with empty content!"
-    end
+    notify "⚠️ Day of parsing All PS_UA games without rus lang and with empty content!" if @day_all_lang_parsing
     run_parse_save_lang
-    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)." unless keeper.count[:updated_desc].zero?
-    notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)." unless keeper.count[:updated_lang].zero?
+    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)." if keeper.count[:updated_desc] > 0
+    notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)." if keeper.count[:updated_lang] > 0
   end
 
   def make_message(parser_count)
@@ -109,7 +102,7 @@ class Manager < Hamster::Harvester
     message << "✅ Restored: #{keeper.count[:restored]} PS_UA games;\n" unless keeper.count[:restored].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} PS_UA games;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} PS_UA games;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} PS_UA games;\n" unless keeper.count[:updated_menu_id].zero?
+    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} PS_UA games;\n" if keeper.count[:updated_menu_id] > 0
     message << "✅ Parsed: #{@pages} pages, #{parser_count} PS_UA games." unless parser_count.zero?
     message
   end

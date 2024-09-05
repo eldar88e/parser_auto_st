@@ -17,7 +17,7 @@ class Manager < Hamster::Harvester
     @keeper = Keeper.new(@settings)
     @debug  = commands[:debug]
     @pages  = 0
-
+    @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour > 12
   end
 
   def export
@@ -52,38 +52,27 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
-
-    if commands[:lang]
-      parse_save_genre_lang
-      return
-    elsif commands[:desc]
-      #parse_save_desc_ru
-      parse_save_desc_dd
-      return
-    end
+    return parse_save_genre_lang if commands[:lang]
+    return parse_save_desc_dd if commands[:desc]
 
     parse_save_main
-
-    if keeper.count[:saved] > 0 || (settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour > 12)
-      parse_save_genre_lang
-    end
-
-    parse_save_genre_lang if keeper.count[:saved] > 0
+    parse_save_genre_lang if keeper.count[:saved] > 0 || @day_all_lang_parsing
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
+
+    has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     cleared_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?
-      clear_cache
-      cleared_cache = true
-    end
-    export if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:updated_menu_id].zero?
+    cleared_cache = clear_cache if has_update
+
+    export if has_update || !keeper.count[:updated_menu_id].zero?
     keeper.finish
     notify '👌 The parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    @debug = true
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero? || !keeper.count[:deleted].zero?)
+    @debug     = true
+    has_update = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
+    clear_cache if !cleared_cache && has_update
   end
 
   private
@@ -106,9 +95,7 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_genre_lang
-    if settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour > 12
-      notify "⚠️ Day of parsing All games without rus lang!"
-    end
+    notify "⚠️ Day of parsing All games without rus lang!" if @day_all_lang_parsing
     run_parse_save_lang
     notify "📌 Updated lang for #{keeper.count[:updated_lang]} game(s)." if keeper.count[:updated_lang] > 0
   end

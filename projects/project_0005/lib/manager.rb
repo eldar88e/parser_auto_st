@@ -27,24 +27,19 @@ class Manager < Hamster::Harvester
   def store
     notify '⚙️ Parsing for Eczane has begun' if @debug
     keeper.status = 'parsing'
-
     parse_save_main
-
     #keeper.delete_not_touched
-
+    has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 # || keeper.count[:deleted] > 0
     cleared_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? #|| !keeper.count[:deleted].zero?
-      clear_cache
-      cleared_cache = true
-    end
-
+    cleared_cache = clear_cache if has_update
     keeper.finish
     notify make_message
     notify '👌 The Eczane parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero?) #|| !keeper.count[:deleted].zero?)
+    @debug = true
+    clear_cache if !cleared_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0) #|| !keeper.count[:deleted].zero?)
   end
 
   private
@@ -63,6 +58,7 @@ class Manager < Hamster::Harvester
       delete_files(ftp)
     end
     notify "The cache has been emptied." if @debug
+    true
   rescue => e
     message = "Please delete the ModX cache file manually!\nError: #{e.message}"
     notify(message, :red, :error)
@@ -111,7 +107,7 @@ class Manager < Hamster::Harvester
     message << "✅ Saved: #{keeper.count[:saved]} new products;\n" unless keeper.count[:saved].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} products;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} products;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated content: #{keeper.count[:content_updated]} products;\n" unless keeper.count[:content_updated].zero?
+    message << "✅ Updated content: #{keeper.count[:content_updated]} products;\n" if keeper.count[:content_updated] > 0
     message << "✅ Parsed: #{@pages} products." unless @pages.zero?
     message
   end

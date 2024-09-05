@@ -18,12 +18,6 @@ class Keeper < Hamster::Keeper
     sg.update(deleted: 1, deletedon: Time.current.to_i, deletedby: settings['user_id']) && @count[:deleted] += sg.size # TODO проверить update_all
   end
 
-  def save_desc_lang(data, model)
-    content = data.delete(:content)
-    save_lang(data, model)
-    save_content(content, model) if content && model.sony_game.content != content
-  end
-
   def save_ua_games(games)
     game_additions = form_block_game_additions(games)
     games.each do |game|

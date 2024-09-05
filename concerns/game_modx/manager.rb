@@ -31,6 +31,7 @@ module GameModx
         delete_files(ftp)
       end
       notify "The cache has been emptied." if @debug
+      true
     rescue => e
       message = "Please delete the ModX cache file manually!\nError: #{e.message}"
       notify(message, :red, :error)
