@@ -31,11 +31,7 @@ module GameModx
     def fetch_game_without_rus
       ids    = SonyGame.active_games([self.class::PARENT_PS5, self.class::PARENT_PS4]).pluck(:id)
       search = { id: ids, rus_voice: 0 }
-      if commands[:genre]
-        search[:genre] = [nil, '']
-        puts 'Searching without genre games'.green
-        sleep 1
-      end
+      search[:genre] = [nil, ''] if commands[:genre]
       result = SonyGameAdditional.where(search).limit(settings['limit_upd_lang'])
       check  = @settings[:touch_update_desc].nil? ||
         @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
