@@ -7,7 +7,7 @@ module GameModx
       response = get_response(url)
       return if !response.present? || response.status != 200
 
-      sleep rand(0.1..0.9)
+      sleep rand(0.5..2.5)
       response.body
     end
 
