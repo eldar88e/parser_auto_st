@@ -17,7 +17,7 @@ class Manager < Hamster::Harvester
     @keeper = Keeper.new(@settings)
     @debug  = commands[:debug]
     @pages  = 0
-    @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour > 12
+    @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour < 12
   end
 
   def export

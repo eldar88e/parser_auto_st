@@ -14,7 +14,7 @@ class Manager < Hamster::Harvester
     @pages    = 0
     @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
     @keeper   = Keeper.new(@settings)
-    @day_all_lang_parsing = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour > 12
+    @day_all_lang_parsing = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
   end
 
   def download
