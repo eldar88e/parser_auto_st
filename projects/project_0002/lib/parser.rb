@@ -8,8 +8,9 @@ class Parser < Hamster::Parser
 
   def initialize(**page)
     super
-    @html   = Nokogiri::HTML(page[:html])
-    @parsed = 0
+    @html       = Nokogiri::HTML(page[:html])
+    @translator = Hamster::Translator.new
+    @parsed     = 0
   end
 
   attr_reader :parsed
@@ -45,7 +46,8 @@ class Parser < Hamster::Parser
 
       game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text
       game[:additional][:platform]  = platform.gsub(' / ', ', ').gsub(/, PS Vita|, PS3/, '')
-      game[:additional][:type_game] = game_raw.at('.game-collection-item-type').text
+      type_game_raw                 = game_raw.at('.game-collection-item-type').text
+      game[:additional][:type_game] = @translator.translate_type type_game_raw
 
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       data_source_url                     = settings['site'] + game_raw.at('a')['href']

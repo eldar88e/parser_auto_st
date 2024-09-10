@@ -2,7 +2,7 @@ module Hamster
   class Translator
     def translate_type(type_raw)
       case type_raw
-      when 'Full Game'
+      when 'Full Game', 'Game'
         'Игра'
       when 'Bundle'
         'Комплект'
