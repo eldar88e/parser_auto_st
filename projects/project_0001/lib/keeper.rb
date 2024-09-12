@@ -13,10 +13,11 @@ class Keeper < Hamster::Keeper
   PARENT_PS4 = Hamster.settings['parent_ps4']
 
   def fetch_game_without_content
-    games_ids = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).pluck(:id)
-    search    = { id: games_ids }
+    games_ids       = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).pluck(:id)
+    search          = { id: games_ids }
     search[:run_id] = run_id if !commands[:genre] && settings['touch_update_desc']
-    SonyGameAdditional.where(search)
+    search[:genre]  = [nil, ''] if commands[:genre]
+    SonyGameAdditional.includes(:sony_game).where(search)
   end
 
   def save_desc_dd(data, game)
