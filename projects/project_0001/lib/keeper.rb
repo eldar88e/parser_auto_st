@@ -24,9 +24,8 @@ class Keeper < Hamster::Keeper
     data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
     game.update(data)
     @count[:updated_desc] += 1 if game.saved_changes?
-  rescue StandardError => e
+  rescue ActiveRecord::StatementInvalid => e # for emoji
     binding.pry
-  rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{id} | #{e.message}"
   end
 
