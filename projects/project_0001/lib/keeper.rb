@@ -25,8 +25,8 @@ class Keeper < Hamster::Keeper
     game.update(data)
     @count[:updated_desc] += 1 if game.saved_changes?
   rescue ActiveRecord::StatementInvalid => e # for emoji
+    Hamster.logger.error "#{self.class} | ID: #{game.id} | #{e.message}"
     binding.pry
-    Hamster.logger.error "ID: #{id} | #{e.message}"
   end
 
   def save_games(games)
