@@ -19,11 +19,13 @@ class Keeper < Hamster::Keeper
     SonyGameAdditional.includes(:sony_game).where(search)
   end
 
-  def save_desc_dd(data, game)
+  def save_desc(data, game)
     @count[:updated_desc] ||= 0
     data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })
     game.update(data)
     @count[:updated_desc] += 1 if game.saved_changes?
+  rescue StandardError => e
+    binding.pry
   rescue ActiveRecord::StatementInvalid => e
     Hamster.logger.error "ID: #{id} | #{e.message}"
   end

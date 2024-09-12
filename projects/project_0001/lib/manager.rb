@@ -112,7 +112,7 @@ class Manager < Hamster::Harvester
       desc   = parser.parse_desc_dd
       next unless desc
 
-      keeper.save_desc_dd(desc, game.sony_game)
+      keeper.save_desc(desc, game.sony_game)
     end
     notify "📌 Added description for #{keeper.count[:updated_desc]} game(s)." if keeper.count[:updated_desc] > 0
   end
