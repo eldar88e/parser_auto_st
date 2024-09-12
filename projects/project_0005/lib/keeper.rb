@@ -52,7 +52,7 @@ class Keeper < Hamster::Keeper
                                "Удалите остатки в таблицах или добавте в основную таблицу под этим ID запись."
         return
       end
-      update_date(product, product_db, content_db)
+      update_data(product, product_db, content_db)
     else
       product[:main][:alias]        = product[:source_url].split('/')[-1]
       product[:main][:uri]          = product[:main][:alias]
@@ -159,7 +159,7 @@ class Keeper < Hamster::Keeper
     @parents[parent_alias]
   end
 
-  def update_date(data, product_db, content_db)
+  def update_data(data, product_db, content_db)
     content_data = data.delete(:main)
     cur_time     = Time.current
     end_time     = Time.at(content_db.createdon) + 3.month
