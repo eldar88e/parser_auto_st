@@ -85,8 +85,6 @@ class Parser < Hamster::Parser
       @parsed += 1
     end
     games
-  rescue StandardError => e
-    binding.pry
   end
 
   private
