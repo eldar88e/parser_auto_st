@@ -56,7 +56,10 @@ class Manager < Hamster::Harvester
     return parse_save_desc_dd if commands[:desc]
 
     parse_save_main
-    parse_save_genre_lang if keeper.count[:saved] > 0 || @day_all_lang_parsing
+    if keeper.count[:saved] > 0 || @day_all_lang_parsing
+      parse_save_genre_lang
+      parse_save_desc_dd
+    end
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
 
