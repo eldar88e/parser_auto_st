@@ -15,8 +15,7 @@ class Keeper < Hamster::Keeper
   def fetch_game_without_content
     games_ids       = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).pluck(:id)
     search          = { id: games_ids }
-    search[:run_id] = run_id if !commands[:genre] && settings['touch_update_desc']
-    search[:genre]  = [nil, ''] if commands[:genre]
+    search[:run_id] = run_id if !commands[:all] && settings['touch_update_desc']
     SonyGameAdditional.includes(:sony_game).where(search)
   end
 
