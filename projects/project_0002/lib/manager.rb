@@ -34,7 +34,7 @@ class Manager < Hamster::Harvester
     return parse_save_desc_lang if commands[:desc] || commands[:lang]
 
     parse_save_main
-    parse_save_desc_lang if @day_all_lang_parsing
+    parse_save_desc_lang if @day_all_lang_parsing || keeper.count[:saved] > 0
     keeper.delete_not_touched
     notify "‼️ Deleted: #{keeper.count[:deleted]} old PS_UA game(s)" if keeper.count[:deleted] > 0
 
