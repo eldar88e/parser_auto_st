@@ -29,7 +29,7 @@ class Parser < Hamster::Parser
     content = json.dig('product', 'product', 'description')
     return unless content
 
-    content.gsub!(/⭐|🏆|‍️‍️‍️‍️‍️‍️‍️💀️️|🚕/, '')
+    content.gsub!(/⭐|🏆|‍️‍️‍️‍️‍️‍️‍️💀️️|🚕|👑/, '')
     { content: content.strip.gsub(/<\/?b>/, '').gsub(/\A[<br>]+|[<br>]+\z/, '').strip }
   end
 

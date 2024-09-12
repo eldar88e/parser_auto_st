@@ -15,7 +15,9 @@ class Keeper < Hamster::Keeper
   def fetch_game_without_content
     games_ids       = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).pluck(:id)
     search          = { id: games_ids }
+    check_day_hour  = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
     search[:run_id] = run_id if !commands[:all] && settings['touch_update_desc']
+    search.delete(:run_id) if check_day_hour
     SonyGameAdditional.includes(:sony_game).where(search)
   end
 
@@ -25,8 +27,7 @@ class Keeper < Hamster::Keeper
     game.update(data)
     @count[:updated_desc] += 1 if game.saved_changes?
   rescue ActiveRecord::StatementInvalid => e # for emoji
-    Hamster.logger.error "#{self.class} | ID: #{game.id} | #{e.message}"
-    binding.pry
+    Hamster.logger.error "#{self.class} | ID: #{game.id} | #{game.sony_game_additional.sony_id} | #{e.message}"
   end
 
   def save_games(games)

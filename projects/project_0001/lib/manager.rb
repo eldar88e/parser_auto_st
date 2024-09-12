@@ -104,6 +104,7 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_dd
+    notify "⚠️ Day of parsing All games without desc!" if @day_all_lang_parsing
     games   = keeper.fetch_game_without_content
     scraper = Scraper.new(keeper: keeper)
     games.each do |game|
