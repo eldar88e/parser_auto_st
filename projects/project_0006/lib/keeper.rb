@@ -23,7 +23,10 @@ class Keeper < Hamster::Keeper
       if game_add.present?
         sony_game = game_add.sony_game
         check     = check_game(sony_game)
-        update_game(game, game_add, sony_game) if check
+        if check
+          game[:main][:content] = form_content(game[:additional][:janr]) if sony_game.content.blank?
+          update_game(game, game_add, sony_game)
+        end
       else
         form_new_game(game, image_link_raw)
         game[:content] = form_content(game[:additional][:janr])

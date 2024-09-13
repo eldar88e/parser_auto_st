@@ -103,7 +103,9 @@ module GameModx
       @count[:updated] += 1 if check_md5_hash
 
       data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-      sony_game.update(data) && @count[:updated_menu_id] += 1 if @count[:menu_id_count] != sony_game[:menuindex]
+      data[:content] = game[:main][:content] if game[:main][:content].present? && sony_game.content.blank?
+      sony_game.update(data)
+      @count[:updated_menu_id] += 1 if sony_game.saved_changes?
     end
 
     def form_new_game(game, image_link_raw)
