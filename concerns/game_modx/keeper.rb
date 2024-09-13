@@ -102,10 +102,10 @@ module GameModx
       game_add.update(game[:additional]) # For update touched_run_id
       @count[:updated] += 1 if check_md5_hash
 
+      check_content = game[:main][:content].present? && sony_game.content.blank?
       data = { menuindex: @count[:menu_id_count], editedon: Time.current.to_i, editedby: settings['user_id'] }
-      data[:content] = game[:main][:content] if game[:main][:content].present? && sony_game.content.blank?
-      sony_game.update(data)
-      @count[:updated_menu_id] += 1 if sony_game.saved_changes?
+      data[:content] = game[:main][:content] if check_content
+      sony_game.update(data) && @count[:updated_menu_id] += 1 if sony_game.menuindex != data[:menuindex] || check_content
     end
 
     def form_new_game(game, image_link_raw)
