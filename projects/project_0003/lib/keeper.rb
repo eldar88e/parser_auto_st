@@ -10,7 +10,7 @@ require_relative '../../../concerns/game_modx/keeper'
 class Keeper < Hamster::Keeper
   include GameModx::Keeper
 
-  MADE_IN    = 'Ukraine'
+  MADE_IN    = 'Украина'
   PARENT_PS5 = 21
   PARENT_PS4 = 22
 

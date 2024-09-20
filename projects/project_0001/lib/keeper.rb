@@ -8,7 +8,7 @@ require_relative '../../../concerns/game_modx/keeper'
 class Keeper < Hamster::Keeper
   include GameModx::Keeper
 
-  MADE_IN    = 'Turkish'
+  MADE_IN    = 'Турция'
   PARENT_PS5 = Hamster.settings['parent_ps5']
   PARENT_PS4 = Hamster.settings['parent_ps4']
 
