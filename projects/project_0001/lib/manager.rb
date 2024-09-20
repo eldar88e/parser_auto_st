@@ -10,13 +10,13 @@ class Manager < Hamster::Harvester
 
   def initialize
     super
+    @keeper   = Keeper.new(@settings)
+    @debug    = commands[:debug]
     @settings = { touch_update_desc: settings['touch_update_desc'],
                   day_all_lang_scrap: settings['day_all_lang_scrap'],
                   sony_url: settings['ps_game']
                 }
-    @keeper = Keeper.new(@settings)
-    @debug  = commands[:debug]
-    @pages  = 0
+    @parse_count = 0
     @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour < 12
   end
 
@@ -52,12 +52,12 @@ class Manager < Hamster::Harvester
   def store
     notify 'Parsing started' if @debug
     keeper.status = 'parsing'
-    return parse_save_genre_lang if commands[:lang]
+    return parse_save_desc_lang if commands[:lang]
     return parse_save_desc_dd if commands[:desc]
 
     parse_save_main
     if keeper.count[:saved] > 0 || @day_all_lang_parsing
-      parse_save_genre_lang
+      parse_save_desc_lang
       parse_save_desc_dd
     end
     keeper.delete_not_touched
@@ -91,16 +91,10 @@ class Manager < Hamster::Harvester
       list_games = parser.parse_list_games
       parser_count += parser.parsed
       keeper.save_games(list_games)
-      @pages += 1
+      @parse_count += 1
     end
     message = make_message(parser_count)
     notify message if message.present?
-  end
-
-  def parse_save_genre_lang
-    notify "⚠️ Day of parsing All games without rus lang!" if @day_all_lang_parsing
-    run_parse_save_lang
-    notify "📌 Updated lang for #{keeper.count[:updated_lang]} game(s)." if keeper.count[:updated_lang] > 0
   end
 
   def parse_save_desc_dd
@@ -115,17 +109,6 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc(desc, game.sony_game)
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} game(s)." if keeper.count[:updated_desc] > 0
-  end
-
-  def make_message(parser_count)
-    message = ""
-    message << "✅ Saved: #{keeper.count[:saved]} new games;\n" unless keeper.count[:saved].zero?
-    message << "✅ Restored: #{keeper.count[:restored]} games;\n" unless keeper.count[:restored].zero?
-    message << "✅ Updated prices: #{keeper.count[:updated]} games;\n" unless keeper.count[:updated].zero?
-    message << "✅ Skipped prices: #{keeper.count[:skipped]} games;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} games;\n" if keeper.count[:updated_menu_id] > 0
-    message << "✅ Parsed: #{@pages} pages, #{parser_count} games." unless parser_count.zero?
-    message
+    notify "📌 Added description for #{keeper.count[:updated_desc]} #{Keeper::MADE_IN} game(s)." if keeper.count[:updated_desc] > 0
   end
 end

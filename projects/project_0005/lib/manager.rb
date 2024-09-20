@@ -33,7 +33,7 @@ class Manager < Hamster::Harvester
     cleared_cache = false
     cleared_cache = clear_cache if has_update
     keeper.finish
-    notify make_message
+    notify form_message
     notify '👌 The Eczane parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
@@ -102,7 +102,7 @@ class Manager < Hamster::Harvester
     Вот несколько из последних:\n#{keeper.no_parent.last(5).join(', ')}" if keeper.no_parent.size > 10
   end
 
-  def make_message
+  def form_message
     message = ""
     message << "✅ Saved: #{keeper.count[:saved]} new products;\n" unless keeper.count[:saved].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} products;\n" unless keeper.count[:updated].zero?

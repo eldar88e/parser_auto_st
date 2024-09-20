@@ -52,10 +52,28 @@ module GameModx
       end
     end
 
+    def parse_save_desc_lang
+      notify "⚠️ Day of parsing All #{keeper.class::MADE_IN} games without rus lang and with empty content!" if @day_all_lang_parsing
+      run_parse_save_lang
+      notify "📌 Added language for #{keeper.count[:updated_lang]} #{keeper.class::MADE_IN} game(s)." if keeper.count[:updated_lang] > 0
+      notify "📌 Added description for #{keeper.count[:updated_desc]} #{keeper.class::MADE_IN} game(s)." if keeper.count[:updated_desc] > 0
+    end
+
     def notify(message, color=:green, method_=:info)
       Hamster.logger.send(method_, message)
       Hamster.report message: message
       puts color.nil? ? message : message.send(color) if @debug
+    end
+
+    def make_message(parser_count=nil)
+      message = "Country: #{keeper.class::MADE_IN}\n"
+      message << "✅ Saved: #{keeper.count[:saved]} new games;\n" if keeper.count[:saved] > 0
+      message << "✅ Restored: #{keeper.count[:restored]} games;\n" if keeper.count[:restored] > 0
+      message << "✅ Updated prices: #{keeper.count[:updated]} games;\n" if keeper.count[:updated] > 0
+      message << "✅ Updated top: #{keeper.count[:updated_menu_id]} games;\n" if keeper.count[:updated_menu_id] > 0
+      last_msg = "✅ Parsed: #{@parse_count} pages, #{parser_count} games."
+      message << parser_count ? last_msg : "✅ Imported: #{@parse_count} games."
+      message
     end
   end
 end

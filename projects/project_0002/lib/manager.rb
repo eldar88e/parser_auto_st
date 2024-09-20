@@ -10,10 +10,10 @@ class Manager < Hamster::Harvester
 
   def initialize
     super
-    @debug    = commands[:debug]
-    @pages    = 0
-    @settings = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
-    @keeper   = Keeper.new(@settings)
+    @debug       = commands[:debug]
+    @parse_count = 0
+    @settings    = ParserSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
+    @keeper      = Keeper.new(@settings)
     @day_all_lang_parsing = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
   end
 
@@ -83,27 +83,9 @@ class Manager < Hamster::Harvester
       list_games = parser.parse_list_games_ua
       parser_count += parser.parsed
       keeper.save_ua_games(list_games)
-      @pages += 1
+      @parse_count += 1
     end
     message = make_message(parser_count)
     notify message if message.present?
-  end
-
-  def parse_save_desc_lang
-    notify "⚠️ Day of parsing All PS_UA games without rus lang and with empty content!" if @day_all_lang_parsing
-    run_parse_save_lang
-    notify "📌 Added description for #{keeper.count[:updated_desc]} PS_UA game(s)." if keeper.count[:updated_desc] > 0
-    notify "📌 Added language for #{keeper.count[:updated_lang]} PS_UA game(s)." if keeper.count[:updated_lang] > 0
-  end
-
-  def make_message(parser_count)
-    message = ""
-    message << "✅ Saved: #{keeper.count[:saved]} new PS_UA games;\n" unless keeper.count[:saved].zero?
-    message << "✅ Restored: #{keeper.count[:restored]} PS_UA games;\n" unless keeper.count[:restored].zero?
-    message << "✅ Updated prices: #{keeper.count[:updated]} PS_UA games;\n" unless keeper.count[:updated].zero?
-    message << "✅ Skipped prices: #{keeper.count[:skipped]} PS_UA games;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} PS_UA games;\n" if keeper.count[:updated_menu_id] > 0
-    message << "✅ Parsed: #{@pages} pages, #{parser_count} PS_UA games." unless parser_count.zero?
-    message
   end
 end

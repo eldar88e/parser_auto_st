@@ -32,16 +32,4 @@ class Manager < Hamster::Harvester
     @debug = true
     clear_cache if !clr_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0)
   end
-
-  private
-
-  def make_message
-    message = ""
-    message << "✅ Saved: #{keeper.count[:saved]} new UA games;\n" unless keeper.count[:saved].zero?
-    message << "✅ Restored: #{keeper.count[:restored]} UA games;\n" unless keeper.count[:restored].zero?
-    message << "✅ Updated prices: #{keeper.count[:updated]} UA games;\n" unless keeper.count[:updated].zero?
-    message << "✅ Updated menuindex: #{keeper.count[:updated_menu_id]} UA games;\n" unless keeper.count[:updated_menu_id].zero?
-    message << "✅ Imported: #{@parse_count} UA games."
-    message
-  end
 end

@@ -24,7 +24,7 @@ class Keeper < Hamster::Keeper
         sony_game = game_add.sony_game
         check     = check_game(sony_game)
         if check
-          game[:main][:content] = form_content(game[:additional][:janr]) if sony_game.content.blank?
+          game[:main][:content] = form_content(game[:additional][:janr]) if sony_game.content.blank? ## TODO со временем можно убрать
           update_game(game, game_add, sony_game)
         end
       else
