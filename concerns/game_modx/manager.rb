@@ -66,13 +66,14 @@ module GameModx
     end
 
     def make_message(parser_count=nil)
-      message = "Country: #{keeper.class::MADE_IN}\n"
+      country = keeper.class::MADE_IN
+      message = "#{{ 'Украина' => '🇺🇦', 'Турция' => '🇹🇷', 'Индия' => '🇮🇳' }[country]} #{country}\n"
       message << "✅ Saved: #{keeper.count[:saved]} new games;\n" if keeper.count[:saved] > 0
       message << "✅ Restored: #{keeper.count[:restored]} games;\n" if keeper.count[:restored] > 0
       message << "✅ Updated prices: #{keeper.count[:updated]} games;\n" if keeper.count[:updated] > 0
       message << "✅ Updated top: #{keeper.count[:updated_menu_id]} games;\n" if keeper.count[:updated_menu_id] > 0
       last_msg = "✅ Parsed: #{@parse_count} pages, #{parser_count} games."
-      message << parser_count ? last_msg : "✅ Imported: #{@parse_count} games."
+      message << (parser_count ? last_msg : "✅ Imported: #{@parse_count} games.")
       message
     end
   end

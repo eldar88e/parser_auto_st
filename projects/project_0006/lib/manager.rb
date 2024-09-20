@@ -13,8 +13,8 @@ class Manager < Hamster::Harvester
     super
     @parse_count = 0
     @debug       = commands[:debug]
-    @keeper      = Keeper.new(@settings)
     @settings    = IndiaSetting.pluck(:variable, :value).to_h { |key, value| [key.to_sym, value] }
+    @keeper      = Keeper.new(@settings)
     @day_all_lang_parsing = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
   end
 

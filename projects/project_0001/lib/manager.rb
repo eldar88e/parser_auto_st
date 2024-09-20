@@ -10,12 +10,12 @@ class Manager < Hamster::Harvester
 
   def initialize
     super
-    @keeper   = Keeper.new(@settings)
     @debug    = commands[:debug]
     @settings = { touch_update_desc: settings['touch_update_desc'],
                   day_all_lang_scrap: settings['day_all_lang_scrap'],
                   sony_url: settings['ps_game']
                 }
+    @keeper      = Keeper.new(@settings)
     @parse_count = 0
     @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour < 12
   end
