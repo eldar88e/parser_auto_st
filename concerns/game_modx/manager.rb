@@ -1,5 +1,6 @@
 module GameModx
   module Manager
+    COUNTRY_FLAG = { 'Украина' => '🇺🇦', 'Турция' => '🇹🇷', 'Индия' => '🇮🇳' }
 
     private
 
@@ -53,10 +54,10 @@ module GameModx
     end
 
     def parse_save_desc_lang
-      notify "⚠️ Day of parsing All #{keeper.class::MADE_IN} games without rus lang and with empty content!" if @day_all_lang_parsing
+      notify "⚠️ Day of parsing All #{COUNTRY_FLAG[keeper.class::MADE_IN]} games without rus lang!" if @day_all_lang_parsing
       run_parse_save_lang
-      notify "📌 Added language for #{keeper.count[:updated_lang]} #{keeper.class::MADE_IN} game(s)." if keeper.count[:updated_lang] > 0
-      notify "📌 Added description for #{keeper.count[:updated_desc]} #{keeper.class::MADE_IN} game(s)." if keeper.count[:updated_desc] > 0
+      notify "📌 Added language for #{keeper.count[:updated_lang]} #{COUNTRY_FLAG[keeper.class::MADE_IN]} game(s)." if keeper.count[:updated_lang] > 0
+      notify "📌 Added description for #{keeper.count[:updated_desc]} #{COUNTRY_FLAG[keeper.class::MADE_IN]} game(s)." if keeper.count[:updated_desc] > 0
     end
 
     def notify(message, color=:green, method_=:info)
@@ -66,8 +67,7 @@ module GameModx
     end
 
     def make_message(parser_count=nil)
-      country = keeper.class::MADE_IN
-      message = "#{{ 'Украина' => '🇺🇦', 'Турция' => '🇹🇷', 'Индия' => '🇮🇳' }[country]} #{country}\n"
+      message = "#{COUNTRY_FLAG[keeper.class::MADE_IN]} #{keeper.class::MADE_IN}\n"
       message << "✅ Saved: #{keeper.count[:saved]} new games;\n" if keeper.count[:saved] > 0
       message << "✅ Restored: #{keeper.count[:restored]} games;\n" if keeper.count[:restored] > 0
       message << "✅ Updated prices: #{keeper.count[:updated]} games;\n" if keeper.count[:updated] > 0

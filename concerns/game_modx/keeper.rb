@@ -2,6 +2,7 @@ module GameModx
   module Keeper
     PROPERTIES = '{"stercseo":{"index":"1","follow":"1","sitemap":"1","priority":"0.5","changefreq":"weekly"}}'
     SOURCE     = 3
+    COUNTRY    = { 'Украина' => 'Ukraine', 'Турция' => 'Turkish', 'Индия' => 'India' }
 
     def initialize(settings)
       super
@@ -166,7 +167,7 @@ module GameModx
     end
 
     def run
-      class_name = { 'Украина' => 'Ukraine', 'Турция' => 'Turkish', 'Индия' => 'India' }[self.class::MADE_IN]
+      class_name = COUNTRY[self.class::MADE_IN]
       klass      = "#{class_name}Run".constantize
       @run ||= RunId.new(klass)
     end
