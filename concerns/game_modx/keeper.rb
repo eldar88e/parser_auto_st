@@ -166,7 +166,8 @@ module GameModx
     end
 
     def run
-      klass = "#{self.class::MADE_IN}Run".constantize
+      class_name = { 'Украина' => 'Ukraine', 'Турция' => 'Turkish', 'Индия' => 'India' }[self.class::MADE_IN]
+      klass      = "#{class_name}Run".constantize
       @run ||= RunId.new(klass)
     end
   end
