@@ -109,6 +109,6 @@ class Manager < Hamster::Harvester
 
       keeper.save_desc(desc, game.sony_game)
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} #{Keeper::MADE_IN} game(s)." if keeper.count[:updated_desc] > 0
+    notify "📌 Added description for #{keeper.count[:updated_desc]} #{COUNTRY_FLAG[Keeper::MADE_IN]} game(s)." if keeper.count[:updated_desc] > 0
   end
 end
