@@ -26,7 +26,7 @@ class Parser < Hamster::Parser
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
-      if prise_discount.present? && !prise_discount.strip.to_i.zero?
+      if prise_discount.present? && prise_discount.scan(/\d/).join.to_f > 0
         game[:additional][:price_tl]     = get_price(prise_discount)
         game[:additional][:price]        = get_price(prise_discount, :ru)
         game[:additional][:old_price_tl] = get_price(price_rs_raw)

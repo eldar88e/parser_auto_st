@@ -79,11 +79,11 @@ module GameModx
       text.split(', ').map { |i| @translator.translate_genre(i) }.sort.join(', ')
     end
 
-    def get_price(raw_price, currency=:rs)
+    def get_price(raw_price, currency=nil)
       return unless raw_price.present?
 
-      price = raw_price.downcase.gsub('rs', '').gsub(',', '').to_f
-      return price if currency == :rs
+      price = raw_price.scan(/\d/).join.to_f
+      return price if currency.nil?
 
       exchanged_price = make_exchange_rate(price)
       round_up_price exchanged_price
