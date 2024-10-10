@@ -26,7 +26,7 @@ class Parser < Hamster::Parser
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
-      if prise_discount.present?
+      if prise_discount.present? && !prise_discount.strip.to_i.zero?
         game[:additional][:price_tl]     = get_price(prise_discount)
         game[:additional][:price]        = get_price(prise_discount, :ru)
         game[:additional][:old_price_tl] = get_price(price_rs_raw)
@@ -34,6 +34,8 @@ class Parser < Hamster::Parser
       else
         game[:additional][:price_tl]     = get_price(price_rs_raw)
         game[:additional][:price]        = get_price(price_rs_raw, :ru)
+        game[:additional][:old_price_tl] = nil
+        game[:additional][:old_price]    = nil
       end
 
       game[:additional][:old_price]         = nil if game[:additional][:old_price] == game[:additional][:price]
