@@ -98,10 +98,15 @@ class Manager < Hamster::Harvester
   end
 
   def parse_save_desc_dd
-    notify "⚠️ Day of parsing All games without desc!" if @day_all_lang_parsing
+    notify "⚠️ Day of parsing All #{COUNTRY_FLAG[keeper.class::MADE_IN]} games without desc!" if @day_all_lang_parsing
     games   = keeper.fetch_game_without_content
     scraper = Scraper.new(keeper: keeper)
     games.each do |game|
+      sony_id  = game.janr
+      contents = SonyGameAdditional.includes(:sony_game).where(janr: sony_id).where.not(sony_game: { content: [nil, '']})
+      content  = contents.present? ? { content: contents.second.sony_game.content } : nil
+      keeper.save_desc(content, game.sony_game) && next if content
+
       page   = scraper.scrape_desc(game.janr)
       parser = Parser.new(html: page)
       desc   = parser.parse_desc_dd

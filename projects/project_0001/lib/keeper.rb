@@ -13,7 +13,7 @@ class Keeper < Hamster::Keeper
   PARENT_PS4 = Hamster.settings['parent_ps4']
 
   def fetch_game_without_content
-    games_ids       = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).pluck(:id)
+    games_ids       = SonyGame.active_games([PARENT_PS5, PARENT_PS4]).where(content: [nil, '']).ids
     search          = { id: games_ids }
     check_day_hour  = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
     search[:run_id] = run_id if !commands[:all] && settings['touch_update_desc']
