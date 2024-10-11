@@ -82,7 +82,7 @@ module GameModx
     def get_price(raw_price, currency=nil)
       return unless raw_price.present?
 
-      price = raw_price.sub(/\.0+/, '').scan(/\d/).join.to_f
+      price = raw_price.sub(/\.\d+/, '').scan(/\d/).join.to_f
       return price if currency.nil?
 
       exchanged_price = make_exchange_rate(price)
