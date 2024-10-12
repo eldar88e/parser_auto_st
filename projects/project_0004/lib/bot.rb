@@ -53,7 +53,7 @@ class Bot
     when '/start'
       send_keyboard(bot, message.chat.id)
     else
-      bot.api.send_message(chat_id: message.chat.id, text: 'Не верные текст!')
+      bot.api.send_message(chat_id: message.chat.id, text: 'Не верный текст!')
     end
   end
 
