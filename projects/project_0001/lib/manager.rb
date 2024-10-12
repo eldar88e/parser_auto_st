@@ -61,7 +61,7 @@ class Manager < Hamster::Harvester
       parse_save_desc_dd
     end
     keeper.delete_not_touched
-    notify "‼️ Deleted: #{keeper.count[:deleted]} old games" if keeper.count[:deleted] > 0
+    notify "‼️ Deleted: #{keeper.count[:deleted]} old #{COUNTRY_FLAG[keeper.class::MADE_IN]} game(s)" if keeper.count[:deleted] > 0
 
     has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     cleared_cache = false
