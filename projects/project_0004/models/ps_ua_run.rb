@@ -6,5 +6,5 @@ class PsUaRun < ApplicationRecord
                        database: ENV.fetch('DATABASE_UA'),
                        username: ENV.fetch('USERNAME_UA'),
                        password: ENV.fetch('PASSWORD_UA'))
-  self.table_name = 'runs'
+  self.table_name = 'ukraine_runs'
 end
