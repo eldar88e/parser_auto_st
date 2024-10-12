@@ -104,7 +104,7 @@ class Manager < Hamster::Harvester
     games.each do |game|
       sony_id  = game.janr
       contents = SonyGameAdditional.includes(:sony_game).where(janr: sony_id).where.not(sony_game: { content: [nil, '']})
-      content  = contents.present? ? { content: contents.second.sony_game.content } : nil
+      content  = contents.present? ? { content: contents[0].sony_game.content } : nil
       keeper.save_desc(content, game.sony_game) && next if content
 
       page   = scraper.scrape_desc(game.janr)
