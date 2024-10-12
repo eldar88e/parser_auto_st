@@ -14,6 +14,8 @@ class Bot
           handle_callback(bot, message)
         when Telegram::Bot::Types::Message
           handle_message(bot, message)
+        else
+          bot.api.send_message(chat_id: message.from.id, text: "Не верные данные!")
         end
       end
     end
