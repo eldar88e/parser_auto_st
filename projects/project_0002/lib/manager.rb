@@ -43,7 +43,7 @@ class Manager < Hamster::Harvester
     cleared_cache = clear_cache if has_update
 
     keeper.finish
-    notify '👌 The PS_UA parser succeeded!'
+    notify "👌 Parser #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message

@@ -69,7 +69,7 @@ class Manager < Hamster::Harvester
 
     export if has_update || !keeper.count[:updated_menu_id].zero?
     keeper.finish
-    notify '👌 The parser succeeded!'
+    notify "👌 Parser #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message

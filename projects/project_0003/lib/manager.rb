@@ -25,7 +25,7 @@ class Manager < Hamster::Harvester
     clr_cache = clear_cache if keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
 
     keeper.finish
-    notify '👌 The UA import succeeded!'
+    notify "👌 Import #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
