@@ -1,12 +1,11 @@
 require_relative './application_record'
 class SonyGame < ApplicationRecord
-  validates :alias, uniqueness: true
-
   self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
-  has_one :sony_game_additional, foreign_key: 'id'   #optional: true
+  validates :uri, uniqueness: true
+
+  has_one :sony_game_additional, foreign_key: 'id'
   has_one :sony_game_intro, foreign_key: 'resource'
-  #has_many :sony_game_category, foreign_key: 'product_id', optional: true
 
   scope :active_games, ->(parent) { where(deleted: 0, published: 1, parent: parent) }
 

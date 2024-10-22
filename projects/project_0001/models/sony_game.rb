@@ -3,6 +3,8 @@ require_relative './application_record'
 class SonyGame < ApplicationRecord
   self.table_name = ENV['BD_TABLE_NAME_MAIN']
 
+  validates :uri, uniqueness: true
+
   has_one :sony_game_additional, foreign_key: 'id'   #optional: true
   has_one :sony_game_intro, foreign_key: 'resource'
   #has_many :sony_game_category, foreign_key: 'product_id', optional: true

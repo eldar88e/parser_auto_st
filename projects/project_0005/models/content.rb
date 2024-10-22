@@ -3,12 +3,10 @@ require_relative './vendor'
 class Content < ApplicationRecord
   self.table_name = 'modx_site_content'
 
-  has_one :product, foreign_key: 'id'   #optional: true
+  validates :uri, uniqueness: true
+
+  has_one :product, foreign_key: 'id'
   has_one :intro, foreign_key: 'resource'
-
-  validates :alias, uniqueness: true
-
-  #has_many :sony_game_category, foreign_key: 'product_id', optional: true
 
   scope :active_contents, ->(parent) { where(deleted: 0, published: 1, parent: parent) }
 
