@@ -11,7 +11,6 @@ module Hamster
 
     @debug = true if @arguments[:debug]
 
-    #Hamster.telegram if @arguments[:telegram]
     Hamster.grab if @arguments[:grab]
     Hamster.dig if @arguments[:dig]
     #Hamster.do if @arguments[:do]

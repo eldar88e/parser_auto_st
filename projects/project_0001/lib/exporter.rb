@@ -1,19 +1,8 @@
 class Exporter < Hamster::Harvester
-  HEAD = ["SKU",
-          'Mark',
-          "Название товара",
-          "Цена",
-          "Price Old",
-          "Изображение",
-          "Наличие русского языка в субтитрах",
-          "Наличие русского языка в голосе",
-          "Жанр игры",
-          "Подробное описание",
-          "Платформа",
-          "Раздел",
-          'SEO title',
-          'SEO descr']
-  MAIN_CATEGORY = 'Игры PlayStation'
+  HEAD = ['SKU', 'Mark', "Название товара", "Цена", "Price Old", "Изображение", "Наличие русского языка в субтитрах",
+          "Наличие русского языка в голосе", "Жанр игры", "Подробное описание", "Платформа", "Раздел", 'SEO title',
+          'SEO descr'].freeze
+  MAIN_CATEGORY = 'Игры PlayStation'.freeze
 
   def initialize(keeper)
     super
@@ -24,6 +13,11 @@ class Exporter < Hamster::Harvester
     games_raw  = @keeper.list_last_popular_game(settings['limit_export'])
     games_list = convert_objects_list(games_raw, domen)
     CSV.generate { |csv| games_list.each { |row| csv << row } }
+  end
+
+  def update_google_sheets
+    binding.pry
+    games_raw  = @keeper.list_last_popular_game(nil)
   end
 
   private

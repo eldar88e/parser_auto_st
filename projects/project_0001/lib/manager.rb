@@ -20,6 +20,11 @@ class Manager < Hamster::Harvester
     @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour < 12
   end
 
+  def export_google
+    exporter = Exporter.new(keeper)
+    exporter.update_google_sheets
+  end
+
   def export
     keeper.status = 'exporting'
     exporter      = Exporter.new(keeper)
