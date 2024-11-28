@@ -12,6 +12,8 @@ def scrape(options)
     manager.store
   elsif options[:export]
     manager.export
+  elsif options[:export_google]
+    manager.export_google
   end
 rescue => error
   puts error.backtrace

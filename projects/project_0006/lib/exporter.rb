@@ -1,4 +1,8 @@
+require_relative '../../../concerns/game_modx/exporter'
+
 class Exporter < Hamster::Harvester
+  include GameModx::Exporter
+
   HEAD = ["SKU",
           'Mark',
           "Название товара",

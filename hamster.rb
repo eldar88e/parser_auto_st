@@ -17,6 +17,7 @@ require 'mysql2'
 require 'open-uri'
 require 'pry'
 require 'telegram/bot'
+require 'google_drive'
 
 Dotenv.load('.env')
 require_relative 'lib/hamster'

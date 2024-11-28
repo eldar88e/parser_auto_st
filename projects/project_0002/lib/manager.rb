@@ -1,6 +1,7 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
+require_relative '../lib/exporter'
 require_relative '../models/parser_setting'
 require 'net/ftp'
 require_relative '../../../concerns/game_modx/manager'
