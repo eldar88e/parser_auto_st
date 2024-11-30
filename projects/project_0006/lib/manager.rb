@@ -56,7 +56,8 @@ class Manager < Hamster::Harvester
     cleared_cache = false
     cleared_cache = clear_cache if has_update
 
-    export if has_update || keeper.count[:updated_menu_id] > 0
+    export        if has_update || keeper.count[:updated_menu_id] > 0
+    export_google if has_update
     keeper.finish
     notify "👌 Parser #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
   rescue => error
