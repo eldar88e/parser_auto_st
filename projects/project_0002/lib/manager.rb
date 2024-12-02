@@ -41,7 +41,7 @@ class Manager < Hamster::Harvester
 
     has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
     cleared_cache = false
-    cleared_cache = clear_cache if has_update
+    cleared_cache = clear_cache('FTP_LOGIN_UA', 'FTP_PASS_UA') if has_update
     export_google if has_update
     keeper.finish
     notify "👌 Parser #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
@@ -50,28 +50,10 @@ class Manager < Hamster::Harvester
     Hamster.report message: error.message
     @debug     = true
     has_update = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
-    clear_cache if !cleared_cache && has_update
+    clear_cache('FTP_LOGIN_UA', 'FTP_PASS_UA') if !cleared_cache && has_update
   end
 
   private
-
-  def clear_cache
-    ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN_UA')
-    ftp_pass = ENV.fetch('FTP_PASS_UA')
-
-    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-      ftp.chdir('/core/cache/context_settings/web')
-      delete_files(ftp)
-      ftp.chdir('/core/cache/resource/web/resources')
-      delete_files(ftp)
-    end
-    notify "The cache has been emptied." if @debug
-    true
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
-  end
 
   def parse_save_main
     run_id       = keeper.run_id

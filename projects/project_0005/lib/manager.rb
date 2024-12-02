@@ -31,7 +31,7 @@ class Manager < Hamster::Harvester
     #keeper.delete_not_touched
     has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 # || keeper.count[:deleted] > 0
     cleared_cache = false
-    cleared_cache = clear_cache if has_update
+    cleared_cache = clear_cache('FTP_LOGIN_ECZANE', 'FTP_PASS_ECZANE') if has_update
     keeper.finish
     notify form_message
     notify '👌 The Eczane parser succeeded!'
@@ -39,30 +39,14 @@ class Manager < Hamster::Harvester
     Hamster.logger.error error.message
     Hamster.report message: error.message
     @debug = true
-    clear_cache if !cleared_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0) #|| !keeper.count[:deleted].zero?)
+    if !cleared_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0) #|| !keeper.count[:deleted].zero?)
+      clear_cache('FTP_LOGIN_ECZANE', 'FTP_PASS_ECZANE')
+    end
   end
 
   private
 
   attr_reader :keeper
-
-  def clear_cache
-    ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN_ECZANE')
-    ftp_pass = ENV.fetch('FTP_PASS_ECZANE')
-
-    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-      ftp.chdir('/core/cache/context_settings/web')
-      delete_files(ftp)
-      ftp.chdir('/core/cache/resource/web/resources')
-      delete_files(ftp)
-    end
-    notify "The cache has been emptied." if @debug
-    true
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
-  end
 
   def delete_files(ftp)
     list = ftp.nlst

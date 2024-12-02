@@ -26,16 +26,16 @@ module GameModx
       end
     end
 
-    def clear_cache
+    def clear_cache(user_env=nil, pass_env=nil)
       ftp_host = ENV.fetch('FTP_HOST')
-      ftp_user = ENV.fetch('FTP_LOGIN')
-      ftp_pass = ENV.fetch('FTP_PASS')
+      ftp_user = ENV.fetch(user_env, 'FTP_LOGIN')
+      ftp_pass = ENV.fetch(pass_env, 'FTP_PASS')
 
       Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-        ftp.chdir('/core/cache/context_settings/web')
-        delete_files(ftp)
-        ftp.chdir('/core/cache/resource/web/resources')
-        delete_files(ftp)
+        %w[/core/cache/context_settings/web /core/cache/resource/web/resources].each do |path|
+          ftp.chdir(path)
+          delete_files(ftp)
+        end
       end
       notify "The cache has been emptied." if @debug
       true
