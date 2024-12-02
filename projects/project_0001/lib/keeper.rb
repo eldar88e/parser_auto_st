@@ -21,14 +21,6 @@ class Keeper < Hamster::Keeper
     SonyGameAdditional.includes(:sony_game).where(search)
   end
 
-  def fetch_content(sony_id)
-    SonyGame.joins(:sony_game_additional)
-            .where(sony_game_additional: { janr: sony_id })
-            .where.not(content: [nil, ''])
-            .limit(1)
-            .pick(:content)
-  end
-
   def save_desc(data, game)
     @count[:updated_desc] ||= 0
     data.merge!({ editedon: Time.current.to_i, editedby: settings['user_id'] })

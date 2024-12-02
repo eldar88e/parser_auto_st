@@ -23,10 +23,7 @@ class Keeper < Hamster::Keeper
       if game_add.present?
         sony_game = game_add.sony_game
         check     = check_game(sony_game)
-        if check
-          game[:main][:content] = form_content(game[:additional][:janr]) if sony_game.content.blank? ## TODO со временем можно убрать
-          update_game(game, game_add, sony_game)
-        end
+        update_game(game, game_add, sony_game) if check
       else
         form_new_game(game, image_link_raw)
         game[:content] = form_content(game[:additional][:janr])
@@ -42,13 +39,6 @@ class Keeper < Hamster::Keeper
 
   def form_link(sony_id)
     settings['ps_game'].gsub('en-tr','en-in') + sony_id
-  end
-
-  def form_content(sony_id)
-    SonyGame.joins(:sony_game_additional)
-            .where.not(content: ['', nil])
-            .where(sony_game_additional: { janr: sony_id })
-            .pluck(:content).first
   end
 
   def form_description(title)

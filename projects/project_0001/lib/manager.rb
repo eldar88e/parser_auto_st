@@ -104,7 +104,7 @@ class Manager < Hamster::Harvester
     scraper = Scraper.new(keeper: keeper)
     games.each do |game|
       sony_id = game.janr
-      content = keeper.fetch_content(sony_id)
+      content = keeper.form_content(sony_id)
       keeper.save_desc({ content: content }, game.sony_game) && next if content
 
       page   = scraper.scrape_desc(game.janr)

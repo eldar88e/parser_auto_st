@@ -29,6 +29,14 @@ module GameModx
       run.finish
     end
 
+    def form_content(sony_id)
+      SonyGame.joins(:sony_game_additional)
+              .where.not(content: ['', nil])
+              .where(sony_game_additional: { janr: sony_id })
+              .limit(1)
+              .pick(:content)
+    end
+
     def fetch_game_without_rus
       params = commands[:desc] ? { content: [nil, ''] } : nil
       ids    = SonyGame.active_games([self.class::PARENT_PS5, self.class::PARENT_PS4]).where(params).ids
