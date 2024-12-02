@@ -71,6 +71,7 @@ class Parser < Hamster::Parser
     result[:rus_voice]  = exist_rus?(info)
     result[:rus_screen] = exist_rus?(info, 'языки_')
     result[:content]    = @html.at('.psw-l-grid p')&.children&.to_html
+    remove_emoji(result[:content]) if result[:content].present?
     result
   end
 

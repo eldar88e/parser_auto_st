@@ -18,6 +18,7 @@ require 'open-uri'
 require 'pry'
 require 'telegram/bot'
 require 'google_drive'
+require 'emoji_regex'
 
 Dotenv.load('.env')
 require_relative 'lib/hamster'

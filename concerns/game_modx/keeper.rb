@@ -30,12 +30,14 @@ module GameModx
     end
 
     def fetch_game_without_rus
-      ids            = SonyGame.active_games([self.class::PARENT_PS5, self.class::PARENT_PS4]).pluck(:id)
-      search         = { id: ids, rus_voice: 0 }
+      params = commands[:desc] ? { content: [nil, ''] } : nil
+      ids    = SonyGame.active_games([self.class::PARENT_PS5, self.class::PARENT_PS4]).where(params).ids
+      search = { id: ids, rus_voice: 0 }
+      search.delete(:rus_voice) if commands[:genre] || commands[:desc]
       search[:genre] = [nil, ''] if commands[:genre]
       result         = SonyGameAdditional.where(search).limit(settings['limit_upd_lang'])
       check_day_hour = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
-      check_day_hour || commands[:genre] ? result : result.where(run_id: run_id)
+      check_day_hour || commands[:genre] || commands[:desc] ? result : result.where(run_id: run_id)
     end
 
     def save_lang(data, model)

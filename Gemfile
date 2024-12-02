@@ -17,3 +17,4 @@ gem 'pry'
 gem 'telegram-bot-ruby', '~> 0.19.2'   # need faraday ~> 1.0
 gem 'babosa'
 gem 'net-ftp', '~> 0.3'
+gem 'emoji_regex'

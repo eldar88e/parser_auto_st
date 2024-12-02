@@ -18,6 +18,13 @@ module GameModx
 
     private
 
+    def remove_emoji(str)
+      str.gsub!(EmojiRegex::Regex, '')
+      str.strip!
+      str.squeeze!(' ')
+      # str.gsub!(/⭐|🏆|‍️‍️‍️‍️‍️‍️‍️💀️️|🚕|👑|🎹|®|👁️‍🗨️|🄬|●|✊|✨|🖐|✌|°|🙂|™/, '')
+    end
+
     def formit_lang(info)
       result              = {}
       result[:release]    = info[:release]

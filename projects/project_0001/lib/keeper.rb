@@ -17,8 +17,16 @@ class Keeper < Hamster::Keeper
     search          = { id: games_ids }
     check_day_hour  = @settings[:day_all_lang_scrap].to_i == Date.current.day && Time.current.hour < 12
     search[:run_id] = run_id if !commands[:all] && settings['touch_update_desc']
-    search.delete(:run_id) if check_day_hour
+    search.delete(:run_id) if check_day_hour || commands[:all]
     SonyGameAdditional.includes(:sony_game).where(search)
+  end
+
+  def fetch_content(sony_id)
+    SonyGame.joins(:sony_game_additional)
+            .where(sony_game_additional: { janr: sony_id })
+            .where.not(content: [nil, ''])
+            .limit(1)
+            .pick(:content)
   end
 
   def save_desc(data, game)
