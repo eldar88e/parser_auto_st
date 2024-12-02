@@ -6,6 +6,12 @@ module GameModx
       'Украина' => { id: 2, id_bonus: 5, id_old: 9, id_date: 10 },
       'Индия'   => { id: 3, id_bonus: 6, id_old: 11, id_date: 12 }
     }.freeze
+    FIRST_COLUMN = [
+      'Название игры', 'Цена Турция', 'Цена Украина', 'Цена Индия',
+      'Цена с PS Plus Турция', 'Цена с PS Plus Украина', 'Цена с PS Plus Индия',
+      'Цена старая Турция', 'Цена старая Украина', 'Цена старая Индия',
+      'Дата скидки Турция', 'Дата скидки Украина', 'Дата скидки Индия', ''
+    ].freeze
 
     def update_google_sheets
       games_raw      = @keeper.list_last_popular_game(nil)
@@ -17,6 +23,8 @@ module GameModx
       worksheet_size = worksheet.rows.size
       count          = [0, 0]
       updates        = []
+
+      write_first_column(worksheet)
 
       games_raw.each_slice(SLICE_LIMIT) do |sliced_games|
         sliced_games.each do |row|
@@ -42,6 +50,14 @@ module GameModx
     end
 
     private
+
+    def write_first_column(worksheet)
+      first_row = worksheet.rows[0]
+      return if first_row == FIRST_COLUMN
+
+      worksheet.update_cells(1, 1, [FIRST_COLUMN])
+      worksheet.save
+    end
 
     def max_row(row, worksheet_size, sony_id_index, title_index)
       additional = row.sony_game_additional

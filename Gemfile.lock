@@ -150,13 +150,13 @@ DEPENDENCIES
   csv (~> 3.3)
   dotenv (~> 3.1.4)
   faraday
-  google_drive
+  google_drive (~> 3.0)
   hashie
   mysql2 (~> 0.5.6)
   net-ftp (~> 0.3)
   nokogiri (~> 1.16)
   pry
-  telegram-bot-ruby
+  telegram-bot-ruby (~> 0.19.2)
 
 RUBY VERSION
    ruby 3.2.2p53
