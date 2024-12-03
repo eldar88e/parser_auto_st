@@ -26,10 +26,10 @@ module GameModx
       end
     end
 
-    def clear_cache(user_env=nil, pass_env=nil)
+    def clear_cache(user_env='FTP_LOGIN', pass_env='FTP_PASS')
       ftp_host = ENV.fetch('FTP_HOST')
-      ftp_user = ENV.fetch(user_env, 'FTP_LOGIN')
-      ftp_pass = ENV.fetch(pass_env, 'FTP_PASS')
+      ftp_user = ENV.fetch(user_env)
+      ftp_pass = ENV.fetch(pass_env)
 
       Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
         %w[/core/cache/context_settings/web /core/cache/resource/web/resources].each do |path|
