@@ -4,7 +4,7 @@ module GameModx
 
     def export_google
       exporter = ::Exporter.new(keeper)
-      msg      = exporter.update_google_sheets
+      msg      = "⚠️ Export temporarily stopped for games" # exporter.update_google_sheets
       Hamster.report(message: msg.gsub('games', "#{COUNTRY_FLAG[keeper.class::MADE_IN]} games"))
     end
 
