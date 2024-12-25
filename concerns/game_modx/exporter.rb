@@ -39,7 +39,7 @@ module GameModx
             count[0] += 1
           else
             count[1] += 1
-            title_index[additional.janr] = game_row_id
+            sony_id_index[additional.janr] = game_row_id
           end
         end
       end
