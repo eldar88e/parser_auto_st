@@ -2,9 +2,9 @@ module GameModx
   module Exporter
     SLICE_LIMIT = 500
     PARAMS      = {
-      'Турция'  => { id: 1, id_bonus: 4, id_old: 7, id_date: 10 },
-      'Украина' => { id: 2, id_bonus: 5, id_old: 8, id_date: 11 },
-      'Индия'   => { id: 3, id_bonus: 6, id_old: 9, id_date: 12 }
+      'Турция'  => { price: 1, price_plus: 4, price_old: 7, date: 10 },
+      'Украина' => { price: 2, price_plus: 5, price_old: 8, date: 11 },
+      'Индия'   => { price: 3, price_plus: 6, price_old: 9, date: 12 }
     }.freeze
     FIRST_COLUMN = [
       'Название игры', 'Цена Турция', 'Цена Украина', 'Цена Индия',
@@ -84,7 +84,7 @@ module GameModx
     end
 
     def make_id
-      %i[id id_bonus id_old id_date].map { |id| PARAMS[@keeper.class::MADE_IN][id] }
+      %i[price price_plus price_old date].map { |key| PARAMS[@keeper.class::MADE_IN][key] }
     end
   end
 end
