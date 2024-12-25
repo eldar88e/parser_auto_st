@@ -2,9 +2,9 @@ module GameModx
   module Exporter
     SLICE_LIMIT = 500
     PARAMS      = {
-      'Турция'  => { id: 1, id_bonus: 4, id_old: 7, id_date: 8 },
-      'Украина' => { id: 2, id_bonus: 5, id_old: 9, id_date: 10 },
-      'Индия'   => { id: 3, id_bonus: 6, id_old: 11, id_date: 12 }
+      'Турция'  => { id: 1, id_bonus: 4, id_old: 7, id_date: 10 },
+      'Украина' => { id: 2, id_bonus: 5, id_old: 8, id_date: 11 },
+      'Индия'   => { id: 3, id_bonus: 6, id_old: 9, id_date: 12 }
     }.freeze
     FIRST_COLUMN = [
       'Название игры', 'Цена Турция', 'Цена Украина', 'Цена Индия',
