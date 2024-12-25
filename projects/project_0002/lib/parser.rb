@@ -1,74 +1,29 @@
-require_relative '../models/sony_game_additional'
+require_relative '../../../concerns/game_modx/parser'
 
 class Parser < Hamster::Parser
+  include GameModx::Parser
+
   MIN_PRICE     = 15
   EXCHANGE_RATE = 4
 
   def initialize(**page)
     super
-    @html           = Nokogiri::HTML(page[:html])
-    @other_platform = 0
-    @other_type     = 0
-    @not_price      = 0
-    @parsed         = 0
+    @html       = Nokogiri::HTML(page[:html])
+    @translator = Hamster::Translator.new
+    @parsed     = 0
   end
 
-  attr_reader :parsed, :other_platform, :not_price, :other_type
-
-  def parse_games_list
-    @html.css('div.game-collection-item').map { |i| i.at('a')['href'] }
-  end
-
-  def parse_sony_desc_lang
-    dl = @html.at('dl.psw-l-grid')
-    return if dl.nil?
-
-    dt_count = dl.css('dt').size
-    info     = {}
-
-    dt_count.times do
-      key   = dl.at('dt').remove.text.strip.sub(':', '').gsub(' ', '_').downcase.to_sym
-      value = dl.at('dd').remove.text
-      info[key] = key == :release ? Date.parse(value) : value
-    end
-
-    result              = {}
-    result[:release]    = info[:выпуск]
-    result[:publisher]  = info[:издатель]
-    result[:genre]      = info[:жанры]
-    result[:rus_voice]  = info[:голос]&.downcase&.match?(/рус/) || 0
-    result[:rus_screen] = info[:языки_отображения]&.downcase&.match?(/рус/) || 0
-    result[:content]    = @html.at('.psw-l-grid p').children.to_html
-    result
-  end
-
-  def get_last_page
-    count_result   = @html.at('div.results').text.match(/\d+/).to_s.to_i
-    games_per_page = @html.css('div.game-collection-item').size
-    last_page_bad  = count_result / games_per_page
-    last_page_f    = count_result / games_per_page.to_f
-    last_page_f > last_page_bad ? last_page_bad + 1 : last_page_bad
-  end
+  attr_reader :parsed
 
   def parse_list_games_ua
     games     = []
     games_raw = @html.css('div.game-collection-item')
     games_raw.each do |game_raw|
-      game         = { main: {}, additional: {} }
-      price_tl_raw = game_raw.at('span.game-collection-item-price')&.text
-      if price_tl_raw.nil? || price_tl_raw.to_i.zero?
-        @not_price += 1
-        next
-      end
-
-      platform = game_raw.at('.game-collection-item-top-platform').text
-      unless platform.downcase.match?(/ps5|ps4/)
-        @other_platform += 1
-        next
-      end
-
+      game           = { main: {}, additional: {} }
+      price_tl_raw   = game_raw.at('span.game-collection-item-price')&.text
+      platform       = game_raw.at('.game-collection-item-top-platform').text
       match_date     = %r[\d день|\d+ дня|\d+ дней|\d+ месяца?|\d+ месяцев|\d+ days?|\d+ months?]
-      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date)
+      date_raw       = game_raw.at('.game-collection-item-end-date')&.text&.match(match_date).to_s
       prise_discount = game_raw.at('span.game-collection-item-price-discount')&.text
       prise_bonus    = game_raw.at('span.game-collection-item-price-bonus')&.text
 
@@ -89,20 +44,10 @@ class Parser < Hamster::Parser
       game[:additional][:price_bonus]       = get_price(prise_bonus, :ru)
       game[:additional][:discount_end_date] = get_discount_end_date(date_raw)
 
-      if game[:additional][:price_tl] < MIN_PRICE
-        @not_price += 1
-        next
-      end
-
       game[:main][:pagetitle]       = game_raw.at('.game-collection-item-details-title').text
-      game[:additional][:platform]  = platform.gsub(' / ', ', ')
+      game[:additional][:platform]  = platform.gsub(' / ', ', ').gsub(/, PS Vita|, PS3/, '')
       type_game_raw                 = game_raw.at('.game-collection-item-type').text
-      game[:additional][:type_game] = translate_type(type_game_raw)
-
-      unless ['Игра', 'Комплект', 'VR игра', 'PSN игра', 'Контент'].include?(game[:additional][:type_game])
-        @other_type += 1
-        next
-      end
+      game[:additional][:type_game] = @translator.translate_type type_game_raw
 
       game[:additional][:image_link_raw]  = game_raw.at('img.game-collection-item-image')['content']
       data_source_url                     = settings['site'] + game_raw.at('a')['href']
@@ -110,7 +55,6 @@ class Parser < Hamster::Parser
       game[:additional][:janr]            = game[:additional][:image_link_raw].split('/')[11]
       game[:additional][:article]         = data_source_url.split('/')[-2]
       game[:main][:alias]                 = make_alias(data_source_url)
-
       games << game
       @parsed += 1
     end
@@ -119,61 +63,29 @@ class Parser < Hamster::Parser
 
   private
 
-  def make_alias(url)
-    url           = transliterate(url) if url.match?(/%/)
-    alias_raw     = url.split('/')[-2..-1]
-    alias_raw[-1] = alias_raw[-1][0..120]
-    alias_raw.reverse.join('-')[0..120]
+  def formit_lang(info)
+    result              = {}
+    result[:release]    = info[:выпуск]
+    result[:publisher]  = info[:издатель]
+    result[:genre]      = form_genres info[:жанры]
+    result[:rus_voice]  = exist_rus?(info)
+    result[:rus_screen] = exist_rus?(info, 'языки_')
+    result[:content]    = @html.at('.psw-l-grid p')&.children&.to_html
+    remove_emoji(result[:content]) if result[:content].present?
+    result
   end
 
-  def transliterate(str)
-    url = URI.decode_www_form(str)[0][0]
-    url.to_slug.transliterate(:russian).to_s
+  def form_genres(genres_raw)
+    return 'Другое' unless genres_raw.present?
+
+    genres_raw.split(', ').map(&:strip).uniq.sort.join(', ')
   end
 
-  def get_price(raw_price, currency=:ua)
-    return if raw_price.nil? || raw_price.strip.to_i.zero?
-
-    price = raw_price.strip.gsub(',', '').to_f
-    return price if currency == :ua
-
-    round_up_price(price * EXCHANGE_RATE)
+  def exist_rus?(info, params='голос')
+    info.any? { |key, value| key.to_s.match?(%r[#{params}]) && value.downcase.match?(/рус/) }
   end
 
-  def round_up_price(price)
-    (price / settings['round_price'].to_f).round * settings['round_price']
-  end
-
-  def get_discount_end_date(date_raw)
-    return unless date_raw
-
-    date_raw      = date_raw.to_s
-    day_month     = date_raw.match?(/день|дня|дней|day|days/) ? :days : :months
-    num_day_month = date_raw.to_i
-    today         = Date.today
-    today + num_day_month.send(day_month)
-  end
-
-  def translate_type(type_raw)
-    case type_raw
-    when 'Full Game'
-      'Игра'
-    when 'Bundle'
-      'Комплект'
-    when 'VR Game'
-      'VR игра'
-    when 'PSN Game'
-      'PSN игра'
-    when 'Game Content'
-      'Контент'
-    else
-      type_raw
-    end
-  end
-
-  def notify(message, color=:green, method_=:info)
-    Hamster.logger.send(method_, message)
-    Hamster.report message: message
-    puts color.nil? ? message : message.send(color) if @debug
+  def make_exchange_rate(price)
+    price * EXCHANGE_RATE
   end
 end

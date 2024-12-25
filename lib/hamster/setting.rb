@@ -3,6 +3,6 @@ require_relative '../models/setting'
 
 module Hamster
   def self.settings
-    Setting.first.attributes
+    @settings ||= Setting.first.attributes
   end
 end

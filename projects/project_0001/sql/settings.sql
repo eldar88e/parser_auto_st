@@ -17,9 +17,9 @@ create table settings
     limit_export               INT(10)            DEFAULT 0,
     small_size                 VARCHAR(255)       DEFAULT NULL,
     medium_size                VARCHAR(255)       DEFAULT NULL,
-    new_touched_update_desc    tinyint(1)         DEFAULT 0,
+    touch_update_desc    tinyint(1)         DEFAULT 0,
     month_since_release        INT(10)            DEFAULT 6,
-    day_lang_all_scrap         INT(10)            DEFAULT 0,
+    day_all_lang_scrap         INT(10)            DEFAULT 0,
     telegram_chat_id           VARCHAR(255)       DEFAULT NULL,
     `created_at`               DATETIME           DEFAULT CURRENT_TIMESTAMP,
     `updated_at`               TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

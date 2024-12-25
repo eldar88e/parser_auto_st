@@ -1,21 +1,12 @@
-require_relative 'seo'
+require_relative '../../../concerns/game_modx/exporter'
 
 class Exporter < Hamster::Harvester
-  HEAD = ["SKU",
-          'Mark',
-          "Название товара",
-          "Цена",
-          "Price Old",
-          "Изображение",
-          "Наличие русского языка в субтитрах",
-          "Наличие русского языка в голосе",
-          "Жанр игры",
-          "Подробное описание",
-          "Платформа",
-          "Раздел",
-          'SEO title',
-          'SEO descr']
-  MAIN_CATEGORY = 'Игры PlayStation'
+  include GameModx::Exporter
+
+  HEAD = ['SKU', 'Mark', "Название товара", "Цена", "Price Old", "Изображение", "Наличие русского языка в субтитрах",
+          "Наличие русского языка в голосе", "Жанр игры", "Подробное описание", "Платформа", "Раздел", 'SEO title',
+          'SEO descr'].freeze
+  MAIN_CATEGORY = 'Игры PlayStation'.freeze
 
   def initialize(keeper)
     super
@@ -23,7 +14,7 @@ class Exporter < Hamster::Harvester
   end
 
   def make_csv(domen)
-    games_raw  = @keeper.list_last_popular_game(settings['limit_export'], [settings['parent_ps5'], settings['parent_ps4']])
+    games_raw  = @keeper.list_last_popular_game(settings['limit_export'])
     games_list = convert_objects_list(games_raw, domen)
     CSV.generate { |csv| games_list.each { |row| csv << row } }
   end
@@ -46,9 +37,9 @@ class Exporter < Hamster::Harvester
       item[7]  = game.sony_game_additional.rus_voice ? 'Да' : 'Нет'
       item[8]  = game.sony_game_additional.genre
       item[9]  = game.content
-      item[10] = game.sony_game_additional.platform.gsub(/, PS Vita|, PS3/, '')
+      item[10] = game.sony_game_additional.platform
       item[11] = MAIN_CATEGORY
-      seo      = Seo.new(domain, game.pagetitle)
+      seo      = Hamster::Seo.new(domain, game.pagetitle)
       item[12] = seo.title
       item[13] = seo.description
 

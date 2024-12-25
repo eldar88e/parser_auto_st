@@ -8,5 +8,6 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class     = true
   self.inheritance_column = :_type_disabled
   include Hamster::Loggable
+  self.logger = Logger.new(STDOUT) if ENV.fetch('DEBUG', false)
   include Hamster::Granary
 end

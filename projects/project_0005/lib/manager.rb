@@ -27,46 +27,26 @@ class Manager < Hamster::Harvester
   def store
     notify '⚙️ Parsing for Eczane has begun' if @debug
     keeper.status = 'parsing'
-
     parse_save_main
-
     #keeper.delete_not_touched
-
+    has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 # || keeper.count[:deleted] > 0
     cleared_cache = false
-    if !keeper.count[:saved].zero? || !keeper.count[:updated].zero? #|| !keeper.count[:deleted].zero?
-      clear_cache
-      cleared_cache = true
-    end
-
+    cleared_cache = clear_cache('FTP_LOGIN_ECZANE', 'FTP_PASS_ECZANE') if has_update
     keeper.finish
-    notify make_message
+    notify form_message
     notify '👌 The Eczane parser succeeded!'
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    clear_cache if !cleared_cache && (!keeper.count[:saved].zero? || !keeper.count[:updated].zero?) #|| !keeper.count[:deleted].zero?)
+    @debug = true
+    if !cleared_cache && (keeper.count[:saved] > 0 || keeper.count[:updated] > 0) #|| !keeper.count[:deleted].zero?)
+      clear_cache('FTP_LOGIN_ECZANE', 'FTP_PASS_ECZANE')
+    end
   end
 
   private
 
   attr_reader :keeper
-
-  def clear_cache
-    ftp_host = ENV.fetch('FTP_HOST')
-    ftp_user = ENV.fetch('FTP_LOGIN_ECZANE')
-    ftp_pass = ENV.fetch('FTP_PASS_ECZANE')
-
-    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
-      ftp.chdir('/core/cache/context_settings/web')
-      delete_files(ftp)
-      ftp.chdir('/core/cache/resource/web/resources')
-      delete_files(ftp)
-    end
-    notify "The cache has been emptied." if @debug
-  rescue => e
-    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
-    notify(message, :red, :error)
-  end
 
   def delete_files(ftp)
     list = ftp.nlst
@@ -106,12 +86,12 @@ class Manager < Hamster::Harvester
     Вот несколько из последних:\n#{keeper.no_parent.last(5).join(', ')}" if keeper.no_parent.size > 10
   end
 
-  def make_message
+  def form_message
     message = ""
     message << "✅ Saved: #{keeper.count[:saved]} new products;\n" unless keeper.count[:saved].zero?
     message << "✅ Updated prices: #{keeper.count[:updated]} products;\n" unless keeper.count[:updated].zero?
     message << "✅ Skipped prices: #{keeper.count[:skipped]} products;\n" unless keeper.count[:skipped].zero?
-    message << "✅ Updated content: #{keeper.count[:content_updated]} products;\n" unless keeper.count[:content_updated].zero?
+    message << "✅ Updated content: #{keeper.count[:content_updated]} products;\n" if keeper.count[:content_updated] > 0
     message << "✅ Parsed: #{@pages} products." unless @pages.zero?
     message
   end

@@ -1,6 +1,6 @@
 class ApplicationRecord < ActiveRecord::Base
-  establish_connection(adapter: ENV.fetch('ADAPTER') { 'mysql2' },
-                       host: ENV.fetch('HOST') { 'localhost' },
+  establish_connection(adapter: 'mysql2',
+                       host: ENV.fetch('HOST', 'localhost'),
                        database: ENV.fetch('DATABASE'),
                        username: ENV.fetch('USERNAME'),
                        password: ENV.fetch('PASSWORD'))
@@ -8,5 +8,6 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class     = true
   self.inheritance_column = :_type_disabled
   include Hamster::Loggable
+  self.logger = Logger.new(STDOUT) if ENV.fetch('DEBUG', false)
   include Hamster::Granary
 end

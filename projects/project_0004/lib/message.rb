@@ -18,24 +18,31 @@ class Message < Hamster::Keeper
     runs       = manager.run_last
     tr_data    = runs[0]
     ua_data    = runs[1]
-    ps_ua_data = runs[2]
-    "📌 Информация о TR парсере:\n" + make_run_text(tr_data) +
-      "\n" + "📌 Информация о UA парсере:\n" + make_run_text(ua_data) +
-      "\n" + "📌 Информация о PS_UA парсере:\n" + make_run_text(ps_ua_data)
+    in_date    = runs[2]
+    ps_ua_data = runs[3]
+    "📌 Информация о 🇹🇷 парсере:\n" + make_run_text(tr_data) +
+      "\n📌 Информация о 🇺🇦 парсере:\n" + make_run_text(ua_data) +
+      "\n📌 Информация о 🇮🇳 парсере:\n" + make_run_text(in_date) +
+      "\n📌 Информация о 🇺🇦 ps-ua парсере:\n" + make_run_text(ps_ua_data)
   end
 
   def report_games
     games = manager.report_games
     <<~MESSAGE
-      📌 Турецкие игры:
+      📌 🇹🇷Турецкие игры:
         ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
         ✅ Удаленные: #{games.where(deleted: 1).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
         ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [settings['parent_ps5'], settings['parent_ps4']]).size}
       
-      📌 Украинские игры:
+      📌 🇺🇦Украинские игры:
         ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [21, 22]).size}
         ✅ Удаленные: #{games.where(deleted: 1).where(parent: [21, 22]).size}
         ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [21, 22]).size}
+
+      📌 🇮🇳Индийские игры:
+        ✅ Активные: #{games.where(deleted: 0, published: 1).where(parent: [24, 25]).size}
+        ✅ Удаленные: #{games.where(deleted: 1).where(parent: [24, 25]).size}
+        ✅ Снятые с публикации: #{games.where(published: 0).where(parent: [24, 25]).size}
     MESSAGE
   end
 
