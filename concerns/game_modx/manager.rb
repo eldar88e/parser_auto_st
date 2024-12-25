@@ -5,7 +5,7 @@ module GameModx
     def export_google
       exporter = ::Exporter.new(keeper)
       exporter.update_google_sheets
-      msg      = "⚠️ Export of games to Google Sheets was completed successfully"
+      msg = '⚠️ Export of games to Google Sheets was completed successfully'
       Hamster.report(message: msg.gsub('games', "#{COUNTRY_FLAG[keeper.class::MADE_IN]} games"))
     end
 
