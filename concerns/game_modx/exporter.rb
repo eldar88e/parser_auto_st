@@ -18,8 +18,8 @@ module GameModx
       spreadsheet    = GoogleDrive::Session.from_service_account_key('key.open-parser.json')
                                            .file_by_id('1-0kt35pFciXYD8_U8Qag50gHwxUAF_A_mtCBd17IL78')
       worksheet      = spreadsheet.worksheets.first
-      sony_id_index  = worksheet.rows.each_with_index.to_h { |row, idx| [row[13], idx + 1] }
-      title_index    = worksheet.rows.each_with_index.to_h { |row, idx| [row[0], idx + 1] }
+      sony_id_index  = worksheet.rows.each_with_index.to_h { |row, idx| [row[13], idx + 2] }
+      title_index    = worksheet.rows.each_with_index.to_h { |row, idx| [row[0], idx + 2] }
       worksheet_size = worksheet.rows.size
       count          = [0, 0]
       updates        = []
@@ -27,14 +27,14 @@ module GameModx
       write_first_column(worksheet)
 
       games_raw.each_slice(SLICE_LIMIT) do |sliced_games|
-        sliced_games.each do |row|
-          additional  = row.sony_game_additional
-          game_row_id = max_row(row, worksheet_size, sony_id_index, title_index)
-          data        = form_row(row)
+        sliced_games.each do |game|
+          additional  = game.sony_game_additional
+          game_row_id = max_row(game, worksheet_size, sony_id_index, title_index)
+          data        = form_row(game)
 
           updates << { row: game_row_id, data: data }
 
-          if sony_id_index[additional.janr] || title_index["#{row.pagetitle} [#{additional.platform}]"]
+          if sony_id_index[additional.janr] || title_index["#{game.pagetitle} [#{additional.platform}]"]
             count[0] += 1
           else
             count[1] += 1
@@ -46,7 +46,7 @@ module GameModx
       apply_updates(worksheet, updates)
       worksheet.save
 
-      "✅ Updated #{count[0]} and created #{count[1]} games for Google Sheets."
+      count
     end
 
     private
@@ -59,10 +59,10 @@ module GameModx
       worksheet.save
     end
 
-    def max_row(row, worksheet_size, sony_id_index, title_index)
-      additional = row.sony_game_additional
-      sony_id_index[additional.janr] || title_index["#{row.pagetitle} [#{additional.platform}]"] ||
-      [worksheet_size + 1, (sony_id_index.values.max || 0) + 1, (title_index.values.max || 0) + 1].max
+    def max_row(game, worksheet_size, sony_id_index, title_index)
+      additional = game.sony_game_additional
+      sony_id_index[additional.janr] || title_index["#{game.pagetitle} [#{additional.platform}]"] ||
+      [worksheet_size + 1, (sony_id_index.values.max || 1) + 1, (title_index.values.max || 1) + 1].max
     end
 
     def apply_updates(worksheet, updates)
