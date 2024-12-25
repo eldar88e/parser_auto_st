@@ -66,7 +66,6 @@ module GameModx
     end
 
     def apply_updates(worksheet, updates)
-      binding.pry
       updates.each { |update| update[:data].each { |key, val| worksheet[update[:row], key + 1] = val } }
     end
 
