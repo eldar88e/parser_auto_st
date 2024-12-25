@@ -18,8 +18,8 @@ module GameModx
       spreadsheet    = GoogleDrive::Session.from_service_account_key('key.open-parser.json')
                                            .file_by_id('1-0kt35pFciXYD8_U8Qag50gHwxUAF_A_mtCBd17IL78')
       worksheet      = spreadsheet.worksheets.first
-      sony_id_index  = worksheet.rows.each_with_index.to_h { |row, idx| [row[13], idx + 2] }
-      title_index    = worksheet.rows.each_with_index.to_h { |row, idx| [row[0], idx + 2] }
+      sony_id_index  = worksheet.rows[1..].each_with_index.to_h { |row, idx| [row[13], idx + 2] }
+      title_index    = worksheet.rows[1..].each_with_index.to_h { |row, idx| [row[0], idx + 2] }
       worksheet_size = worksheet.rows.size
       count          = [0, 0]
       updates        = []
@@ -66,6 +66,7 @@ module GameModx
     end
 
     def apply_updates(worksheet, updates)
+      binding.pry
       updates.each { |update| update[:data].each { |key, val| worksheet[update[:row], key + 1] = val } }
     end
 
