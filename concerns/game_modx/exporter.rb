@@ -18,13 +18,14 @@ module GameModx
       spreadsheet    = GoogleDrive::Session.from_service_account_key('key.open-parser.json')
                                            .file_by_id('1-0kt35pFciXYD8_U8Qag50gHwxUAF_A_mtCBd17IL78')
       worksheet      = spreadsheet.worksheets.first
+
+      write_first_column(worksheet)
+
       sony_id_index  = worksheet.rows[1..].each_with_index.to_h { |row, idx| [row[13], idx + 2] }
       title_index    = worksheet.rows[1..].each_with_index.to_h { |row, idx| [row[0], idx + 2] }
       worksheet_size = worksheet.rows.size
       count          = [0, 0]
       updates        = []
-
-      write_first_column(worksheet)
 
       games_raw.each_slice(SLICE_LIMIT) do |sliced_games|
         sliced_games.each do |game|
