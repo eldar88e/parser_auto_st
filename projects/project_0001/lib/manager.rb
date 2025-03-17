@@ -39,10 +39,6 @@ class Manager < Hamster::Harvester
     ['stekla_jcb'].each do |brand| # TODO: Убрать HARD CODE !!!
       brand_alias = MATCH[brand]&.gsub('_', '-')
       raise StandardError, "Unknown brand: #{brand}" unless brand_alias
-
-      binding.pry
-
-
       brand_db = ModxSiteContent.find_by(parent: 12, alias: brand_alias)
       models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
@@ -60,7 +56,7 @@ class Manager < Hamster::Harvester
             parent: model_db.id, alias: type_alias, pagetitle: titles[type_alias], longtitle: titles[type_alias],
             published: 1, publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID,
             createdon: Time.current.to_i, uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}", isfolder: 1,
-            template: T_CATEGORY_ID) unless type_db
+            template: T_CATEGORY_ID)
           items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
           items.each do |item|
             item_alias = item.gsub('_', '-').sub('.gz', '')
