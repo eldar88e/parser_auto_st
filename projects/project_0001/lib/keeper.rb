@@ -29,7 +29,7 @@ class Keeper < Hamster::Keeper
     if title.size > 70
       product[:pagetitle] = title[0..69]
       product[:longtitle] = title[0..69]
-      product[:content] = "<p>#{title}<p>" + product[:content]
+      product[:content] = "<p>#{title}<p>" + product[:content].to_s
     end
   end
 
