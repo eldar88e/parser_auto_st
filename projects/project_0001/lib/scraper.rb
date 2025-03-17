@@ -1,36 +1,83 @@
 require_relative '../lib/parser'
-require_relative '../../../concerns/game_modx/scraper'
 
 class Scraper < Hamster::Scraper
-  include GameModx::Scraper
+  DOMAIN = 'komexpress.ru'.freeze
+  RUN_ID = 1
+  PREFIX = '/products/category/'
+  BRANDS = { 'stekla_jcb': 'jcb' }
 
   def initialize(**args)
     super
     @referers = YAML.load_file('referer.yml')['referer']
     @count    = 0
-    @keeper   = args[:keeper]
-    @settings = args[:settings]
+    # @keeper   = args[:keeper]
     @debug    = commands[:debug]
-    @run_id   = @keeper.run_id
+    # @run_id   = @keeper.run_id
   end
 
-  def scrape_games_tr
-    first_page = "#{settings['site']}#{settings['path_tr']}1#{settings['params']}"
-    last_page  = make_last_page(first_page)
-    puts "Found #{last_page} pages with a list of games (36 games/page) on the website #{first_page}" if @debug
-    [*1..last_page].each do |page|
-      link = "#{settings['site']}#{settings['path_tr']}#{page}#{settings['params']}"
-      puts "Page #{page} of #{last_page}".green if @debug
-      game_list = get_response(link).body
-      sleep(rand(0.3..2.3))
-      peon.put(file: "game_list_#{page}.html", content: game_list, subfolder: "#{run_id}_games_tr")
-      @count += 1
+  def scrape
+    first_path  = '/products/category/431754'
+    brands_list = process_level(first_path)
+    brands_list.each do |brand|
+      types_list = process_level(brand)
+      types_list.each do |type|
+        models_list = process_level(type)
+        models_list.each do |model|
+          items_list = process_level(model, true)
+          items_list.each do |item|
+            sleep rand(0.7..2.3)
+            item_body = get_response(item).body
+            subfolder = form_subfolder_path(brand, type, model)
+            name      = item.gsub("https://#{DOMAIN}/products/", '').gsub('-', '_')
+            peon.put(file: "#{name}.html", content: item_body, subfolder: "#{RUN_ID}/#{subfolder}")
+            @count += 1
+          rescue => e
+            puts '=' * 80
+            puts e.message
+            puts '*' * 80
+            binding.pry
+          end
+        end
+      end
     end
+
+    # sleep(rand(0.3..2.3))
+    # peon.put(file: "steklo_marka_#{page}.html", content: game_list, subfolder: "#{1}_steklo")
+    # @count += 1
   end
 
-  def scrape_desc(id)
-    url = settings['dd_game'] + id
-    sleep rand(0.5..2.5)
-    get_response(url).body
+  def form_subfolder_path(brand, type, model)
+    (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_') + '/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_')
+  end
+
+  def process_level(path, product=nil)
+    link_types     = "https://#{DOMAIN}#{path}"
+    types_list_row = get_response(link_types).body
+    category_alias = path.gsub(PREFIX, '').gsub(/\/|_/, '-')
+    add_alias(types_list_row, category_alias) unless json_saver.urls[category_alias]
+    Parser.new(html: types_list_row).send( product ? :parse_product_list : :parse_list)
+  end
+
+  def add_alias(types_list_row, category_alias)
+    title = Parser.new(html: types_list_row).parse_title
+    json_saver.add_url(category_alias, title)
+  end
+
+  def get_response(link, try=1)
+    headers = { 'Referer' => @referers.sample, 'Accept-Language' => 'en-US,en;q=0.9,ru-RU;q=0.8,ru;q=0.7' }
+    response = connect_to(link, ssl_verify: false, headers: headers)
+    raise 'Error receiving response from server' unless response.present?
+    response
+  rescue => e
+    try += 1
+
+    if try < 4
+      Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+      sleep 5 * try
+      retry
+    end
+
+    Hamster.logger.error "#{e.message} || #{e.class} || #{link} || try: #{try}"
+    Hamster.report message: "#{e.message} || #{e.class} || #{link} || try: #{try}"
   end
 end

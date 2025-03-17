@@ -17,10 +17,10 @@ require 'mysql2'
 require 'open-uri'
 require 'pry'
 require 'telegram/bot'
-require 'google_drive'
 require 'emoji_regex'
 
 Dotenv.load('.env')
+
 require_relative 'lib/hamster'
 require_relative 'lib/harvester'
 require_relative 'lib/keeper'
@@ -29,7 +29,6 @@ require_relative 'lib/scraper'
 require_relative 'lib/storage'
 require_relative 'lib/fake_agent'
 require_relative 'lib/granary'
-require_relative 'lib/translator'
 require_relative 'lib/seo'
 
 require_relative 'lib/specials/activerecord/mysql2_adapter_patch'

@@ -17,33 +17,12 @@ module Hamster
         log "Cannot use such messenger as #{use.to_s.capitalize}!", :red
       end
     end
-
-    def send_file(csv_string, file_name)
-      initialize
-
-      #type_     = type == :gz ? 'application/x-gzip' : 'text/csv'
-      #file_name = type == :gz ? 'games.csv.gz' : 'games.csv'
-      message   = "⚽️ Top #{settings['limit_export']} PS games."
-      #message   = 'Archived ' + message if type == :gz
-      [@raw_users.to_s.split(',')].flatten.each do |user_id|
-        Telegram::Bot::Client.run(@token_) do |bot|
-          bot.api.send_document(
-            chat_id: user_id,
-            document: Faraday::UploadIO.new(StringIO.new(csv_string), 'application/x-gzip', file_name),
-            caption: message
-          )
-        end
-      end
-    rescue => e
-      Hamster.logger.error e.message
-      puts e.message.red if commands[:debug]
-    end
     
     private
 
     def initialize
       @token_    ||= ENV['TELEGRAM_BOT_TOKEN']
-      @raw_users ||= settings['telegram_chat_id']
+      @raw_users ||= ENV['TELEGRAM_CHAT_ID']
 
       log 'The recipient of the report cannot be found!', :red unless @raw_users
     end

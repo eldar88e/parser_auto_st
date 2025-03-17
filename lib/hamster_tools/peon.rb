@@ -177,6 +177,12 @@ module Hamster
         Dir.glob("#{store_path}/*").select { |p| p[-3..-1] == '.gz' }.map { |p| File.basename(p) }
       end
 
+      def give_dirs(**args)
+        subfolder = check_dir_path(args[:subfolder])
+        store_path = "#{@store}#{subfolder}"
+        Dir.children(store_path).select { |entry| File.directory?(File.join(store_path, entry)) }
+      end
+
       def give_list_year(**args)
         subfolder = check_dir_path(args[:subfolder])
         store_path = "#{@store}#{subfolder}"
@@ -283,6 +289,7 @@ module Hamster
 
       def check_dir_path(path)
         return path if path.nil?
+
         path =~ /\A\/?(\w+\/?)+\z/ ? "/#{path}/".squeeze('/')[1..-1] : raise("Incorrect subfolder path. Check it carefully.")
       end
 

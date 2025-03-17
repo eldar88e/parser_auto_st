@@ -9,7 +9,7 @@ module Hamster
       parse_arguments
     end
 
-    @debug = true if @arguments[:debug]
+    @debug = true if ENV.fetch('DEBUG', @arguments[:debug])
 
     Hamster.grab if @arguments[:grab]
     Hamster.dig if @arguments[:dig]

@@ -1,119 +1,135 @@
 require_relative '../lib/scraper'
 require_relative '../lib/parser'
 require_relative '../lib/keeper'
-require_relative '../lib/exporter'
 require 'net/ftp'
-require_relative '../../../concerns/game_modx/manager'
 
 class Manager < Hamster::Harvester
-  include GameModx::Manager
+  RUN_ID = 1
+  ROOT_ID = 12 # спецтехника
+  T_SUB_CATEGORY_ID = 17
+  T_CATEGORY_ID = 14
+  T_PRODUCT_ID = 13
+  ROOT_ALIAS = 'katalog/specztexnika/'
+  MATCH = { 'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere'  }.freeze
+  USER_ID = 6
 
   def initialize
     super
-    @debug    = commands[:debug]
-    @settings = { touch_update_desc: settings['touch_update_desc'],
-                  day_all_lang_scrap: settings['day_all_lang_scrap'],
-                  sony_url: settings['ps_game']
-                }
-    @keeper      = Keeper.new(@settings)
+    @debug       = commands[:debug]
+    @keeper      = Keeper.new(nil)
     @parse_count = 0
-    @day_all_lang_parsing = settings['day_all_lang_scrap'].to_i == Date.current.day && Time.current.hour < 12
-  end
-
-  def export
-    keeper.status = 'exporting'
-    exporter      = Exporter.new(keeper)
-    domens        = %i[open_ps ps_try reloc ps_store]
-    domens.each do |domen|
-      csv       = exporter.make_csv(domen)
-      file_name = "#{keeper.run_id}_#{domen.to_s}_games.csv.gz"
-      peon.put(file: file_name, content: csv)
-      #csv_str = peon.give(file: file_name)
-
-      file_path    = "#{@_storehouse_}store/#{file_name}"
-      gz_file_data = IO.binread(file_path)
-      Hamster.send_file(gz_file_data, file_name)
-    end
-
-    notify "Exporting finish!" if @debug
   end
 
   def download
-    peon.move_all_to_trash
-    puts 'The Store has been emptied.' if @debug
-    peon.throw_trash(3)
-    puts 'The Trash has been emptied of files older than 10 days.' if @debug
+    # peon.move_all_to_trash
+    # puts 'The Store has been emptied.' if @debug
+    # peon.throw_trash(3)
+    # puts 'The Trash has been emptied of files older than 10 days.' if @debug
     notify 'Scraping started' if @debug
-    scraper = Scraper.new(keeper: keeper)
-    scraper.scrape_games_tr
+    scraper = Scraper.new(keeper: nil) # keeper
+    scraper.scrape
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end
 
   def store
-    notify 'Parsing started' if @debug
-    keeper.status = 'parsing'
-    return parse_save_desc_lang if commands[:lang]
-    return parse_save_desc_dd if commands[:desc]
+    # notify 'Parsing started' if @debug
+    # keeper.status = 'parsing'
+    brands = peon.give_dirs(subfolder: RUN_ID.to_s)
+    titles = json_saver.urls
+    ['stekla_jcb'].each do |brand| # TODO: Убрать HARD CODE !!!
+      brand_alias = MATCH[brand]&.gsub('_', '-')
+      raise StandardError, "Unknown brand: #{brand}" unless brand_alias
 
-    parse_save_main
-    if keeper.count[:saved] > 0 || @day_all_lang_parsing
-      parse_save_desc_lang
-      parse_save_desc_dd
+      binding.pry
+
+
+      brand_db = ModxSiteContent.find_by(parent: 12, alias: brand_alias)
+      models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
+      models.each do |model|
+        model_alias = model.gsub('_', '-')
+        model_db = ModxSiteContent.find_by(parent: brand_db.id, alias: model_alias)
+        model_db = ModxSiteContent.create(
+          parent: brand_db.id, alias: model_alias, pagetitle: titles[model_alias], longtitle: titles[model_alias], published: 1,
+          publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
+          uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}", isfolder: 1, template: T_SUB_CATEGORY_ID) unless model_db
+        types = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
+        types.each do |type|
+          type_alias = type.gsub('_', '-')
+          type_db = ModxSiteContent.find_by(parent: model_db.id, alias: type_alias)
+          type_db = ModxSiteContent.create(
+            parent: model_db.id, alias: type_alias, pagetitle: titles[type_alias], longtitle: titles[type_alias], published: 1,
+            publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
+            uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}", isfolder: 1,
+            template: T_CATEGORY_ID) unless type_db
+          items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
+          items.each do |item|
+            item_alias = item.gsub('_', '-').sub('.gz', '')
+            body = peon.give(file: item, subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
+            data = Parser.new(html: body).parse
+            data_2 = {
+              parent: type_db.id, alias: item_alias.gsub('.html', ''), published: 1, publishedon: Time.current.to_i,
+              publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
+              uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}", template: T_PRODUCT_ID
+            }
+            data.merge!(data_2)
+            keeper.save_product(data)
+          rescue StandardError => e
+            binding.pry
+          end
+          puts keeper.count[:saved].to_s.green
+        end
+        binding.pry
+      end
     end
-    keeper.delete_not_touched
-    notify "‼️ Deleted: #{keeper.count[:deleted]} old #{COUNTRY_FLAG[keeper.class::MADE_IN]} game(s)" if keeper.count[:deleted] > 0
 
-    has_update    = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
-    cleared_cache = false
-    cleared_cache = clear_cache if has_update
-
-    export        if has_update || !keeper.count[:updated_menu_id].zero?
-    export_google if has_update
-    keeper.finish
-    notify "👌 Parser #{COUNTRY_FLAG[keeper.class::MADE_IN]} succeeded!"
+    # clear_cache
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
     @debug     = true
-    has_update = keeper.count[:saved] > 0 || keeper.count[:updated] > 0 || keeper.count[:deleted] > 0
-    clear_cache if !cleared_cache && has_update
+    #clear_cache
   end
 
   private
 
-  def parse_save_main
-    run_id       = keeper.run_id
-    list_pages   = peon.give_list(subfolder: "#{run_id}_games_tr").sort_by { |name| name.scan(/\d+/).first.to_i }
-    parser_count = 0
-    list_pages.each do |name|
-      puts name.green if @debug
-      file       = peon.give(file: name, subfolder: "#{run_id}_games_tr")
-      parser     = Parser.new(html: file)
-      list_games = parser.parse_list_games
-      parser_count += parser.parsed
-      keeper.save_games(list_games)
-      @parse_count += 1
+  attr_accessor :keeper
+
+  def clear_cache(user_env='FTP_LOGIN', pass_env='FTP_PASS')
+    ftp_host = ENV.fetch('FTP_HOST')
+    ftp_user = ENV.fetch(user_env)
+    ftp_pass = ENV.fetch(pass_env)
+
+    Net::FTP.open(ftp_host, ftp_user, ftp_pass) do |ftp|
+      %w[/core/cache/context_settings/web /core/cache/resource/web/resources].each do |path|
+        ftp.chdir(path)
+        delete_files(ftp)
+      end
     end
-    message = make_message(parser_count)
-    notify message if message.present?
+    notify "The cache has been emptied." if @debug
+    true
+  rescue => e
+    message = "Please delete the ModX cache file manually!\nError: #{e.message}"
+    notify(message, :red, :error)
   end
 
-  def parse_save_desc_dd
-    notify "⚠️ Day of parsing All #{COUNTRY_FLAG[keeper.class::MADE_IN]} games without desc!" if @day_all_lang_parsing
-    games   = keeper.fetch_game_without_content
-    scraper = Scraper.new(keeper: keeper)
-    games.each do |game|
-      sony_id = game.janr
-      content = keeper.form_content(sony_id)
-      keeper.save_desc({ content: content }, game.sony_game) && next if content
-
-      page   = scraper.scrape_desc(game.janr)
-      parser = Parser.new(html: page)
-      desc   = parser.parse_desc_dd
-      next unless desc
-
-      keeper.save_desc(desc, game.sony_game)
+  def delete_files(ftp)
+    list = ftp.nlst
+    list.each do |i|
+      try = 0
+      begin
+        try += 1
+        ftp.delete(i)
+      rescue Net::FTPPermError => e
+        Hamster.logger.error e.message
+        sleep 5 * try
+        retry if try > 3
+      end
     end
-    notify "📌 Added description for #{keeper.count[:updated_desc]} #{COUNTRY_FLAG[Keeper::MADE_IN]} game(s)." if keeper.count[:updated_desc] > 0
+  end
+
+  def notify(message, color=:green, method_=:info)
+    Hamster.logger.send(method_, message)
+    Hamster.report message: message
+    puts color.nil? ? message : message.send(color) if @debug
   end
 end

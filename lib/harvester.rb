@@ -23,17 +23,21 @@ module Hamster
     def peon
       @_peon_
     end
+
+    def json_saver
+      @_json_saver_
+    end
     
     private
     
     def initialize(*_)
-      #s             = Storage.new
       @_storehouse_ = "#{ENV['HOME']}/my_parsing/project_#{Hamster.project_number}/"
       @_peon_       = Hamster::Harvester::Peon.new(storehouse)
+      @_json_saver_ = Hamster::Harvester::JsonSaver.new(storehouse)
       @_commands_   = Hamster.commands
-      @logger       = Hamster.logger
-      @settings_    = Hamster.settings
-      Hamster.close_connection(Setting)
+      @_commands_[:debug] ||= ENV.fetch('DEBUG', false)
+      @logger    = Hamster.logger
+      @settings_ = nil # Hamster.settings
     end
   end
 end
