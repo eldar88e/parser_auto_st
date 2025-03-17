@@ -55,11 +55,11 @@ class Manager < Hamster::Harvester
         types = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
         types.each do |type|
           type_alias = type.gsub('_', '-')
-          type_db = ModxSiteContent.find_by(parent: model_db.id, alias: type_alias)
-          type_db = ModxSiteContent.create(
-            parent: model_db.id, alias: type_alias, pagetitle: titles[type_alias], longtitle: titles[type_alias], published: 1,
-            publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
-            uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}", isfolder: 1,
+          type_db = ModxSiteContent.find_or_initialize_by(parent: model_db.id, alias: type_alias)
+          type_db.update!(
+            parent: model_db.id, alias: type_alias, pagetitle: titles[type_alias], longtitle: titles[type_alias],
+            published: 1, publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID,
+            createdon: Time.current.to_i, uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}", isfolder: 1,
             template: T_CATEGORY_ID) unless type_db
           items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
           items.each do |item|
@@ -71,9 +71,9 @@ class Manager < Hamster::Harvester
               publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
               uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}", template: T_PRODUCT_ID
             }
-            data.merge!(data_2)
-            keeper.save_product(data)
+            keeper.save_product data.merge(data_2)
           rescue StandardError => e
+            puts e
             binding.pry
           end
           puts keeper.count[:saved].to_s.green
