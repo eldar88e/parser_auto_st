@@ -42,9 +42,9 @@ class Parser < Hamster::Parser
     return if content.blank?
 
     content = clear_content if content.downcase.match?(BAD_WORDS)
-    content.gsub!('Информация по установке здесь')
-    content.strip
+
     binding.pry if content.downcase.match?(BAD_WORDS)
+
     content
   end
 
