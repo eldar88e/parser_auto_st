@@ -1,4 +1,6 @@
 class Parser < Hamster::Parser
+  BAD_WORDS = %r{телефон|оплата|почта|email|каталог|вопросам|установка}
+
   def initialize(**page)
     super
     @parsed = 0
@@ -39,11 +41,18 @@ class Parser < Hamster::Parser
     content = @html.at('div.product-content div.user-inner')&.text
     return if content.blank?
 
+    content = clear_content if content.downcase.match?(BAD_WORDS)
     content.gsub!('Информация по установке здесь')
     content.strip
-    if content.downcase.match?(/Телефон|оплата|почта|email|каталог/)
-      binding.pry
-    end
+    binding.pry if content.downcase.match?(BAD_WORDS)
+    content
+  end
+
+  def clear_content
+    raw_content_children = @html.at('div.product-content div.user-inner').children
+    first_bad_word       = raw_content_children.find { |i| i.text.downcase.match?(BAD_WORDS) }
+    first_bad_word_index = raw_content_children.index(first_bad_word)
+    raw_content_children[0..first_bad_word_index - 1].text
   end
 
   def make_alias(url)

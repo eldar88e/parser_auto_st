@@ -40,14 +40,11 @@ class Scraper < Hamster::Scraper
         end
       end
     end
-
-    # sleep(rand(0.3..2.3))
-    # peon.put(file: "steklo_marka_#{page}.html", content: game_list, subfolder: "#{1}_steklo")
-    # @count += 1
   end
 
   def form_subfolder_path(brand, type, model)
-    (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_') + '/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_')
+    (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_') +
+      '/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_')
   end
 
   def process_level(path, product=nil)
