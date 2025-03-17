@@ -10,8 +10,12 @@ class Manager < Hamster::Harvester
   T_CATEGORY_ID = 14
   T_PRODUCT_ID = 13
   ROOT_ALIAS = 'katalog/specztexnika/'
-  MATCH = { 'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere', '1190097' => 'hitachi',
-            'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu' }.freeze
+  MATCH = {
+    'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere', '1190097' => 'hitachi',
+    'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu', '2369142' => 'hyundai-stekla',
+    'stekla-bobcat-1' => 'bobcat', 'stekla-volvo' => 'volvo-steklo', 'stekla-terex' => 'terex',
+    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla'
+  }.freeze
   USER_ID = 6
 
   def initialize
@@ -77,10 +81,10 @@ class Manager < Hamster::Harvester
             binding.pry
           end
           puts keeper.count[:saved].to_s.green
-          sleep 3
+          sleep 0.5
         end
         puts keeper.count[:saved].to_s.green
-        sleep 3
+        sleep 1
       end
     end
 
