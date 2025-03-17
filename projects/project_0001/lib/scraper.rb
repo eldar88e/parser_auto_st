@@ -6,6 +6,8 @@ class Scraper < Hamster::Scraper
   PREFIX = '/products/category/'
   BRANDS = { 'stekla_jcb': 'jcb' }
 
+  attr_reader :count
+
   def initialize(**args)
     super
     @referers = YAML.load_file('referer.yml')['referer']

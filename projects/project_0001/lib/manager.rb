@@ -10,7 +10,8 @@ class Manager < Hamster::Harvester
   T_CATEGORY_ID = 14
   T_PRODUCT_ID = 13
   ROOT_ALIAS = 'katalog/specztexnika/'
-  MATCH = { 'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere'  }.freeze
+  MATCH = { 'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere', '1190097' => 'hitachi',
+            'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu' }.freeze
   USER_ID = 6
 
   def initialize
@@ -36,9 +37,12 @@ class Manager < Hamster::Harvester
     # keeper.status = 'parsing'
     brands = peon.give_dirs(subfolder: RUN_ID.to_s)
     titles = json_saver.urls
-    ['stekla_jcb'].each do |brand| # TODO: Убрать HARD CODE !!!
+    brands.each do |brand|
       brand_alias = MATCH[brand]&.gsub('_', '-')
-      raise StandardError, "Unknown brand: #{brand}" unless brand_alias
+      # raise StandardError, "Unknown brand: #{brand}" unless brand_alias
+
+      next if brand_alias.nil?
+
       brand_db = ModxSiteContent.find_by(parent: 12, alias: brand_alias)
       models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
@@ -73,8 +77,10 @@ class Manager < Hamster::Harvester
             binding.pry
           end
           puts keeper.count[:saved].to_s.green
+          sleep 3
         end
-        binding.pry
+        puts keeper.count[:saved].to_s.green
+        sleep 3
       end
     end
 
