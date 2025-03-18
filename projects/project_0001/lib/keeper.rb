@@ -55,7 +55,7 @@ class Keeper < Hamster::Keeper
   def prepare_additional_content_attr(content, sub)
     content[:longtitle] = content[:pagetitle]
     normalize_title(content)
-    content[:description] = form_description(content[:title])
+    content[:description] = form_description(content[:pagetitle])
     form_template_id(content, sub)
     content.merge!(DEFAULT_COLUMNS)
   end
@@ -72,9 +72,9 @@ class Keeper < Hamster::Keeper
   end
 
   def form_description(title)
-    <<~DESCR.gsub(/\n/, '')
+    <<~DESCR.squeeze(' ').chomp
       Широкий выбор автостёкол для спецтехники #{title}.
-      Производство за 8 часов, быстрая доставка и профессиональная установка в Уфе.
+      Производство, быстрая доставка и профессиональная установка в Уфе и по всей России.
       Закажите стекло для спецтехники KOMATSU, HITACHI, LIEBHERR, МТЗ и других производителей!
     DESCR
   end
