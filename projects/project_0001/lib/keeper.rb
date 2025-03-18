@@ -67,7 +67,8 @@ class Keeper < Hamster::Keeper
     normal_title = TextTruncator.call({ text: title, max: 70 })
     product[:pagetitle] = normal_title
     product[:longtitle] = normal_title
-    product[:content]   = "<p>#{title}<p>" + product[:content].to_s
+    product[:content]   = product[:introtext] if product[:content].blank?
+    product[:content]   = "<p>#{title}<p>" + product[:content].to_s if product[:content].blank?
   end
 
   def form_description(title)
