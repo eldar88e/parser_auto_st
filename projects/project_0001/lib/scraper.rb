@@ -20,6 +20,7 @@ class Scraper < Hamster::Scraper
   def scrape
     first_path  = '/products/category/431754'
     brands_list = process_level(first_path)
+    binding.pry
     brands_list.each do |brand|
       types_list = process_level(brand)
       types_list.each do |type|
