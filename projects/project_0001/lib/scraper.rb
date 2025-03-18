@@ -63,9 +63,9 @@ class Scraper < Hamster::Scraper
   end
 
   def form_subfolder_path(brand, type, model)
-    result = (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_'))
-    result += ('/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_') if model
-    result
+    result = [brand.sub(PREFIX, '').gsub('/', '_'), type.sub(PREFIX, '').gsub('/', '_')]
+    result << model.sub(PREFIX, '').gsub('/', '_') if model
+    result.join('/').gsub('-', '_')
   end
 
   def process_level(path, product=nil)
