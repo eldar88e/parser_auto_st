@@ -18,14 +18,11 @@ class Scraper < Hamster::Scraper
   end
 
   def scrape
-    first_path      = '/products/category/431754'
-    existing_brands = peon.give_dirs(subfolder: RUN_ID.to_s)
-    brands_list     = process_level(first_path)
+    first_path  = '/products/category/431754'
+    brands_list = process_level(first_path)
+    # existing_brands = peon.give_dirs(subfolder: RUN_ID.to_s)
     brands_list.each do |brand|
-      puts brand if @debug
-      next if existing_brands.include? brand.split('/')[-1].gsub('-', '_')
-
-      binding.pry
+      # next if existing_brands.include? brand.split('/')[-1].gsub('-', '_')
       types_list = process_category(brand, brand)
       types_list.each do |type|
         models_list = process_category(type, brand ,type)
@@ -52,17 +49,12 @@ class Scraper < Hamster::Scraper
 
   def scrape_products(items_list, brand, type = nil, model = nil)
     items_list.each do |item|
-      sleep rand(0.7..2.3)
+      sleep rand(0.3..1.2)
       item_body = get_response(item).body
       subfolder = form_subfolder_path(brand, type, model)
       name      = item.gsub("https://#{DOMAIN}/products/", '').gsub('-', '_')
       peon.put(file: "#{name}.html", content: item_body, subfolder: "#{RUN_ID}/#{subfolder}")
       @count += 1
-    rescue => e
-      puts '=' * 80
-      puts e.message
-      puts '*' * 80
-      binding.pry
     end
   end
 
