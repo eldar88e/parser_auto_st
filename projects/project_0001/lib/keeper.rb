@@ -53,6 +53,7 @@ class Keeper < Hamster::Keeper
   end
 
   def prepare_additional_content_attr(content, sub)
+    content[:longtitle] = content[:longtitle]
     normalize_title(content)
     content[:description] = form_description(content[:title])
     form_template_id(content, sub)
@@ -63,7 +64,7 @@ class Keeper < Hamster::Keeper
     title = product[:pagetitle]
     return if title.size <= 70
 
-    normal_title = title[0..69]
+    normal_title = TextTruncator.call({ text: title, max: 70 })
     product[:pagetitle] = normal_title
     product[:longtitle] = normal_title
     product[:content]   = "<p>#{title}<p>" + product[:content].to_s

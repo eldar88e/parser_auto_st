@@ -29,7 +29,6 @@ require_relative 'lib/scraper'
 require_relative 'lib/storage'
 require_relative 'lib/fake_agent'
 require_relative 'lib/granary'
-require_relative 'lib/seo'
 
 require_relative 'lib/specials/activerecord/mysql2_adapter_patch'
 require_relative 'lib/specials/md5_hash'
