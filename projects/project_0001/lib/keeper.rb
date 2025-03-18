@@ -24,7 +24,8 @@ class Keeper < Hamster::Keeper
     # return content_db if content_db # TODO: раскомментировать !!!
 
     prepare_additional_content_attr(content, sub)
-    content[:parent] = parent.id
+    content[:parent]   = parent.id
+    content[:isfolder] = 0 if sub == :product
     content_db.update!(content)
     content_db
   rescue => e
