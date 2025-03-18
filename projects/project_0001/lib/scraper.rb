@@ -1,10 +1,9 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
-  DOMAIN = 'komexpress.ru'.freeze
   RUN_ID = 1
+  DOMAIN = 'komexpress.ru'.freeze
   PREFIX = '/products/category/'
-  BRANDS = { 'stekla_jcb': 'jcb' }
 
   attr_reader :count
 
@@ -26,16 +25,10 @@ class Scraper < Hamster::Scraper
       puts brand if @debug
       next if existing_brands.include? brand.split('/')[-1].gsub('-', '_')
 
-      types_list = process_level(brand)
+      binding.pry
+      types_list = process_category(brand, brand)
       types_list.each do |type|
-        models_list = process_level(type, :check)
-        if models_list[:product]
-          Hamster.report message: "#{brand} | #{type} without model" if @debug
-          scrape_products(models_list[:result], brand, type)
-          next
-        else
-          models_list = models_list[:result]
-        end
+        models_list = process_category(type, brand ,type)
         models_list.each do |model|
           items_list = process_level(model, :product)
           scrape_products(items_list, brand, type, model)
@@ -46,7 +39,18 @@ class Scraper < Hamster::Scraper
 
   private
 
-  def scrape_products(items_list, brand, type, model = nil)
+  def process_category(category, brand, type = nil)
+    category_list = process_level(category, :check)
+    if category_list[:product]
+      Hamster.report message: "#{category} without under level" if @debug
+      scrape_products(category_list[:result], brand, type)
+      []
+    else
+      category_list[:result]
+    end
+  end
+
+  def scrape_products(items_list, brand, type = nil, model = nil)
     items_list.each do |item|
       sleep rand(0.7..2.3)
       item_body = get_response(item).body
@@ -63,7 +67,8 @@ class Scraper < Hamster::Scraper
   end
 
   def form_subfolder_path(brand, type, model)
-    result = [brand.sub(PREFIX, '').gsub('/', '_'), type.sub(PREFIX, '').gsub('/', '_')]
+    result = [brand.sub(PREFIX, '').gsub('/', '_')]
+    result << type.sub(PREFIX, '').gsub('/', '_') if type
     result << model.sub(PREFIX, '').gsub('/', '_') if model
     result.join('/').gsub('-', '_')
   end
