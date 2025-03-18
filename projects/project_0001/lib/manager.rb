@@ -70,11 +70,11 @@ class Manager < Hamster::Harvester
                            uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}" }
             keeper.save_product(type_db, data.merge(data_2))
           end
-          puts keeper.count[:saved].to_s.green
         end
-        notify keeper.count[:saved].to_s
       end
     end
+
+    notify "Success parsed #{keeper.count[:saved]} products."
 
     # clear_cache
   rescue => error
