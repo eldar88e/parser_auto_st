@@ -31,6 +31,7 @@ class Scraper < Hamster::Scraper
         models_list = process_level(type)
         models_list.each do |model|
           items_list = process_level(model, true)
+          binding.pry
           items_list.each do |item|
             sleep rand(0.7..2.3)
             item_body = get_response(item).body
