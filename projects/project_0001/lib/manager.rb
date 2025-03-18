@@ -65,10 +65,6 @@ class Manager < Hamster::Harvester
             data_2     = { alias: item_alias.gsub('.html', ''),
                            uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}" }
             keeper.save_product(type_db, data.merge(data_2))
-          rescue StandardError => e
-            puts e
-            notify(e.message, :red, :error)
-            binding.pry
           end
           puts keeper.count[:saved].to_s.green
         end

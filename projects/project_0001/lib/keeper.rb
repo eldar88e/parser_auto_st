@@ -27,6 +27,9 @@ class Keeper < Hamster::Keeper
     content[:parent] = parent.id
     content_db.update!(content)
     content_db
+  rescue => e
+    puts e.message
+    binding.pry
   end
 
   def save_product(parent, product)
