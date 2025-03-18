@@ -46,32 +46,35 @@ class Manager < Hamster::Harvester
         next
       end
 
-      next unless brand == 'stekla_xgma'
+      models = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
 
-      binding.pry
-      items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand )
+      pages = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand)
+      if pages.present?
+        uri = "#{ROOT_ALIAS}#{brand_alias}"
+        parse_pages(pages, brand_db, uri, brand)
+        next
+      end
 
-      models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
         model_alias = model.gsub('_', '-')
-        models_att  = { alias: model_alias, pagetitle: titles[model_alias],
-                        uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}" }
-        model_db = keeper.find_or_create(brand_db, models_att, true)
+        uri         = "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}"
+        models_att  = { alias: model_alias, pagetitle: titles[model_alias], uri: uri }
+        model_db    = keeper.find_or_create(brand_db, models_att, true)
+
+        pages = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
+        if pages.present?
+          parse_pages(pages, model_db, uri, brand, model)
+          next
+        end
+
         types    = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
         types.each do |type|
           type_alias = type.gsub('_', '-')
-          type_attr  = { alias: type_alias, pagetitle: titles[type_alias],
-                         uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}" }
-          type_db = keeper.find_or_create(model_db, type_attr)
-          items   = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
-          items.each do |item|
-            item_alias = item.gsub('_', '-').sub('.gz', '')
-            body       = peon.give(file: item, subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
-            data       = Parser.new(html: body).parse
-            data_2     = { alias: item_alias.gsub('.html', ''),
-                           uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}" }
-            keeper.save_product(type_db, data.merge(data_2))
-          end
+          uri        = "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}"
+          type_attr  = { alias: type_alias, pagetitle: titles[type_alias], uri: uri }
+          type_db    = keeper.find_or_create(model_db, type_attr)
+          pages      = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
+          parse_pages(pages, type_db, uri, brand, model, type)
         end
       end
     end
@@ -89,6 +92,20 @@ class Manager < Hamster::Harvester
   private
 
   attr_accessor :keeper
+
+  def parse_pages(pages, page_db, uri, brand, model=nil, type=nil)
+    pages.each do |item|
+      item_alias = item.gsub('_', '-').sub('.gz', '')
+      subfolder  = "#{RUN_ID.to_s}/#{brand}"
+      subfolder += "/#{model}" if model
+      subfolder += "/#{type}" if type
+      body   = peon.give(file: item, subfolder:  subfolder)
+      data   = Parser.new(html: body).parse
+      data_2 = { alias: item_alias.gsub('.html', ''), uri: uri + "/#{item_alias}" }
+      keeper.save_product(page_db, data.merge(data_2))
+    end
+  end
+
 
   def clear_cache(user_env='FTP_LOGIN', pass_env='FTP_PASS')
     ftp_host = ENV.fetch('FTP_HOST')
