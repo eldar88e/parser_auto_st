@@ -4,19 +4,15 @@ require_relative '../lib/keeper'
 require 'net/ftp'
 
 class Manager < Hamster::Harvester
-  RUN_ID = 1
-  ROOT_ID = 12 # спецтехника
-  T_SUB_CATEGORY_ID = 17
-  T_CATEGORY_ID = 14
-  T_PRODUCT_ID = 13
-  ROOT_ALIAS = 'katalog/specztexnika/'
-  MATCH = {
+  RUN_ID     = 1
+  PARENT_ID  = 12 # спецтехника
+  ROOT_ALIAS = 'katalog/specztexnika/'.freeze
+  MATCH      = {
     'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere', '1190097' => 'hitachi',
     'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu', '2369142' => 'hyundai-stekla',
     'stekla-bobcat-1' => 'bobcat', 'stekla-volvo' => 'volvo-steklo', 'stekla-terex' => 'terex',
-    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla'
+    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla',
   }.freeze
-  USER_ID = 6
 
   def initialize
     super
@@ -42,49 +38,41 @@ class Manager < Hamster::Harvester
     brands = peon.give_dirs(subfolder: RUN_ID.to_s)
     titles = json_saver.urls
     brands.each do |brand|
+      puts brand.green if @debug
       brand_alias = MATCH[brand]&.gsub('_', '-')
-      # raise StandardError, "Unknown brand: #{brand}" unless brand_alias
+      notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil?
 
-      next if brand_alias.nil?
+      brand_db = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias || brand)
+      notify("Brand #{brand} not find!", :red, :error) && next if brand_alias.nil?
 
-      brand_db = ModxSiteContent.find_by(parent: 12, alias: brand_alias)
       models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
         model_alias = model.gsub('_', '-')
-        model_db = ModxSiteContent.find_by(parent: brand_db.id, alias: model_alias)
-        model_db = ModxSiteContent.create(
-          parent: brand_db.id, alias: model_alias, pagetitle: titles[model_alias], longtitle: titles[model_alias], published: 1,
-          publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
-          uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}", isfolder: 1, template: T_SUB_CATEGORY_ID) unless model_db
-        types = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
+        models_att  = { alias: model_alias, pagetitle: titles[model_alias],
+                        uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}" }
+        model_db = keeper.find_or_create(brand_db, models_att, true)
+        types    = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
         types.each do |type|
           type_alias = type.gsub('_', '-')
-          type_db = ModxSiteContent.find_or_initialize_by(parent: model_db.id, alias: type_alias)
-          type_db.update!(
-            parent: model_db.id, alias: type_alias, pagetitle: titles[type_alias], longtitle: titles[type_alias],
-            published: 1, publishedon: Time.current.to_i, publishedby: USER_ID, createdby: USER_ID,
-            createdon: Time.current.to_i, uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}", isfolder: 1,
-            template: T_CATEGORY_ID)
-          items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
+          type_attr  = { alias: type_alias, pagetitle: titles[type_alias],
+                         uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}" }
+          type_db = keeper.find_or_create(model_db, type_attr)
+          items   = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
           items.each do |item|
             item_alias = item.gsub('_', '-').sub('.gz', '')
-            body = peon.give(file: item, subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
-            data = Parser.new(html: body).parse
-            data_2 = {
-              parent: type_db.id, alias: item_alias.gsub('.html', ''), published: 1, publishedon: Time.current.to_i,
-              publishedby: USER_ID, createdby: USER_ID, createdon: Time.current.to_i,
-              uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}", template: T_PRODUCT_ID
-            }
-            keeper.save_product data.merge(data_2)
+            body       = peon.give(file: item, subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
+            data       = Parser.new(html: body).parse
+            data_2     = { alias: item_alias.gsub('.html', ''),
+                           uri: "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}/#{item_alias}" }
+            keeper.save_product(type_db, data.merge(data_2))
           rescue StandardError => e
             puts e
+            notify(e.message, :red, :error)
             binding.pry
           end
           puts keeper.count[:saved].to_s.green
-          sleep 0.5
         end
-        puts keeper.count[:saved].to_s.green
-        sleep 1
+        notify keeper.count[:saved].to_s
       end
     end
 
@@ -92,7 +80,7 @@ class Manager < Hamster::Harvester
   rescue => error
     Hamster.logger.error error.message
     Hamster.report message: error.message
-    @debug     = true
+    @debug = true
     #clear_cache
   end
 
