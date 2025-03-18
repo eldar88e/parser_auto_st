@@ -40,7 +40,7 @@ class Manager < Hamster::Harvester
     brands.each do |brand|
       puts brand.green if @debug
       brand_alias = MATCH[brand.gsub('_', '-')]
-      notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil? && @debug
+      # notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil? && @debug
 
       brand_alias ||= brand.gsub('_', '-')
       brand_db    = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
