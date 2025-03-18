@@ -1,5 +1,6 @@
 class Parser < Hamster::Parser
   BAD_WORDS = %r{телефон|оплата|почта|email|каталог|вопросам|установк|komexpress}i
+  COMPANY   = '«Авторитет»'.freeze
 
   def initialize(**page)
     super
@@ -43,20 +44,29 @@ class Parser < Hamster::Parser
     raw_content = @html.at('div.product-content div.user-inner')
     return if raw_content&.text.blank?
 
+    prepare_content(raw_content)
     raw_content_children = raw_content.children
-    raw_content_children.css('a')&.each(&:remove)
-    first_bad_word = raw_content_children.find { |i| i.text.match?(BAD_WORDS) }
-    content        = first_bad_word ? clear_content(raw_content_children, first_bad_word) : raw_content
-    content        = content.to_html
+    first_bad_word       = raw_content_children.find { |i| i.text.match?(BAD_WORDS) }
+    content              = first_bad_word ? clear_content(raw_content_children, first_bad_word) : raw_content.to_html
 
     binding.pry if content.match?(BAD_WORDS)
 
     content
   end
 
+  def prepare_content(raw_content)
+    raw_content.css('a')&.each(&:remove)
+    raw_content.traverse do |node|
+      if node.text? && node.content.match?(/компанией komexpress/i)
+        node.content = node.content.gsub(/komexpress/i, COMPANY)
+      end
+    end
+  end
+
   def clear_content(raw_content_children, first_bad_word)
     first_bad_word_index = raw_content_children.index(first_bad_word)
-    raw_content_children[0..first_bad_word_index - 1]
+    Hamster.report message: "Пустой контент #{@html.at('link[rel="canonical"]')['href']}" if first_bad_word_index.zero? # TODO: убрать !!!
+    first_bad_word_index.zero? ? '' : raw_content_children[0..first_bad_word_index - 1].to_html
   end
 
   def make_alias(url)
