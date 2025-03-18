@@ -16,9 +16,8 @@ class Manager < Hamster::Harvester
 
   def initialize
     super
-    @debug       = commands[:debug]
-    @keeper      = Keeper.new(nil)
-    @parse_count = 0
+    @debug  = commands[:debug]
+    @keeper = Keeper.new(nil)
   end
 
   def download
@@ -33,9 +32,9 @@ class Manager < Hamster::Harvester
   end
 
   def store
-    # notify 'Parsing started' if @debug
     # keeper.status = 'parsing'
     brands = peon.give_dirs(subfolder: RUN_ID.to_s)
+    notify "Parsing started #{brands.size} brands" if @debug
     titles = json_saver.urls
     brands.each do |brand|
       puts brand.green if @debug
