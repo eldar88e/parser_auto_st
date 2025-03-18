@@ -39,11 +39,11 @@ class Manager < Hamster::Harvester
     titles = json_saver.urls
     brands.each do |brand|
       puts brand.green if @debug
-      brand_alias = MATCH[brand]&.gsub('_', '-')
-      notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil?
+      notify("Brand #{brand} not matched!", :red, :warn) if MATCH[brand].nil? && @debug
 
-      brand_db = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias || brand)
-      notify("Brand #{brand} not find!", :red, :error) && next if brand_alias.nil?
+      brand_alias = (MATCH[brand] || brand).gsub('_', '-')
+      brand_db = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
+      notify("Brand #{brand} not find!", :red, :error) && next if brand_db.nil?
 
       models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
