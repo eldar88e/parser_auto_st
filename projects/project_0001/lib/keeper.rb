@@ -32,7 +32,7 @@ class Keeper < Hamster::Keeper
   def save_product(parent, product)
     article = product.delete(:article)
 
-    find_or_create(parent, product, :product)
+    item = find_or_create(parent, product, :product)
 
     tv_article = item.tv.find_or_initialize_by(tmplvarid: ARTICLE_TV_ID)
     tv_article.update!(value: article)
