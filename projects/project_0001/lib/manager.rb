@@ -8,7 +8,8 @@ class Manager < Hamster::Harvester
   PARENT_ID  = 12 # спецтехника
   ROOT_ALIAS = 'katalog/specztexnika/'.freeze
   MATCH      = {
-    '1190097' => 'hitachi', '431769' => 'komatsu', '2369142' => 'hyundai-stekla', 'stekla-bobcat-1' => 'bobcat'
+    '1190097' => 'hitachi', '431769' => 'komatsu', '2369142' => 'hyundai-stekla', 'stekla-bobcat-1' => 'bobcat',
+    'stekla-xgma' => 'xgma'
   }.freeze
 
   def initialize
@@ -44,6 +45,11 @@ class Manager < Hamster::Harvester
         notify("Brand #{brand} not find!", :red, :error)
         next
       end
+
+      next unless brand == 'stekla_xgma'
+
+      binding.pry
+      items = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand )
 
       models   = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
       models.each do |model|
