@@ -12,16 +12,20 @@ class Scraper < Hamster::Scraper
     super
     @referers = YAML.load_file('referer.yml')['referer']
     @count    = 0
-    # @keeper   = args[:keeper]
     @debug    = commands[:debug]
+
+    # @keeper   = args[:keeper]
     # @run_id   = @keeper.run_id
   end
 
   def scrape
-    first_path  = '/products/category/431754'
-    brands_list = process_level(first_path)
-    binding.pry
+    first_path      = '/products/category/431754'
+    existing_brands = peon.give_dirs(subfolder: RUN_ID.to_s)
+    brands_list     = process_level(first_path)
     brands_list.each do |brand|
+      puts brand if @debug
+      next if existing_brands.include? brand.split('/')[-1].gsub('-', '_')
+
       types_list = process_level(brand)
       types_list.each do |type|
         models_list = process_level(type)

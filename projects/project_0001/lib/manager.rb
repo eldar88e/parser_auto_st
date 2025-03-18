@@ -8,10 +8,7 @@ class Manager < Hamster::Harvester
   PARENT_ID  = 12 # спецтехника
   ROOT_ALIAS = 'katalog/specztexnika/'.freeze
   MATCH      = {
-    'stekla-jcb' => 'jcb', 'john-deere-steklo' => 'stekla-john-deere', '1190097' => 'hitachi',
-    'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu', '2369142' => 'hyundai-stekla',
-    'stekla-bobcat-1' => 'bobcat', 'stekla-volvo' => 'volvo-steklo', 'stekla-terex' => 'terex',
-    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla'
+    '1190097' => 'hitachi', '431769' => 'komatsu', '2369142' => 'hyundai-stekla', 'stekla-bobcat-1' => 'bobcat'
   }.freeze
 
   def initialize
