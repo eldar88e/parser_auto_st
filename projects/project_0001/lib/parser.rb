@@ -44,10 +44,10 @@ class Parser < Hamster::Parser
     return if raw_content&.text.blank?
 
     raw_content_children = raw_content.children
-    first_bad_word       = raw_content_children.find { |i| i.text.match?(BAD_WORDS) }
-    content = first_bad_word ? clear_content(raw_content_children, first_bad_word) : raw_content
-    content = content.css('a')&.each(&:remove)
-    content = content.to_html
+    raw_content_children.css('a')&.each(&:remove)
+    first_bad_word = raw_content_children.find { |i| i.text.match?(BAD_WORDS) }
+    content        = first_bad_word ? clear_content(raw_content_children, first_bad_word) : raw_content
+    content        = content.to_html
 
     binding.pry if content.match?(BAD_WORDS)
 
