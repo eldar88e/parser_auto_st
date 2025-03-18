@@ -8,10 +8,10 @@ class Manager < Hamster::Harvester
   PARENT_ID  = 12 # спецтехника
   ROOT_ALIAS = 'katalog/specztexnika/'.freeze
   MATCH      = {
-    'stekla_jcb' => 'jcb', 'john-deere-steklo' => 'stekla_john_deere', '1190097' => 'hitachi',
+    'stekla-jcb' => 'jcb', 'john-deere-steklo' => 'stekla-john-deere', '1190097' => 'hitachi',
     'stekla-caterpillar' => 'caterpillar-steklo', '431769' => 'komatsu', '2369142' => 'hyundai-stekla',
     'stekla-bobcat-1' => 'bobcat', 'stekla-volvo' => 'volvo-steklo', 'stekla-terex' => 'terex',
-    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla',
+    'stekla-new-holland' => 'new.holland', 'stekla-john-deere' => 'john-deere-steklo', 'stekla-case' => 'case-stekla'
   }.freeze
 
   def initialize
@@ -39,9 +39,10 @@ class Manager < Hamster::Harvester
     titles = json_saver.urls
     brands.each do |brand|
       puts brand.green if @debug
-      notify("Brand #{brand} not matched!", :red, :warn) if MATCH[brand].nil? && @debug
+      brand_alias = MATCH[brand.gsub('_', '-')]
+      notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil? && @debug
 
-      brand_alias = (MATCH[brand] || brand).gsub('_', '-')
+      brand_alias ||= brand.gsub('_', '-')
       brand_db    = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
       if brand_db.nil?
         notify("Brand #{brand} not find!", :red, :error)
