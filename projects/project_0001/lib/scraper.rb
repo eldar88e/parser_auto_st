@@ -28,31 +28,44 @@ class Scraper < Hamster::Scraper
 
       types_list = process_level(brand)
       types_list.each do |type|
-        models_list = process_level(type)
-        binding.pry
+        models_list = process_level(type, :check)
+        if models_list[:product]
+          Hamster.report message: "#{brand} | #{type} without model" if @debug
+          scrape_products(models_list[:result], brand, type)
+          next
+        else
+          models_list = models_list[:result]
+        end
         models_list.each do |model|
-          items_list = process_level(model, true)
-          items_list.each do |item|
-            sleep rand(0.7..2.3)
-            item_body = get_response(item).body
-            subfolder = form_subfolder_path(brand, type, model)
-            name      = item.gsub("https://#{DOMAIN}/products/", '').gsub('-', '_')
-            peon.put(file: "#{name}.html", content: item_body, subfolder: "#{RUN_ID}/#{subfolder}")
-            @count += 1
-          rescue => e
-            puts '=' * 80
-            puts e.message
-            puts '*' * 80
-            binding.pry
-          end
+          items_list = process_level(model, :product)
+          scrape_products(items_list, brand, type, model)
         end
       end
     end
   end
 
+  private
+
+  def scrape_products(items_list, brand, type, model = nil)
+    items_list.each do |item|
+      sleep rand(0.7..2.3)
+      item_body = get_response(item).body
+      subfolder = form_subfolder_path(brand, type, model)
+      name      = item.gsub("https://#{DOMAIN}/products/", '').gsub('-', '_')
+      peon.put(file: "#{name}.html", content: item_body, subfolder: "#{RUN_ID}/#{subfolder}")
+      @count += 1
+    rescue => e
+      puts '=' * 80
+      puts e.message
+      puts '*' * 80
+      binding.pry
+    end
+  end
+
   def form_subfolder_path(brand, type, model)
-    (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_') +
-      '/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_')
+    result = (brand.gsub(PREFIX, '').gsub('/', '_') + '/' + type.gsub(PREFIX, '').gsub('/', '_'))
+    result += ('/' + model.gsub(PREFIX, '').gsub('/', '_')).gsub('-', '_') if model
+    result
   end
 
   def process_level(path, product=nil)
@@ -60,7 +73,15 @@ class Scraper < Hamster::Scraper
     types_list_row = get_response(link_types).body
     category_alias = path.gsub(PREFIX, '').gsub(/\/|_/, '-')
     add_alias(types_list_row, category_alias) unless json_saver.urls[category_alias]
-    Parser.new(html: types_list_row).send( product ? :parse_product_list : :parse_list)
+    result = Parser.new(html: types_list_row).send( product == :product ? :parse_product_list : :parse_list)
+    product == :check ? check_product(types_list_row, result) : result
+  end
+
+  def check_product(types_list_row, result)
+    return  { result: result, product: false } if result.present?
+
+    result = Parser.new(html: types_list_row).parse_product_list
+    { result: result, product: true }
   end
 
   def add_alias(types_list_row, category_alias)
