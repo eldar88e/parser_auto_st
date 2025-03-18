@@ -53,7 +53,7 @@ class Keeper < Hamster::Keeper
   end
 
   def prepare_additional_content_attr(content, sub)
-    content[:longtitle] = content[:longtitle]
+    content[:longtitle] = content[:pagetitle]
     normalize_title(content)
     content[:description] = form_description(content[:title])
     form_template_id(content, sub)
