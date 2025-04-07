@@ -27,16 +27,20 @@ class Parser < Hamster::Parser
     puts @html.at('link[rel="canonical"]')['href'] if @debug
     data = {}
     data[:pagetitle] = @html.at('div.product-content h1').text
-    data[:introtext] = @html.at('div.product-content div.clearfix div.user-inner')&.text
-    @html.at('div.product-content div.clearfix div.user-inner').remove
-    data[:content] = form_content
-
-    data[:article] = @html.at('div.product-content div.infoDigits').text.gsub('Артикул:', '').strip
-
+    data[:introtext] = form_introtext
+    data[:content]   = form_content
+    data[:article]   = @html.at('div.product-content div.infoDigits').text.gsub('Артикул:', '').strip
     data
   end
 
   private
+
+  def form_introtext
+    tags   = 'div.product-content div.clearfix div.user-inner'
+    result = @html.at(tags)&.text&.gsub!('закаленное', 'триплекс')
+    @html.at(tags).remove
+    result
+  end
 
   def form_content
     raw_content = @html.at('div.product-content div.user-inner')
