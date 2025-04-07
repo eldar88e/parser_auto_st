@@ -1,4 +1,3 @@
-require_relative '../models/run'
 require_relative '../models/modx_site_content'
 require_relative '../models/modx_site_tmplvar_contentvalues'
 
@@ -28,17 +27,14 @@ class Keeper < Hamster::Keeper
     content[:isfolder] = 0 if sub == :product
     content_db.update!(content)
     content_db
-  rescue => e
-    puts e.message
-    binding.pry
   end
 
   def save_product(parent, product)
-    article = product.delete(:article)
+    article    = product.delete(:article)
+    item       = find_or_create(parent, product, :product)
+    tv_article = item.tv.find_or_initialize_by(tmplvarid: ARTICLE_TV_ID) # TODO: убрать _or_initialize
+    # return if tv_article # TODO: раскомментировать !!!
 
-    item = find_or_create(parent, product, :product)
-
-    tv_article = item.tv.find_or_initialize_by(tmplvarid: ARTICLE_TV_ID)
     tv_article.update!(value: article)
 
     @count[:saved] += 1
@@ -64,17 +60,44 @@ class Keeper < Hamster::Keeper
     title = product[:pagetitle]
     return if title.size <= 70
 
-    normal_title = TextTruncator.call({ text: title, max: 70 })
+    normal_title        = TextTruncator.call({ text: title, max: 70 })
     product[:pagetitle] = normal_title
     product[:longtitle] = normal_title
     product[:content]   = product[:introtext] if product[:content].blank?
-    product[:content]   = "<p>#{title}<p>" + product[:content].to_s if product[:content].blank?
+    product[:content]   = "<p>#{title}<p>" if product[:content].blank?
+    add_corporation_info(product)
+  end
+
+  def add_corporation_info(product)
+    product[:content] += <<~INFO.squeeze(' ').chomp
+      <br/><br/>
+      <p>ОПЛАТА:</p>
+      <ul class="corporation">
+        <li>скидка при оплате наличными;</li>
+        <li>безналичный расчет на р/с ООО (с НДС);</li>
+        <li>безналичный расчет на р/с ИП (без НДС);</li>
+        <li>наличный расчет.</li>
+      </ul>
+  
+      <p>ДОСТАВКА:</p>
+      <ul class="corporation">
+        <li>самовывоз с нашего склада по адресу: Уфа, ул. Благоварская, д. 4;</li>
+        <li>по Уфе нашим транспортом;</li>
+        <li>транспортными компаниями Деловые линии, ПЭК, GTD по России, Белоруссии и в Казахстан.</li>
+      </ul>
+
+      <p>По всем вопросам:</p>
+      <ul class="corporation">
+        <li>Телефон/ватс-ап/телеграмм: 8 (917) 480-80-70;</li>
+        <li>Эл.почта: 2747410@mail.ru</li>
+      </ul>
+    INFO
   end
 
   def form_description(title)
     <<~DESCR.squeeze(' ').chomp
       Широкий выбор автостёкол для спецтехники #{title}.
-      Производство, быстрая доставка и профессиональная установка в Уфе и по всей России.
+      Производство за 8 часов, быстрая доставка и профессиональная установка в Уфе и по всей России.
       Закажите стекло для спецтехники KOMATSU, HITACHI, LIEBHERR, МТЗ и других производителей!
     DESCR
   end

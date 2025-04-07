@@ -9,7 +9,10 @@ class Manager < Hamster::Harvester
   ROOT_ALIAS = 'katalog/specztexnika/'.freeze
   MATCH      = {
     '1190097' => 'hitachi', '431769' => 'komatsu', '2369142' => 'hyundai-stekla', 'stekla-bobcat-1' => 'bobcat',
-    'stekla-xgma' => 'xgma'
+    'stekla-xgma' => 'xgma', 'stekla-sem' => 'sem', 'stekla-liugong' => 'liugon', 'stekla-fiat-hitachi-' => 'fiat-hitachi',
+    'stekla-daewoo-' => 'daewoo', 'stekla--mustang' => 'mustang', 'stekla-bucher' => 'bucher-citycat',
+    'stekla-hamm-1' => 'hamm', 'stekla-yanmar-' => 'yanmar', 'stekla-dlya-sdlg1' => 'sdlg', 'stekla--dieci' => 'dieci',
+    'stekla-bomag' => 'bomag'
   }.freeze
 
   def initialize
@@ -30,28 +33,29 @@ class Manager < Hamster::Harvester
   end
 
   def store
-    # keeper.status = 'parsing'
     brands = peon.give_dirs(subfolder: RUN_ID.to_s)
     notify "Parsing started #{brands.size} brands" if @debug
     titles = json_saver.urls
+    # next_brands = true
     brands.each do |brand|
       puts brand.green if @debug
-      brand_alias = MATCH[brand.gsub('_', '-')]
-      # notify("Brand #{brand} not matched!", :red, :warn) if brand_alias.nil? && @debug
 
+      # next_brands = false if brand == 'stekla_sandvik'
+      # next if next_brands
+
+      brand_alias = MATCH[brand.gsub('_', '-')]
       brand_alias ||= brand.gsub('_', '-')
-      brand_db    = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
+      brand_db = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
       if brand_db.nil?
         notify("Brand #{brand} not find!", :red, :error)
         next
       end
 
       models = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand)
-
-      pages = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand)
+      pages  = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand)
       if pages.present?
         uri = "#{ROOT_ALIAS}#{brand_alias}"
-        parse_pages(pages, brand_db, uri, brand)
+        save_pages(pages, brand_db, uri, brand)
         next
       end
 
@@ -60,21 +64,20 @@ class Manager < Hamster::Harvester
         uri         = "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}"
         models_att  = { alias: model_alias, pagetitle: titles[model_alias], uri: uri }
         model_db    = keeper.find_or_create(brand_db, models_att, true)
-
-        pages = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
+        pages       = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
         if pages.present?
-          parse_pages(pages, model_db, uri, brand, model)
+          save_pages(pages, model_db, uri, brand, model)
           next
         end
 
-        types    = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
+        types = peon.give_dirs(subfolder: RUN_ID.to_s + '/' + brand + '/' + model)
         types.each do |type|
           type_alias = type.gsub('_', '-')
           uri        = "#{ROOT_ALIAS}#{brand_alias}/#{model_alias}/#{type_alias}"
           type_attr  = { alias: type_alias, pagetitle: titles[type_alias], uri: uri }
           type_db    = keeper.find_or_create(model_db, type_attr)
           pages      = peon.give_list(subfolder: RUN_ID.to_s + '/' + brand + '/' + model + '/' + type)
-          parse_pages(pages, type_db, uri, brand, model, type)
+          save_pages(pages, type_db, uri, brand, model, type)
         end
       end
     end
@@ -93,7 +96,7 @@ class Manager < Hamster::Harvester
 
   attr_accessor :keeper
 
-  def parse_pages(pages, page_db, uri, brand, model=nil, type=nil)
+  def save_pages(pages, page_db, uri, brand, model=nil, type=nil)
     pages.each do |item|
       item_alias = item.gsub('_', '-').sub('.gz', '')
       subfolder  = "#{RUN_ID.to_s}/#{brand}"

@@ -28,3 +28,4 @@ build/
 .idea/
 .env*
 key.*
+.DS_Store

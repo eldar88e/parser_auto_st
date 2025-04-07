@@ -34,8 +34,6 @@ class Parser < Hamster::Parser
     data[:article] = @html.at('div.product-content div.infoDigits').text.gsub('Артикул:', '').strip
 
     data
-  rescue => e
-    binding.pry
   end
 
   private
@@ -48,17 +46,15 @@ class Parser < Hamster::Parser
     raw_content_children = raw_content.children
     first_bad_word       = raw_content_children.find { |i| i.text.match?(BAD_WORDS) }
     content              = first_bad_word ? clear_content(raw_content_children, first_bad_word) : raw_content.to_html
-
-    binding.pry if content.match?(BAD_WORDS)
-
+    content.gsub!('закаленное', 'триплекс')
     content
   end
 
   def prepare_content(raw_content)
     raw_content.css('a')&.each(&:remove)
     raw_content.traverse do |node|
-      if node.text? && node.content.match?(/компанией komexpress/i)
-        node.content = node.content.gsub(/komexpress/i, COMPANY)
+      if node.text? && node.content.match?(/komexpress|комэкспресс/i)
+        node.content = node.content.gsub(/komexpress|комэкспресс/i, COMPANY)
       end
     end
   end
