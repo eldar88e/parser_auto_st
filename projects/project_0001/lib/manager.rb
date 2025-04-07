@@ -23,11 +23,8 @@ class Manager < Hamster::Harvester
 
   def download
     # peon.move_all_to_trash
-    # puts 'The Store has been emptied.' if @debug
-    # peon.throw_trash(3)
-    # puts 'The Trash has been emptied of files older than 10 days.' if @debug
     notify 'Scraping started' if @debug
-    scraper = Scraper.new(keeper: nil) # keeper
+    scraper = Scraper.new
     scraper.scrape
     notify "Scraping finish! Scraped: #{scraper.count} pages." if @debug
   end
@@ -43,9 +40,8 @@ class Manager < Hamster::Harvester
       # next_brands = false if brand == 'stekla_sandvik'
       # next if next_brands
 
-      brand_alias = MATCH[brand.gsub('_', '-')]
-      brand_alias ||= brand.gsub('_', '-')
-      brand_db = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
+      brand_alias = MATCH[brand.gsub('_', '-')] || brand.gsub('_', '-')
+      brand_db    = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
       if brand_db.nil?
         notify("Brand #{brand} not find!", :red, :error)
         next
@@ -89,7 +85,24 @@ class Manager < Hamster::Harvester
     Hamster.logger.error error.message
     Hamster.report message: error.message
     @debug = true
-    #clear_cache
+    # clear_cache
+  end
+
+  def update_brand_seo
+    scraper = Scraper.new
+    brands  = scraper.brands
+    brands.each do |path|
+      brand       = path.split('/').last
+      brand_alias = MATCH[brand] || brand
+      brand_db    = ModxSiteContent.find_by(parent: PARENT_ID, alias: brand_alias)
+      next if brand_db.nil?
+
+      page = scraper.scrape_brand(path)
+      data = Parser.new(html: page).parse_brand
+      unless data.match?(/В данном разделе/)
+        brand_db.update(content: "#{brand_db.content}<br/><br/><p class='seo'>#{data}<p>")
+      end
+    end
   end
 
   private
@@ -108,7 +121,6 @@ class Manager < Hamster::Harvester
       keeper.save_product(page_db, data.merge(data_2))
     end
   end
-
 
   def clear_cache(user_env='FTP_LOGIN', pass_env='FTP_PASS')
     ftp_host = ENV.fetch('FTP_HOST')

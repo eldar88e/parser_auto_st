@@ -11,6 +11,10 @@ class Parser < Hamster::Parser
 
   attr_reader :parsed
 
+  def parse_brand
+    @html.css('div.user-inner')&.text&.strip&.gsub("\n", '<br/>')
+  end
+
   def parse_title
     @html.css('h1.curr_cat').text
   end

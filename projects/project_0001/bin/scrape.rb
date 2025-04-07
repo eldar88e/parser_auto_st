@@ -7,6 +7,8 @@ def scrape(options)
     manager.download
   elsif options[:store]
     manager.store
+  elsif options[:seo]
+    manager.update_brand_seo
   elsif options[:auto]
     manager.download
     manager.store

@@ -1,9 +1,10 @@
 require_relative '../lib/parser'
 
 class Scraper < Hamster::Scraper
-  RUN_ID = 1
-  DOMAIN = 'komexpress.ru'.freeze
-  PREFIX = '/products/category/'
+  RUN_ID   = 1
+  DOMAIN   = 'komexpress.ru'.freeze
+  PREFIX   = '/products/category/'.freeze
+  CATEGORY = '/products/category/431754'.freeze
 
   attr_reader :count
 
@@ -12,16 +13,11 @@ class Scraper < Hamster::Scraper
     @referers = YAML.load_file('referer.yml')['referer']
     @count    = 0
     @debug    = commands[:debug]
-
-    # @keeper   = args[:keeper]
-    # @run_id   = @keeper.run_id
   end
 
   def scrape
-    first_path  = '/products/category/431754'
-    brands_list = process_level(first_path)
     # existing_brands = peon.give_dirs(subfolder: RUN_ID.to_s)
-    brands_list.each do |brand|
+    brands.each do |brand|
       # next if existing_brands.include? brand.split('/')[-1].gsub('-', '_')
       types_list = process_category(brand, brand)
       types_list.each do |type|
@@ -32,6 +28,15 @@ class Scraper < Hamster::Scraper
         end
       end
     end
+  end
+
+  def brands
+    process_level(CATEGORY)
+  end
+
+  def scrape_brand(path)
+    link = "https://#{DOMAIN}#{path}"
+    get_response(link).body
   end
 
   private
