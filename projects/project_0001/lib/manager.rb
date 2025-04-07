@@ -12,7 +12,7 @@ class Manager < Hamster::Harvester
     'stekla-xgma' => 'xgma', 'stekla-sem' => 'sem', 'stekla-liugong' => 'liugon', 'stekla-fiat-hitachi-' => 'fiat-hitachi',
     'stekla-daewoo-' => 'daewoo', 'stekla--mustang' => 'mustang', 'stekla-bucher' => 'bucher-citycat',
     'stekla-hamm-1' => 'hamm', 'stekla-yanmar-' => 'yanmar', 'stekla-dlya-sdlg1' => 'sdlg', 'stekla--dieci' => 'dieci',
-    'stekla-bomag' => 'bomag'
+    'stekla-bomag' => 'bomag', 'stekla-xcmg' => 'xcmg'
   }.freeze
 
   def initialize
