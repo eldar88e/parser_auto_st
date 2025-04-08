@@ -3,6 +3,7 @@ require_relative '../models/modx_site_tmplvar_contentvalues'
 
 class Keeper < Hamster::Keeper
   ARTICLE_TV_ID     = 9
+  IMAGE_TV_ID       = 1
   USER_ID           = 6
   T_PRODUCT_ID      = 13
   T_SUB_CATEGORY_ID = 17
@@ -30,12 +31,16 @@ class Keeper < Hamster::Keeper
   end
 
   def save_product(parent, product)
-    article    = product.delete(:article)
-    item       = find_or_create(parent, product, :product)
-    tv_article = item.tv.find_or_initialize_by(tmplvarid: ARTICLE_TV_ID) # TODO: убрать _or_initialize
-    # return if tv_article # TODO: раскомментировать !!!
+    article = product.delete(:article)
+    item    = find_or_create(parent, product, :product)
 
-    tv_article.update!(value: article)
+    if article.present?
+      tv_article = item.tv.find_or_initialize_by(tmplvarid: ARTICLE_TV_ID)
+      tv_article.update!(value: article)
+
+      tv_image = item.tv.find_or_initialize_by(tmplvarid: IMAGE_TV_ID)
+      tv_image.update!(value: "new/#{article}.jpg")
+    end
 
     @count[:saved] += 1
   end
