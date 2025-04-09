@@ -26,6 +26,7 @@ class Keeper < Hamster::Keeper
     prepare_additional_content_attr(content, sub)
     content[:parent]   = parent.id
     content[:isfolder] = 0 if sub == :product
+    binding.pry
     content_db.update!(content)
     content_db
   end
@@ -62,14 +63,10 @@ class Keeper < Hamster::Keeper
   end
 
   def normalize_title(product)
-    title = product[:pagetitle]
-    return if title.size <= 70
-
-    normal_title        = TextTruncator.call({ text: title, max: 70 })
-    product[:pagetitle] = normal_title
-    product[:longtitle] = normal_title
+    product[:pagetitle] = TextTruncator.call({ text: product[:pagetitle], max: 70 }) if product[:pagetitle].size > 70
+    product[:longtitle] = product[:pagetitle]
     product[:content]   = product[:introtext] if product[:content].blank?
-    product[:content]   = "<p>#{title}<p>" if product[:content].blank?
+    product[:content]   = "<p>#{product[:pagetitle]}<p>" if product[:content].blank?
     add_corporation_info(product)
   end
 
