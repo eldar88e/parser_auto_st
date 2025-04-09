@@ -26,7 +26,6 @@ class Keeper < Hamster::Keeper
     prepare_additional_content_attr(content, sub)
     content[:parent]   = parent.id
     content[:isfolder] = 0 if sub == :product
-    binding.pry
     content_db.update!(content)
     content_db
   end
@@ -55,18 +54,17 @@ class Keeper < Hamster::Keeper
   end
 
   def prepare_additional_content_attr(content, sub)
+    content[:pagetitle] = TextTruncator.call({ text: content[:pagetitle], max: 70 }) if content[:pagetitle].size > 70
     content[:longtitle] = content[:pagetitle]
-    normalize_title(content)
+    fill_content(content)
     content[:description] = form_description(content[:pagetitle])
     form_template_id(content, sub)
     content.merge!(DEFAULT_COLUMNS)
   end
 
-  def normalize_title(product)
-    product[:pagetitle] = TextTruncator.call({ text: product[:pagetitle], max: 70 }) if product[:pagetitle].size > 70
-    product[:longtitle] = product[:pagetitle]
-    product[:content]   = product[:introtext] if product[:content].blank?
-    product[:content]   = "<p>#{product[:pagetitle]}<p>" if product[:content].blank?
+  def fill_content(product)
+    product[:content] = product[:introtext] if product[:content].blank?
+    product[:content] = "<p>#{product[:pagetitle]}<p>" if product[:content].blank?
     add_corporation_info(product)
   end
 
